@@ -1,15 +1,46 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <rect width="512" height="512" fill="#F4F1EA"/>
-  <g fill="none" stroke="#111111" stroke-width="28" stroke-linejoin="round" stroke-linecap="round">
-    <!-- Speed square: right triangle, right angle at bottom left -->
-    <path d="M 96 416 L 96 96 L 416 416 Z"/>
-    <!-- Pivot hole -->
-    <circle cx="160" cy="352" r="28" stroke-width="20"/>
-    <!-- Degree ticks along the hypotenuse -->
-    <path d="M 176 256 L 208 256" stroke-width="16"/>
-    <path d="M 236 316 L 268 316" stroke-width="16"/>
-    <path d="M 296 376 L 328 376" stroke-width="16"/>
-    <!-- Fence lip along the bottom -->
-    <path d="M 96 416 L 416 416" stroke-width="36"/>
+  <!-- Bold straight-lined trace of the user's drawing, refined:
+       every angle that isn't 90° is 45°. Two overlapping triangles
+       sharing the bottom-left corner, diagonals crossing in the
+       middle. Corners rounded just a little (round linejoin, stroke
+       24.6 → ~12 radius). Nothing else — no ticks, no pivot hole,
+       no fence lip, no inner detail, no text.
+       Angle check (all diagonals dx = ±dy, i.e. 45° to horizontal):
+       - Speed-square hypotenuse (52,154)-(256,358): dx +204, dy +204
+       - Roof left slope (256,154)-(52,358): dx -204, dy +204
+       - Roof right slope (256,154)-(460,358): dx +204, dy +204
+       All other edges are vertical or horizontal; square is 90° at
+       bottom-left (45°/45° at the other corners), roof peak is 90°
+       (45° at both eaves).
+       Scale/size (v1.1, Kompakt): the design was re-centred in the
+       512 frame — scaled 0.88 about its own centre and centred at
+       (256,256). Measured visual bounding box (stroke included):
+       x 40–472, y 142–370, so margins are even per axis:
+       left/right 40 px, top/bottom 141 px. The top/bottom paper is
+       larger than the sides because the design itself is wide and
+       shallow (about 2:1); it is NOT stretched, and the top and
+       bottom margins are equal — no big empty top band.
+       Launcher standard followed: standard Android legacy launcher
+       icon, 48 dp baseline (mdpi 48, hdpi 72, xhdpi 96, xxhdpi 144,
+       xxxhdpi 192 px), plain mipmap PNGs, no adaptive icon.
+       Mudita's own built-in apps use a different template (per
+       Mudita UX lead Tomasz, forum 2025-07-04: 81 px mdpi tile,
+       40 px symbol inside, 19 px corner-radius border, 2.5 px
+       stroke) — that template is for Mudita's own apps, not for
+       sideloaded apps, which Android shows at the standard 48 dp
+       size and which on the Kompakt are reached via Settings.
+       A Mudita-tile version of this symbol is saved as an option at
+       workspace/icon-variants/icon-mudita-tile-512.png (not used
+       in the APK). No adaptive-icon XML was added: a launcher mask
+       (circle/squircle) would clip the wide design's left/right
+       tips, and the Kompakt launcher uses plain PNGs. -->
+  <g fill="none" stroke="#111111" stroke-width="24.6" stroke-linejoin="round" stroke-linecap="round">
+    <!-- Speed square: vertical leg left (52,154)-(52,358), base bottom
+         (52,358)-(256,358), hypotenuse down-right (52,154)-(256,358) -->
+    <path d="M 52 154 L 52 358 L 256 358 Z"/>
+    <!-- Gable roof: peak (256,154), left slope to shared bottom-left
+         corner (52,358), right slope to (460,358). No base line. -->
+    <path d="M 52 358 L 256 154 L 460 358"/>
   </g>
 </svg>

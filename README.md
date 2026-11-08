@@ -25,13 +25,22 @@ and any Android phone.
   - `src/com/mmrice/concalc/MainActivity.java` — single Activity, full-screen
     WebView loading `android/assets/index.html`, JavaScript on, no permissions
   - `assets/index.html` — same file as `index.html` at the repo root
-- `icon.svg` — speed-square launcher icon, monochrome black on paper #F4F1EA.
-  The APK build uses PNGs rendered from this at mdpi/hdpi/xhdpi/xxhdpi/xxxhdpi.
+- `icon.svg` — launcher icon: two overlapping triangles — a speed square
+  overlayed on a gable roof pitch. Monochrome black on paper
+  #F4F1EA, no text. Centred in the 512 frame with even margins
+  (left/right 40 px, top/bottom 141 px — the design is wide and
+  shallow, so the top/bottom paper is larger, but equal).
+  The APK build uses PNGs rendered from this at mdpi 48, hdpi 72,
+  xhdpi 96, xxhdpi 144, xxxhdpi 192 px (standard 48 dp legacy
+  launcher icon; no adaptive icon — a launcher mask would clip
+  the wide design's tips, and the Kompakt uses plain PNGs).
   (PNGs are not in this repo — this push is text files only.)
+  A Mudita stock-tile variant (81 px tile, 40 px symbol, 19 px
+  radius border) is saved as an option in the workspace, not used.
 
 ## APK
 
-Current release: **ConCalc 1.0** — version 1.0, versionCode 1, package
+Current release: **ConCalc 1.1** — version 1.1, versionCode 2, package
 `com.mmrice.concalc`, minSdk 21, targetSdk 33, self-signed.
 
 This is a new, personal app — a fresh package and a fresh signing key.
@@ -39,7 +48,7 @@ It will NOT update over the old builds (v0.1–v0.3):
 uninstall the old app first, then install this one fresh.
 
 The APK binary is not in this repo — GitHub's text push can't carry binaries.
-Download `ConCalcV1.0.apk` from the chat / release and sideload it, or build
+Download `ConCalcV1.1.apk` from the chat / release and sideload it, or build
 it yourself below. Keep the keystore at
 `~/workspace/apk-build/concalc-personal.keystore` — updates must use the
 same key.
@@ -112,7 +121,8 @@ permission, no other permissions.
 
 ## Status
 
-Untested on real Kompakt hardware as of v1.0. Core math spot-checked
+Untested on real Kompakt hardware as of v1.1. Core math spot-checked
 (6' 9 1/2", 6/12 rafter, 9 ft stairs, 10x10 ft x 4" concrete), and
 v1.0 passed 50/50 headless tests against the reference worked examples.
+v1.1 changes only the launcher icon — same calculator, same code.
 Personal project, not associated with any business.
