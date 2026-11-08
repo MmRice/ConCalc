@@ -8,14 +8,17 @@ and any Android phone.
 - Fractions to 1/64, decimal feet/inches, yards, metric
 - Rise / Run / Diag / Pitch, Hip/Val, Jack, Rake-Wall, Stair layout,
   circles/arcs, board feet, concrete, flooring, drywall, studs, roofing,
-  baluster spacing, cost, memory, paperless tape
+  baluster spacing, cost, memory, history
 - One value at a time on a single display.
   Punch Diag and you get Diag. Punch it again and you get Diag again.
   No tables, no scrolling, no panels underneath.
 - History (replaces Tape): tap HIST at the top-left of the display for a
-  scrollable list of past calculations, newest first, saved between
-  sessions. Tap a row to load its answer back into the calculator.
-  Clear history wipes the list only — not the calculator, memory or prefs.
+  paged list of past calculations, newest first, 8 fixed-height rows per
+  page with ▲ / ▼ page arrows and a page indicator ("1–8 of 23"), saved
+  between sessions. Tap a row to load its answer back into the calculator.
+  History auto-prunes to the last 100 entries — oldest drops automatically,
+  so there is no wipe control. (The calculator's Clear All, Conv+×, is
+  separate: it resets stored riser/tread/o.c./wt-vol defaults.)
 - Conv is the Shift key for the small-print second functions.
 - Mudita style: monochrome, paper-white, flat keys, no ads, no tracking,
   no pop-ups. Works offline once loaded.
@@ -44,7 +47,7 @@ and any Android phone.
 
 ## APK
 
-Current release: **ConCalc 1.2** — version 1.2, versionCode 3, package
+Current release: **ConCalc 1.3** — version 1.3, versionCode 4, package
 `com.mmrice.concalc`, minSdk 21, targetSdk 33, self-signed.
 
 This is a new, personal app — a fresh package and a fresh signing key.
@@ -52,7 +55,7 @@ It will NOT update over the old builds (v0.1–v0.3):
 uninstall the old app first, then install this one fresh.
 
 The APK binary is not in this repo — GitHub's text push can't carry binaries.
-Download `ConCalcV1.2.apk` from the chat / release and sideload it, or build
+Download `ConCalcV1.3.apk` from the chat / release and sideload it, or build
 it yourself below. Keep the keystore at
 `~/workspace/apk-build/concalc-personal.keystore` — updates must use the
 same key.
@@ -125,8 +128,8 @@ permission, no other permissions.
 
 ## Status
 
-Untested on real Kompakt hardware as of v1.2. Core math spot-checked
+Untested on real Kompakt hardware as of v1.3. Core math spot-checked
 (6' 9 1/2", 6/12 rafter, 9 ft stairs, 10x10 ft x 4" concrete), and
 v1.0 passed 50/50 headless tests against the reference worked examples.
-v1.2 replaces Tape with a full History screen (HIST button, top-left of the display: a scrollable list, newest first, tap a row to reuse its answer, Clear history with a tap-again confirm, saved between sessions) and renames the On/C key to Clear (same behaviour). v1.1 changed only the launcher icon.
+v1.3 brings History into line with Mudita Mindful Design: fixed-height rows, discrete paged scrolling (8 per page, ▲/▼ arrows, page indicator), one header row shared by the calculator and History screens, no grey text, no dark mode, larger second-function labels in black, Clear key 44px. The wipe control is removed — history auto-prunes to the last 100. v1.2 replaces Tape with a full History screen (HIST button, top-left of the display: a list, newest first, tap a row to reuse its answer, saved between sessions) and renames the On/C key to Clear (same behaviour). v1.1 changed only the launcher icon.
 Personal project, not associated with any business.

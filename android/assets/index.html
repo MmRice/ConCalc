@@ -3,20 +3,19 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<meta name="color-scheme" content="light dark" />
+<meta name="color-scheme" content="light" />
 <meta name="theme-color" content="#ffffff" />
 <link rel="icon" href="data:," />
 <title>Construction Calculator</title>
 <style>
   :root{
-    --page:#e8e8e6; --bg:#ffffff; --ink:#141412; --muted:#6e6e68; --faint:#a3a39c;
+    /* MMD v1.3: no grey TEXT — all text is --ink (near-black). Light fills
+       (--num-bg/--op-bg) and hairline dividers (--line/--key-line) are kept
+       as background/border only, never as text; a black alternative would
+       make keys indistinguishable and dividers too heavy on E Ink. */
+    --page:#e8e8e6; --bg:#ffffff; --ink:#141412;
     --line:#e2e2de; --key-line:#d9d9d4; --num-bg:#f3f3f1; --op-bg:#eaeae7;
     --solid:#141412; --on-solid:#ffffff; --focus:#141412;
-  }
-  @media (prefers-color-scheme: dark){
-    :root{ --page:#000000; --bg:#101010; --ink:#f2f2ef; --muted:#a6a6a0; --faint:#7c7c76;
-      --line:#2b2b2b; --key-line:#383836; --num-bg:#1e1e1e; --op-bg:#282826;
-      --solid:#f2f2ef; --on-solid:#101010; --focus:#f2f2ef; }
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
   html,body{height:100%;}
@@ -28,51 +27,64 @@
     width:min(440px,100vw); height:min(100dvh,940px); max-height:100dvh;
     padding:26px 20px 18px; display:flex; flex-direction:column; gap:14px;}
   @media (max-width:480px){ .device{border:none; height:100dvh; padding:22px 16px 14px;} }
+  /* ---------- top bar: ONE header row, shared by calculator and History ----------
+     Same height, same left slot, same centre slot, same right slot on both
+     screens (MMD "Fit in the Lines": common elements stay in the same pixels,
+     only textual details change). */
+  .topbar{display:flex; justify-content:space-between; align-items:center; gap:8px; min-height:44px; flex:0 0 auto;}
+  .top-title{font-size:.78rem; letter-spacing:.16em; font-weight:500; color:var(--ink);
+    text-transform:uppercase; text-align:center; flex:1 1 auto; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .hist-count{font-size:.78rem; font-weight:500; color:var(--ink); white-space:nowrap;
+    min-height:44px; display:flex; align-items:center;}
   /* ---------- display: open paper, hairline rule underneath ---------- */
   .lcd{color:var(--ink); padding:2px 2px 16px; border-bottom:1px solid var(--ink); flex:0 0 auto;}
-  .lcd-top{display:flex; justify-content:space-between; align-items:center; gap:6px; min-height:44px;}
   .hist-btn{font:inherit; font-size:.7rem; letter-spacing:.14em; font-weight:600;
     border:1px solid var(--ink); border-radius:999px; background:var(--bg); color:var(--ink);
     padding:8px 14px; min-height:44px; cursor:pointer; flex:0 0 auto;}
   .hist-btn:active{background:var(--solid); color:var(--on-solid);}
   .lcd-inds{display:flex; gap:6px; margin-left:auto;}
-  /* ---------- history screen: the ONLY scrollable list ---------- */
+  /* ---------- history screen: MMD paged list, fixed rows, no scrolling ----------
+     8 fixed-height rows per page; dividers in exactly the same pixels on
+     every page; discrete ▲/▼ paging with a visible page indicator. */
   .history{display:none; flex:1 1 auto; min-height:0; flex-direction:column; gap:10px;}
   .device.show-history .lcd, .device.show-history .power, .device.show-history .keypad{display:none;}
   .device.show-history .history{display:flex;}
-  .hist-head{display:flex; justify-content:space-between; align-items:center; gap:8px; flex:0 0 auto;}
-  .hist-title{font-size:.78rem; letter-spacing:.16em; font-weight:500; color:var(--muted); text-transform:uppercase;}
-  .hist-back, .hist-clear{font:inherit; font-size:.78rem; font-weight:500;
-    border:1px solid var(--ink); border-radius:999px; background:var(--bg); color:var(--ink);
-    padding:8px 12px; min-height:44px; cursor:pointer;}
-  .hist-clear.armed{background:var(--solid); color:var(--on-solid);}
-  .hist-list{flex:1 1 auto; min-height:0; overflow-y:auto; display:flex; flex-direction:column;}
-  .hist-row{display:flex; flex-direction:column; align-items:flex-start; gap:2px; width:100%;
+  .hist-list{flex:1 1 auto; min-height:0; overflow:hidden; display:flex; flex-direction:column;}
+  .hist-row{display:flex; flex-direction:column; align-items:flex-start; justify-content:center; gap:2px; width:100%;
+    height:64px; flex:0 0 64px; box-sizing:border-box;
     text-align:left; background:var(--bg); border:none; border-bottom:1px solid var(--line);
-    padding:12px 4px; cursor:pointer; font:inherit; color:var(--ink);}
+    padding:8px 4px; cursor:pointer; font:inherit; color:var(--ink);}
   .hist-row:active{background:var(--num-bg);}
-  .hist-expr{font-size:.8rem; color:var(--muted); word-break:break-word;}
-  .hist-res{font-size:1.25rem; font-weight:300; font-variant-numeric:tabular-nums;}
-  .hist-empty{color:var(--muted); padding:28px 4px; text-align:center; font-size:.9rem;}
+  .hist-expr{font-size:.8rem; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%;}
+  .hist-res{font-size:1.25rem; font-weight:300; font-variant-numeric:tabular-nums;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%;}
+  .hist-empty{color:var(--ink); padding:28px 4px; text-align:center; font-size:.9rem;}
+  .hist-pager{display:flex; justify-content:space-between; align-items:center; gap:8px; flex:0 0 auto; min-height:56px;}
+  .hist-page-btn{font:inherit; font-size:.9rem; font-weight:500;
+    border:1px solid var(--ink); border-radius:999px; background:var(--bg); color:var(--ink);
+    padding:8px 18px; min-height:44px; cursor:pointer; flex:0 0 auto;}
+  .hist-page-btn:active{background:var(--solid); color:var(--on-solid);}
+  .hist-page-btn[hidden]{visibility:hidden;}
+  .hist-page-info{font-size:.78rem; font-weight:500; color:var(--ink); white-space:nowrap;}
   .ind{font-size:.6rem; letter-spacing:.12em; font-weight:600; border:1px solid var(--ink);
     border-radius:999px; padding:1px 8px; line-height:1.5; display:none;}
   .ind.on{display:block;}
   .lcd-main{display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin-top:8px;}
-  .lcd-label{font-size:.78rem; letter-spacing:.16em; font-weight:500; color:var(--muted);
+  .lcd-label{font-size:.78rem; letter-spacing:.16em; font-weight:500; color:var(--ink);
     text-transform:uppercase; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
   .lcd-value{font-weight:300; letter-spacing:-.01em; font-variant-numeric:tabular-nums;
     font-size:clamp(2.3rem,10vmin,3.4rem); line-height:1.05; text-align:right; white-space:nowrap;}
   .lcd-units{display:flex; justify-content:space-between; align-items:baseline; margin-top:8px; gap:10px;}
-  .lcd-sub{color:var(--muted); font-size:clamp(.72rem,3vmin,.84rem); white-space:nowrap;
+  .lcd-sub{color:var(--ink); font-size:clamp(.72rem,3vmin,.84rem); white-space:nowrap;
     overflow:hidden; text-overflow:ellipsis; min-height:1.25em; font-variant-numeric:tabular-nums;}
-  .lcd-unitcap{font-size:.62rem; letter-spacing:.18em; font-weight:600; color:var(--faint); white-space:nowrap;}
+  .lcd-unitcap{font-size:.62rem; letter-spacing:.18em; font-weight:600; color:var(--ink); white-space:nowrap;}
   /* ---------- clear row ---------- */
   .power{display:grid; grid-template-columns:1fr; flex:0 0 auto;}
   /* ---------- keypad: flat outlined keys, generous air ---------- */
   .keypad{flex:1 1 auto; min-height:0; display:grid; grid-template-rows:repeat(8,1fr); gap:5px;}
   .krow{display:grid; grid-template-columns:repeat(5,1fr); gap:8px; min-height:0;}
   .cell{display:flex; flex-direction:column; min-height:0;}
-  .shift-lbl{color:var(--faint); font-size:clamp(.54rem,2.3vmin,.66rem); font-weight:500;
+  .shift-lbl{color:var(--ink); font-size:clamp(.7rem,2.8vmin,.8rem); font-weight:500;
     letter-spacing:.04em; line-height:1.3; height:1.3em; text-align:center; white-space:nowrap; overflow:hidden;}
   button.key{font:inherit; flex:1 1 auto; min-height:0; border:1px solid var(--key-line); border-radius:14px;
     background:var(--bg); color:var(--ink); cursor:pointer; padding:1px 2px;
@@ -87,22 +99,26 @@
   button.key.conv:active, button.key[data-k="eq"]:active{background:var(--bg); color:var(--ink); border-color:var(--ink);}
   button.key:focus-visible{outline:2px solid var(--focus); outline-offset:2px;}
   button.key.power-key{border-radius:999px; border:1px solid var(--ink); background:var(--bg);
-    font-size:.9rem; font-weight:500; letter-spacing:.06em; min-height:42px;}
+    font-size:.9rem; font-weight:500; letter-spacing:.06em; min-height:44px;}
   .sr{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0);}
 </style>
 </head>
 <body>
 <div class="device" role="application" aria-label="Construction calculator">
+  <!-- ================= SHARED TOP BAR (calculator + History, same pixels) ================= -->
+  <div class="topbar" id="topbar">
+    <button class="hist-btn" id="histBtn" type="button" aria-label="History">&#9719; HIST</button>
+    <button class="hist-btn" id="histBack" type="button" style="display:none">&larr; Calc</button>
+    <span class="top-title" id="topTitle"></span>
+    <span class="lcd-inds" id="lcdInds">
+      <span class="ind" id="indShift">SHIFT</span>
+      <span class="ind" id="indRcl">RCL</span>
+      <span class="ind" id="indMem">MEM</span>
+    </span>
+    <span class="hist-count" id="histCount" style="display:none"></span>
+  </div>
   <!-- ================= DISPLAY ================= -->
   <div class="lcd" id="lcd">
-    <div class="lcd-top">
-      <button class="hist-btn" id="histBtn" type="button" aria-label="History">&#9719; HIST</button>
-      <span class="lcd-inds">
-        <span class="ind" id="indShift">SHIFT</span>
-        <span class="ind" id="indRcl">RCL</span>
-        <span class="ind" id="indMem">MEM</span>
-      </span>
-    </div>
     <div class="lcd-main">
       <span class="lcd-label" id="dispLabel">Ready</span>
       <span class="lcd-value" id="dispMain">0&Prime;</span>
@@ -179,13 +195,13 @@
 
   <!-- ================= HISTORY (replaces Tape) ================= -->
   <div class="history" id="historyView" aria-label="History">
-    <div class="hist-head">
-      <button class="hist-back" id="histBack" type="button">&larr; Calc</button>
-      <span class="hist-title">History</span>
-      <button class="hist-clear" id="histClearBtn" type="button">Clear history</button>
-    </div>
     <div class="hist-list" id="historyList"></div>
     <div class="hist-empty" id="historyEmpty">No calculations yet</div>
+    <div class="hist-pager">
+      <button class="hist-page-btn" id="histPrev" type="button">&uarr; Prev</button>
+      <span class="hist-page-info" id="histPageInfo"></span>
+      <button class="hist-page-btn" id="histNext" type="button">Next &darr;</button>
+    </div>
   </div>
 
 </div>
@@ -193,10 +209,11 @@
 <script>
 "use strict";
 /* =====================================================================
-   ConCalc v1.2 — key rules implemented here:
-   - History replaces Tape: completed results are recorded and shown
-     in a full History screen (HIST button, top-left of the display).
-     Tape's stepping behaviour is gone.
+   ConCalc v1.3 — key rules implemented here (MMD-aligned):
+   - History: full list, newest first, fixed-height rows, discrete paged
+     scrolling (8 per page, ▲/▼ arrows + page indicator), shared header
+     row with the calculator. No wipe control — history auto-prunes to the
+     last 100 entries, oldest drops automatically.
    - Numbers are PLAIN until tagged: type a number, then Feet/Inch/Yds/
      m/cm/mm tags it; an untagged number is a plain count (reference:
      "enter dimensions from largest to smallest", and % / board-feet /
@@ -295,9 +312,11 @@ function fmtAngle(deg){
   return fmtNum(deg,2) + "°";
 }
 
-/* ---------- history (replaces Tape): full list, newest first, persisted ---------- */
-var histEntries = [], historyOpen = false, histClearArmed = false;
-var HIST_KEY = "concalc.history.v1", HIST_MAX = 100;
+/* ---------- history: paged list, newest first, persisted (MMD) ----------
+   Fixed-height rows, 8 per page, discrete ▲/▼ paging. No wipe control:
+   history auto-prunes to the last 100 entries, oldest drops automatically. */
+var histEntries = [], historyOpen = false, histPage = 0;
+var HIST_KEY = "concalc.history.v1", HIST_MAX = 100, HIST_PER_PAGE = 8;
 function loadHistory(){
   try{
     var raw = localStorage.getItem(HIST_KEY);
@@ -312,13 +331,19 @@ function addHistory(expr, resultText, val, dim){
   histEntries.unshift({expr:expr, result:resultText, val:val, dim:dim});
   if(histEntries.length > HIST_MAX) histEntries.length = HIST_MAX;
   saveHistory();
-  if(historyOpen) renderHistory();
+  if(historyOpen){ histPage = 0; renderHistory(); }
 }
+function histPageCount(){ return Math.max(1, Math.ceil(histEntries.length / HIST_PER_PAGE)); }
 function renderHistory(){
   var list = $("historyList"); if(!list) return;
   list.innerHTML = "";
-  $("historyEmpty").style.display = histEntries.length ? "none" : "";
-  histEntries.forEach(function(e){
+  var total = histEntries.length;
+  if(histPage > histPageCount() - 1) histPage = histPageCount() - 1;
+  if(histPage < 0) histPage = 0;
+  $("historyEmpty").style.display = total ? "none" : "";
+  var start = histPage * HIST_PER_PAGE;
+  var pageEntries = histEntries.slice(start, start + HIST_PER_PAGE);
+  pageEntries.forEach(function(e){
     var row = document.createElement("button");
     row.type = "button"; row.className = "hist-row";
     var ex = document.createElement("span"); ex.className = "hist-expr"; ex.textContent = e.expr;
@@ -331,28 +356,35 @@ function renderHistory(){
     });
     list.appendChild(row);
   });
+  var from = total ? start + 1 : 0, to = Math.min(total, start + HIST_PER_PAGE);
+  var label = total ? from + "\u2013" + to + " of " + total : "0 of 0";
+  var info = $("histPageInfo"); if(info) info.textContent = "Page " + (histPage + 1) + " of " + histPageCount();
+  var cnt = $("histCount"); if(cnt) cnt.textContent = label;
+  var prev = $("histPrev"), next = $("histNext");
+  if(prev) prev.hidden = histPage <= 0;
+  if(next) next.hidden = histPage >= histPageCount() - 1;
+}
+function histPageStep(dir){
+  var n = histPage + dir;
+  if(n < 0 || n > histPageCount() - 1) return;
+  histPage = n; renderHistory();
 }
 function openHistory(){
-  historyOpen = true; histClearArmed = false;
-  var cb = $("histClearBtn"); if(cb){ cb.classList.remove("armed"); cb.textContent = "Clear history"; }
+  historyOpen = true; histPage = 0;
+  $("histBtn").style.display = "none"; $("histBack").style.display = "";
+  $("topTitle").textContent = "History";
+  $("lcdInds").style.display = "none"; $("histCount").style.display = "";
   document.querySelector(".device").classList.add("show-history");
   renderHistory();
 }
 function closeHistory(){
   historyOpen = false;
+  $("histBtn").style.display = ""; $("histBack").style.display = "none";
+  $("topTitle").textContent = "";
+  $("lcdInds").style.display = ""; $("histCount").style.display = "none";
   document.querySelector(".device").classList.remove("show-history");
 }
 function toggleHistory(){ if(historyOpen) closeHistory(); else openHistory(); }
-function clearHistoryArm(){
-  var cb = $("histClearBtn");
-  if(!histClearArmed){
-    histClearArmed = true; cb.classList.add("armed"); cb.textContent = "Tap again to clear";
-    return;
-  }
-  histEntries = []; saveHistory(); histClearArmed = false;
-  cb.classList.remove("armed"); cb.textContent = "Clear history";
-  renderHistory();
-}
 loadHistory();
 
 /* ---------- state ---------- */
@@ -1541,7 +1573,8 @@ document.querySelectorAll("button.key").forEach(function(b){
 });
 $("histBtn").addEventListener("click", function(){ toggleHistory(); });
 $("histBack").addEventListener("click", function(){ closeHistory(); });
-$("histClearBtn").addEventListener("click", function(){ clearHistoryArm(); });
+$("histPrev").addEventListener("click", function(){ histPageStep(-1); });
+$("histNext").addEventListener("click", function(){ histPageStep(1); });
 document.addEventListener("keydown", function(ev){
   if(/^[0-9]$/.test(ev.key)) handleKey("d:" + ev.key);
   else if(ev.key === ".") handleKey("dot");
