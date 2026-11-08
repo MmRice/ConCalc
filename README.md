@@ -12,16 +12,27 @@ and any Android phone.
 - One value at a time on a single display.
   Punch Diag and you get Diag. Punch it again and you get Diag again.
   No tables, no scrolling, no panels underneath.
-- History (replaces Tape): tap HIST at the top-left of the display for a
-  paged list of past calculations, newest first, 8 fixed-height rows per
-  page with ▲ / ▼ page arrows and a page indicator ("1–8 of 23"), saved
-  between sessions. Tap a row to load its answer back into the calculator.
-  History opens as a sheet over the keypad — the display stays visible —
-  with a fixed 44px header and its own scroll.
+- History (replaces Tape): tap the display to open a paged list of past
+  calculations, newest first, 8 fixed-height rows per page with ▲ / ▼
+  page arrows and a page indicator ("1–8 of 23"), saved between sessions.
+  Tap a row to load its answer back into the calculator. History opens
+  as a sheet over the keypad — the display stays visible — with a fixed
+  44px header and its own scroll; tap the display again, or the sheet's
+  "← Calc" button, to go back. There is no HIST button and no top bar.
   History auto-prunes to the last 100 entries — oldest drops automatically,
   so there is no wipe control. (The calculator's Clear All, Conv+×, is
   separate: it resets stored riser/tread/o.c./wt-vol defaults.)
-- Conv is the Shift key: press it and the keys that have a second function swap their label to show it (a small dot marks those keys); press it again, or use the second function, and the labels go back. No small-print second functions on the face.
+- Conv is the second-function key: press it and the keys that have a
+  second function swap their label to show it (a small dot marks those
+  keys); press it again, or use the second function, and the labels go
+  back. No small-print second functions on the face. While Conv is on,
+  the indicator in the sub row under the display reads CONV.
+- Clear lives on the backspace key, labelled "⌫ / C" (the ⌫ is set a
+  little larger than the key text): tap deletes one character, hold
+  ~0.6 seconds clears the display, hold again clears temporary values.
+  There is no Clear button. The CONV / RCL / MEM indicators live in the
+  sub row under the display value, so there is no top bar at all — the
+  display and keypad get the room.
 - Mudita style: monochrome, paper-white, flat keys, no ads, no tracking,
   no pop-ups. Works offline once loaded.
 
@@ -49,7 +60,7 @@ and any Android phone.
 
 ## APK
 
-Current release: **ConCalc 1.5** — version 1.5, versionCode 6, package
+Current release: **ConCalc 1.7** — version 1.7, versionCode 8, package
 `com.mmrice.concalc`, minSdk 21, targetSdk 33, self-signed.
 
 This is a new, personal app — a fresh package and a fresh signing key.
@@ -57,7 +68,7 @@ It will NOT update over the old builds (v0.1–v0.3):
 uninstall the old app first, then install this one fresh.
 
 The APK binary is not in this repo — GitHub's text push can't carry binaries.
-Download `ConCalcV1.5.apk` from the chat / release and sideload it, or build
+Download `ConCalcV1.7.apk` from the chat / release and sideload it, or build
 it yourself below. Keep the keystore at
 `~/workspace/apk-build/concalc-personal.keystore` — updates must use the
 same key.
@@ -133,7 +144,8 @@ permission, no other permissions.
 Untested on real Kompakt hardware as of v1.3. Core math spot-checked
 (6' 9 1/2", 6/12 rafter, 9 ft stairs, 10x10 ft x 4" concrete), and
 v1.0 passed 50/50 headless tests against the reference worked examples.
-v1.5 is UI only, no math changes: the display shows the value only — the
+v1.7 is UI only, no math changes: tap the display to open History (no HIST button), backspace is now "⌫ / C" — tap deletes one character, hold ~0.6s clears the display, hold again clears temporary values — so there is no Clear button and no top bar at all; the CONV / RCL / MEM indicators moved into the sub row under the display value, the Conv indicator reads CONV (not SHIFT), and the display and keypad get the freed space (with a comfortable margin, not flush to the top).
+v1.6 is a one-bug fix, no math changes: the FEET · INCH unit cap is pinned to the right of the display — in v1.5 it jumped to the left whenever the solver sub line was empty, because the row is space-between and the cap became the sole flex child. v1.5 is UI only, no math changes: the display shows the value only — the
 explanatory subtext under it is gone (no unit conversions, no pitch
 explanation, no instructions); the sub line carries only the solver
 position ("1 of N") when stepping through multi-result solvers. Clear

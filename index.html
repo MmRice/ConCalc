@@ -27,22 +27,22 @@
     width:min(440px,100vw); height:min(100dvh,940px); max-height:100dvh;
     padding:26px 20px 18px; display:flex; flex-direction:column; gap:12px;}
   @media (max-width:480px){ .device{border:none; height:100dvh; padding:22px 16px 14px;} }
-  /* ---------- top bar: ONE header row, shared by calculator and History ----------
-     Same height, same left slot, same centre slot, same right slot on both
-     screens (MMD "Fit in the Lines": common elements stay in the same pixels,
-     only textual details change). */
-  .topbar{display:flex; justify-content:space-between; align-items:center; gap:8px; min-height:44px; flex:0 0 auto;}
-  .top-title{font-size:.78rem; letter-spacing:.16em; font-weight:500; color:var(--ink);
-    text-transform:uppercase; text-align:center; flex:1 1 auto; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
-  .hist-count{font-size:.78rem; font-weight:500; color:var(--ink); white-space:nowrap;
-    min-height:44px; display:flex; align-items:center;}
-  /* ---------- display: open paper, hairline rule underneath ---------- */
-  .lcd{color:var(--ink); padding:10px 2px 16px; border-bottom:1px solid var(--ink); flex:0 0 auto;}
+  /* ---------- v1.7: NO top bar at all. History is opened by tapping the
+     display, Clear lives on the backspace key (hold), and the CONV / RCL /
+     MEM indicators live in the sub row under the display value. The freed
+     top-bar row goes to the display and keypad — more room, but the
+     display is NOT flush to the top: .device keeps its 26px top padding. */
+  /* ---------- display: open paper, hairline rule underneath ----------
+     The display is tappable (tap = History), so no text selection. */
+  .lcd{color:var(--ink); padding:10px 2px 16px; border-bottom:1px solid var(--ink); flex:0 0 auto;
+    cursor:pointer; user-select:none; -webkit-user-select:none;}
   .hist-btn{font:inherit; font-size:.7rem; letter-spacing:.14em; font-weight:600;
     border:1px solid var(--ink); border-radius:999px; background:var(--bg); color:var(--ink);
     padding:8px 14px; min-height:44px; cursor:pointer; flex:0 0 auto;}
   .hist-btn:active{background:var(--solid); color:var(--on-solid);}
-  .lcd-inds{display:flex; gap:6px; margin-left:auto;}
+  /* v1.7: indicators live in the sub row (see .lcd-units), between the
+     solver "N of N" on the left and the unit cap pinned right. */
+  .lcd-inds{display:flex; gap:6px; align-items:baseline;}
   /* ---------- history screen: MMD paged list, fixed rows, no scrolling ----------
      8 fixed-height rows per page; dividers in exactly the same pixels on
      every page; discrete ▲/▼ paging with a visible page indicator. */
@@ -89,11 +89,16 @@
   .lcd-sub{color:var(--ink); font-size:clamp(.72rem,3vmin,.84rem); white-space:nowrap;
     overflow:hidden; text-overflow:ellipsis; font-variant-numeric:tabular-nums;}
   .lcd-sub:empty{display:none;}
-  .lcd-unitcap{font-size:.62rem; letter-spacing:.18em; font-weight:600; color:var(--ink); white-space:nowrap;}
-  /* ---------- Clear: v1.5, top-right corner of the face (top bar) ----------
-     It no longer has a row of its own — the space goes back to the
-     keypad rows, which grow taller. Same key, same behaviour. */
-  .topbar .key{flex:0 0 auto; min-width:64px;}
+  /* v1.6: the unit cap is pinned to the RIGHT. The row is space-between,
+     so when the sub collapses empty (v1.5) the cap became the sole flex
+     child and jumped to the left. margin-left:auto keeps it right
+     whether the solver "N of N" sub is present or not. */
+  .lcd-unitcap{font-size:.62rem; letter-spacing:.18em; font-weight:600; color:var(--ink); white-space:nowrap; margin-left:auto;}
+  /* ---------- v1.7: no Clear button anywhere on the face. Clear lives on
+     the backspace key: tap = backspace, hold ~0.6s = Clear. The key is
+     labelled "⌫ / C" and the ⌫ is set a little larger than the key text
+     so it reads at a glance. */
+  .back-ico{font-size:1.4em; line-height:1; vertical-align:-0.1em;}
   /* ---------- keypad: stock-calculator air (v1.5 inspo) ----------
      Number and function keys are plain black text — no fill, no
      border. Operator keys (÷ × − +) sit in thin outlined rounded
@@ -119,34 +124,24 @@
   button.key:active{background:var(--solid); color:var(--on-solid); border-color:transparent;}
   button.key.conv:active, button.key[data-k="eq"]:active{background:var(--bg); color:var(--ink); border-color:var(--ink);}
   button.key:focus-visible{outline:2px solid var(--focus); outline-offset:2px;}
-  button.key.power-key{border:none; border-radius:14px; background:transparent;
-    font-size:clamp(.9rem,4vmin,1.1rem); font-weight:500; letter-spacing:0; min-height:44px;}
   .sr{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0);}
 </style>
 </head>
 <body>
 <div class="device" role="application" aria-label="Construction calculator">
-  <!-- ================= SHARED TOP BAR (calculator + History, same pixels) ================= -->
-  <div class="topbar" id="topbar">
-    <button class="hist-btn" id="histBtn" type="button" aria-label="History">&#9719; HIST</button>
-    <button class="hist-btn" id="histBack" type="button" style="display:none">&larr; Calc</button>
-    <span class="top-title" id="topTitle"></span>
-    <span class="lcd-inds" id="lcdInds">
-      <span class="ind" id="indShift">SHIFT</span>
-      <span class="ind" id="indRcl">RCL</span>
-      <span class="ind" id="indMem">MEM</span>
-    </span>
-    <span class="hist-count" id="histCount" style="display:none"></span>
-    <button class="key power-key" id="clearBtn" data-k="onc" type="button">Clear</button>
-  </div>
-  <!-- ================= DISPLAY ================= -->
-  <div class="lcd" id="lcd">
+  <!-- ================= DISPLAY (tap it to open History) ================= -->
+  <div class="lcd" id="lcd" title="Tap for History">
     <div class="lcd-main">
       <span class="lcd-label" id="dispLabel">Ready</span>
       <span class="lcd-value" id="dispMain">0&Prime;</span>
     </div>
     <div class="lcd-units">
       <span class="lcd-sub" id="dispSub"></span>
+      <span class="lcd-inds" id="lcdInds">
+        <span class="ind" id="indConv">CONV</span>
+        <span class="ind" id="indRcl">RCL</span>
+        <span class="ind" id="indMem">MEM</span>
+      </span>
       <span class="lcd-unitcap" id="dispUnits">FEET&nbsp;&nbsp;·&nbsp;&nbsp;INCH</span>
     </div>
   </div>
@@ -181,7 +176,7 @@
       <div class="cell"><button class="key" data-k="feet" type="button">Feet</button></div>
       <div class="cell"><button class="key" data-k="inch" type="button">Inch</button></div>
       <div class="cell"><button class="key" data-k="frac" type="button">/</button></div>
-      <div class="cell"><button class="key" data-k="back" type="button" aria-label="Backspace">&#9003;</button></div>
+      <div class="cell"><button class="key" id="backBtn" data-k="back" type="button" aria-label="Backspace — hold to Clear"><span class="back-ico">&#9003;</span> / C</button></div>
     </div>
     <div class="krow">
       <div class="cell"><button class="key conv" data-k="conv" type="button">Conv</button></div>
@@ -215,7 +210,7 @@
 
   <!-- ================= HISTORY (replaces Tape): sheet over the keypad ================= -->
   <div class="history" id="historyView" aria-label="History">
-    <div class="hist-head"><span class="hist-head-title">History</span><span class="hist-head-count" id="histHeadCount"></span></div>
+    <div class="hist-head"><button class="hist-btn" id="histBackSheet" type="button">&larr; Calc</button><span class="hist-head-title">History</span><span class="hist-head-count" id="histHeadCount"></span></div>
     <div class="hist-list" id="historyList"></div>
     <div class="hist-empty" id="historyEmpty">No calculations yet</div>
     <div class="hist-pager">
@@ -231,13 +226,16 @@
 <script>
 "use strict";
 /* =====================================================================
-   ConCalc v1.5 — key rules implemented here (MMD-aligned):
-   - History: overlay sheet over the keypad area (display and top bar
-     stay visible), newest first, fixed-height rows, discrete paged
+   ConCalc v1.7 — key rules implemented here (MMD-aligned):
+   - History: overlay sheet over the keypad area (display stays
+     visible), newest first, fixed-height rows, discrete paged
      scrolling (8 per page, ▲/▼ arrows + page indicator), fixed 44px
      header inside the sheet, own scroll if the sheet is short. No wipe
      control — history auto-prunes to the last 100 entries, oldest drops
      automatically. Persisted in localStorage (concalc.history.v1).
+     v1.7: tap the display to open History (no HIST button, no top
+     bar); the sheet's own "← Calc" button, or tapping the display
+     again, closes it.
    - Numbers are PLAIN until tagged: type a number, then Feet/Inch/Yds/
      m/cm/mm tags it; an untagged number is a plain count (reference:
      "enter dimensions from largest to smallest", and % / board-feet /
@@ -255,9 +253,13 @@
    - Conv swaps key labels (see SHIFT_LABELS): no small-print
      second-function labels on the face at all — a dot marks keys
      that have a second function. Label swap is display-only.
-   - Clear sits in the top-right corner of the face (top bar) and has
-     no row of its own; the freed space goes to the keypad rows.
-     1st press clears the display, 2nd clears temporary values.
+   - v1.7: no Clear button and no top bar at all. Clear lives on the
+     backspace key, labelled "⌫ / C" (⌫ set larger than the key text):
+     tap = delete one character, hold ~0.6s = Clear (1st press: clears
+     the display; hold again = 2nd press: clears temporary values).
+     Clear All (Conv+×) is unchanged. The CONV / RCL / MEM indicators
+     live in the sub row under the display value, and the Conv indicator
+     reads CONV, not SHIFT.
    - The display shows the value only: no explanatory subtext under
      it (no unit conversions, no pitch explanation, no
      instructions). The sub line carries only the solver position
@@ -396,7 +398,6 @@ function renderHistory(){
   var from = total ? start + 1 : 0, to = Math.min(total, start + HIST_PER_PAGE);
   var label = total ? from + "\u2013" + to + " of " + total : "0 of 0";
   var info = $("histPageInfo"); if(info) info.textContent = "Page " + (histPage + 1) + " of " + histPageCount();
-  var cnt = $("histCount"); if(cnt) cnt.textContent = label;
   var hcnt = $("histHeadCount"); if(hcnt) hcnt.textContent = label;
   var prev = $("histPrev"), next = $("histNext");
   if(prev) prev.hidden = histPage <= 0;
@@ -409,17 +410,11 @@ function histPageStep(dir){
 }
 function openHistory(){
   historyOpen = true; histPage = 0;
-  $("histBtn").style.display = "none"; $("histBack").style.display = "";
-  $("topTitle").textContent = "History";
-  $("lcdInds").style.display = "none"; $("histCount").style.display = "";
   document.querySelector(".device").classList.add("show-history");
   renderHistory();
 }
 function closeHistory(){
   historyOpen = false;
-  $("histBtn").style.display = ""; $("histBack").style.display = "none";
-  $("topTitle").textContent = "";
-  $("lcdInds").style.display = ""; $("histCount").style.display = "none";
   document.querySelector(".device").classList.remove("show-history");
 }
 function toggleHistory(){ if(historyOpen) closeHistory(); else openHistory(); }
@@ -515,7 +510,7 @@ function bareNumber(){
 /* ---------- display ---------- */
 function updateIndicators(){
   $("indMem").className = "ind" + (memory !== null ? " on" : "");
-  $("indShift").className = "ind" + (shiftArmed ? " on" : "");
+  $("indConv").className = "ind" + (shiftArmed ? " on" : "");
   var rclEl = $("indRcl"); if(rclEl) rclEl.className = "ind" + (rclArmed ? " on" : "");
   var cap = "";
   if(dispDim===2) cap = "AREA";
@@ -1640,11 +1635,42 @@ function handleKey(k){
   if(wtvolStoreMode && k !== "d:0") wtvolStoreMode = false;
   primaryKey(k);
 }
+/* ---------- v1.7: display tap = History, backspace hold = Clear ----------
+   The backspace key is NOT wired through the generic click loop below:
+   it has its own handlers so a long press can fire Clear without the
+   tap that follows it also deleting a character. Tap = backspace (one
+   char); hold ~0.6s = handleOnC (1st hold clears the display, a second
+   hold clears temporary values, same as the old Clear button's 1st/2nd
+   press). Pointer events cover touch and mouse on the Kompakt WebView;
+   the context menu is suppressed so a long press never pops a menu. */
+var HOLD_CLEAR_MS = 600;
+var backHoldTimer = null, backHoldFired = false;
+function backHoldStart(){
+  backHoldFired = false;
+  clearTimeout(backHoldTimer);
+  backHoldTimer = setTimeout(function(){ backHoldFired = true; handleOnC(); }, HOLD_CLEAR_MS);
+}
+function backHoldCancel(){ clearTimeout(backHoldTimer); backHoldTimer = null; }
+(function(){
+  var backBtn = $("backBtn");
+  if(backBtn){
+    backBtn.addEventListener("pointerdown", backHoldStart);
+    backBtn.addEventListener("pointerup", backHoldCancel);
+    backBtn.addEventListener("pointerleave", backHoldCancel);
+    backBtn.addEventListener("pointercancel", backHoldCancel);
+    backBtn.addEventListener("contextmenu", function(ev){ ev.preventDefault(); });
+    backBtn.addEventListener("click", function(){
+      if(backHoldFired){ backHoldFired = false; return; }  /* hold already cleared */
+      handleKey("back");
+    });
+  }
+})();
 document.querySelectorAll("button.key").forEach(function(b){
+  if(b.getAttribute("data-k") === "back") return;  /* own handlers above */
   b.addEventListener("click", function(){ handleKey(b.getAttribute("data-k")); });
 });
-$("histBtn").addEventListener("click", function(){ toggleHistory(); });
-$("histBack").addEventListener("click", function(){ closeHistory(); });
+$("lcd").addEventListener("click", function(){ toggleHistory(); });
+$("histBackSheet").addEventListener("click", function(){ closeHistory(); });
 $("histPrev").addEventListener("click", function(){ histPageStep(-1); });
 $("histNext").addEventListener("click", function(){ histPageStep(1); });
 document.addEventListener("keydown", function(ev){
