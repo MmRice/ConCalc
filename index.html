@@ -25,7 +25,7 @@
   /* ---------- app sheet: flat, paper-white, no device shell ---------- */
   .device{background:var(--bg); border-left:1px solid var(--line); border-right:1px solid var(--line);
     width:min(440px,100vw); height:min(100dvh,940px); max-height:100dvh;
-    padding:26px 20px 18px; display:flex; flex-direction:column; gap:14px;}
+    padding:26px 20px 18px; display:flex; flex-direction:column; gap:12px;}
   @media (max-width:480px){ .device{border:none; height:100dvh; padding:22px 16px 14px;} }
   /* ---------- top bar: ONE header row, shared by calculator and History ----------
      Same height, same left slot, same centre slot, same right slot on both
@@ -46,10 +46,19 @@
   /* ---------- history screen: MMD paged list, fixed rows, no scrolling ----------
      8 fixed-height rows per page; dividers in exactly the same pixels on
      every page; discrete ▲/▼ paging with a visible page indicator. */
-  .history{display:none; flex:1 1 auto; min-height:0; flex-direction:column; gap:10px;}
-  .device.show-history .lcd, .device.show-history .power, .device.show-history .keypad{display:none;}
+  /* History is a sheet over the keypad area only: the display and the
+     top bar stay visible above it. Own scroll so the pager is always
+     reachable on a short screen; paging (8/page) is still the primary
+     navigation. */
+  .calc-body{position:relative; flex:1 1 auto; min-height:0; display:flex; flex-direction:column; gap:12px;}
+  .history{display:none; position:absolute; inset:0; z-index:5; background:var(--bg);
+    flex-direction:column; gap:10px;}
   .device.show-history .history{display:flex;}
-  .hist-list{flex:1 1 auto; min-height:0; overflow:hidden; display:flex; flex-direction:column;}
+  .hist-head{flex:0 0 44px; min-height:44px; display:flex; align-items:center; justify-content:space-between;
+    border-bottom:1px solid var(--ink); padding:0 2px;}
+  .hist-head-title{font-size:.78rem; letter-spacing:.16em; font-weight:500; text-transform:uppercase;}
+  .hist-head-count{font-size:.78rem; font-weight:500;}
+  .hist-list{flex:1 1 auto; min-height:0; overflow:auto; display:flex; flex-direction:column;}
   .hist-row{display:flex; flex-direction:column; align-items:flex-start; justify-content:center; gap:2px; width:100%;
     height:64px; flex:0 0 64px; box-sizing:border-box;
     text-align:left; background:var(--bg); border:none; border-bottom:1px solid var(--line);
@@ -78,19 +87,24 @@
   .lcd-sub{color:var(--ink); font-size:clamp(.72rem,3vmin,.84rem); white-space:nowrap;
     overflow:hidden; text-overflow:ellipsis; min-height:1.25em; font-variant-numeric:tabular-nums;}
   .lcd-unitcap{font-size:.62rem; letter-spacing:.18em; font-weight:600; color:var(--ink); white-space:nowrap;}
-  /* ---------- clear row ---------- */
-  .power{display:grid; grid-template-columns:1fr; flex:0 0 auto;}
+  /* ---------- clear row: Clear is a regular single key (col 1 of 5),
+     same size and styling as every other key. No new function fills
+     the freed slots. ---------- */
+  .power{display:grid; grid-template-columns:repeat(5,1fr); gap:8px; flex:0 0 auto;}
   /* ---------- keypad: flat outlined keys, generous air ---------- */
-  .keypad{flex:1 1 auto; min-height:0; display:grid; grid-template-rows:repeat(8,1fr); gap:5px;}
+  .keypad{flex:1 1 auto; min-height:0; display:grid; grid-template-rows:repeat(8,1fr); gap:8px;}
   .krow{display:grid; grid-template-columns:repeat(5,1fr); gap:8px; min-height:0;}
-  .cell{display:flex; flex-direction:column; min-height:0;}
-  .shift-lbl{color:var(--ink); font-size:clamp(.7rem,2.8vmin,.8rem); font-weight:500;
-    letter-spacing:.04em; line-height:1.3; height:1.3em; text-align:center; white-space:nowrap; overflow:hidden;}
-  button.key{font:inherit; flex:1 1 auto; min-height:0; border:1px solid var(--key-line); border-radius:14px;
+  .cell{display:flex; min-height:0;}
+  /* v1.4: no small-print second-function labels anywhere on the face.
+     Keys with a second function carry a small dot (top-right corner);
+     pressing Conv swaps their visible label to the second function. */
+  button.key{position:relative; font:inherit; flex:1 1 auto; min-height:0; border:1px solid var(--key-line); border-radius:14px;
     background:var(--bg); color:var(--ink); cursor:pointer; padding:1px 2px;
-    font-size:clamp(.8rem,3.6vmin,1rem); font-weight:500; line-height:1.05;}
+    font-size:clamp(.9rem,4vmin,1.1rem); font-weight:500; line-height:1.05;}
+  button.key.has-shift::after{content:"\2022"; position:absolute; top:3px; right:6px;
+    font-size:.6rem; line-height:1; color:var(--ink);}
   button.key.num{background:var(--num-bg); border-color:transparent;
-    font-size:clamp(1.1rem,5vmin,1.5rem); font-weight:400;}
+    font-size:clamp(1.2rem,5.5vmin,1.6rem); font-weight:400;}
   button.key[data-k^="op:"], button.key[data-k="back"]{background:var(--op-bg); border-color:transparent;}
   button.key.conv{background:var(--solid); color:var(--on-solid); border-color:transparent; font-weight:600;}
   button.key.conv.armed{background:var(--bg); color:var(--ink); border:1.5px solid var(--ink);}
@@ -98,8 +112,8 @@
   button.key:active{background:var(--solid); color:var(--on-solid); border-color:transparent;}
   button.key.conv:active, button.key[data-k="eq"]:active{background:var(--bg); color:var(--ink); border-color:var(--ink);}
   button.key:focus-visible{outline:2px solid var(--focus); outline-offset:2px;}
-  button.key.power-key{border-radius:999px; border:1px solid var(--ink); background:var(--bg);
-    font-size:.9rem; font-weight:500; letter-spacing:.06em; min-height:44px;}
+  button.key.power-key{border-radius:14px; border:1px solid var(--key-line); background:var(--bg);
+    font-size:clamp(.9rem,4vmin,1.1rem); font-weight:500; letter-spacing:0; min-height:44px;}
   .sr{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0);}
 </style>
 </head>
@@ -129,6 +143,7 @@
     </div>
   </div>
 
+  <div class="calc-body">
   <div class="power">
     <button class="key power-key" data-k="onc" type="button">Clear</button>
   </div>
@@ -136,65 +151,66 @@
   <!-- ================= KEYPAD ================= -->
   <div class="keypad" aria-label="Keypad">
     <div class="krow">
-      <div class="cell"><span class="shift-lbl"></span><button class="key" data-k="pitch" type="button">Pitch</button></div>
-      <div class="cell"><span class="shift-lbl"></span><button class="key" data-k="rise" type="button">Rise</button></div>
-      <div class="cell"><span class="shift-lbl"></span><button class="key" data-k="run" type="button">Run</button></div>
-      <div class="cell"><span class="shift-lbl">Roof</span><button class="key" data-k="diag" type="button">Diag</button></div>
-      <div class="cell"><span class="shift-lbl">Ir/Pitch</span><button class="key" data-k="hip" type="button">Hip/V</button></div>
+      <div class="cell"><button class="key" data-k="pitch" type="button">Pitch</button></div>
+      <div class="cell"><button class="key" data-k="rise" type="button">Rise</button></div>
+      <div class="cell"><button class="key" data-k="run" type="button">Run</button></div>
+      <div class="cell"><button class="key" data-k="diag" type="button">Diag</button></div>
+      <div class="cell"><button class="key" data-k="hip" type="button">Hip/V</button></div>
     </div>
     <div class="krow">
-      <div class="cell"><span class="shift-lbl">Conc</span><button class="key" data-k="bdft" type="button">Bd Ft</button></div>
-      <div class="cell"><span class="shift-lbl">Bal</span><button class="key" data-k="stair" type="button">Stair</button></div>
-      <div class="cell"><span class="shift-lbl">Arc</span><button class="key" data-k="circ" type="button">Circ</button></div>
-      <div class="cell"><span class="shift-lbl">Drywall</span><button class="key" data-k="rwall" type="button">R/Wall</button></div>
-      <div class="cell"><span class="shift-lbl">Ir/Jack</span><button class="key" data-k="jack" type="button">Jack</button></div>
+      <div class="cell"><button class="key" data-k="bdft" type="button">Bd Ft</button></div>
+      <div class="cell"><button class="key" data-k="stair" type="button">Stair</button></div>
+      <div class="cell"><button class="key" data-k="circ" type="button">Circ</button></div>
+      <div class="cell"><button class="key" data-k="rwall" type="button">R/Wall</button></div>
+      <div class="cell"><button class="key" data-k="jack" type="button">Jack</button></div>
     </div>
     <div class="krow">
-      <div class="cell"><span class="shift-lbl"></span><button class="key" data-k="m" type="button">m</button></div>
-      <div class="cell"><span class="shift-lbl"></span><button class="key" data-k="cm" type="button">cm</button></div>
-      <div class="cell"><span class="shift-lbl"></span><button class="key" data-k="mm" type="button">mm</button></div>
-      <div class="cell"><span class="shift-lbl"></span><button class="key" data-k="weight" type="button">Weight</button></div>
-      <div class="cell"><span class="shift-lbl">x&sup2;</span><button class="key" data-k="sqrt" type="button">&radic;x</button></div>
+      <div class="cell"><button class="key" data-k="m" type="button">m</button></div>
+      <div class="cell"><button class="key" data-k="cm" type="button">cm</button></div>
+      <div class="cell"><button class="key" data-k="mm" type="button">mm</button></div>
+      <div class="cell"><button class="key" data-k="weight" type="button">Weight</button></div>
+      <div class="cell"><button class="key" data-k="sqrt" type="button">&radic;x</button></div>
     </div>
     <div class="krow">
-      <div class="cell"><span class="shift-lbl"></span><button class="key" data-k="yds" type="button">Yds</button></div>
-      <div class="cell"><span class="shift-lbl"></span><button class="key" data-k="feet" type="button">Feet</button></div>
-      <div class="cell"><span class="shift-lbl"></span><button class="key" data-k="inch" type="button">Inch</button></div>
-      <div class="cell"><span class="shift-lbl"></span><button class="key" data-k="frac" type="button">/</button></div>
-      <div class="cell"><span class="shift-lbl"></span><button class="key" data-k="back" type="button" aria-label="Backspace">&#8592;</button></div>
+      <div class="cell"><button class="key" data-k="yds" type="button">Yds</button></div>
+      <div class="cell"><button class="key" data-k="feet" type="button">Feet</button></div>
+      <div class="cell"><button class="key" data-k="inch" type="button">Inch</button></div>
+      <div class="cell"><button class="key" data-k="frac" type="button">/</button></div>
+      <div class="cell"><button class="key" data-k="back" type="button" aria-label="Backspace">&#8592;</button></div>
     </div>
     <div class="krow">
-      <div class="cell"><span class="shift-lbl"></span><button class="key conv" data-k="conv" type="button">Conv</button></div>
-      <div class="cell"><span class="shift-lbl">Riser Ht</span><button class="key num" data-k="d:7" type="button">7</button></div>
-      <div class="cell"><span class="shift-lbl"></span><button class="key num" data-k="d:8" type="button">8</button></div>
-      <div class="cell"><span class="shift-lbl">Tread W</span><button class="key num" data-k="d:9" type="button">9</button></div>
-      <div class="cell"><span class="shift-lbl">1/x</span><button class="key" data-k="op:/" type="button">&divide;</button></div>
+      <div class="cell"><button class="key conv" data-k="conv" type="button">Conv</button></div>
+      <div class="cell"><button class="key num" data-k="d:7" type="button">7</button></div>
+      <div class="cell"><button class="key num" data-k="d:8" type="button">8</button></div>
+      <div class="cell"><button class="key num" data-k="d:9" type="button">9</button></div>
+      <div class="cell"><button class="key" data-k="op:/" type="button">&divide;</button></div>
     </div>
     <div class="krow">
-      <div class="cell"><span class="shift-lbl">M-R/C</span><button class="key" data-k="rcl" type="button">Rcl</button></div>
-      <div class="cell"><span class="shift-lbl"></span><button class="key num" data-k="d:4" type="button">4</button></div>
-      <div class="cell"><span class="shift-lbl">o.c.</span><button class="key num" data-k="d:5" type="button">5</button></div>
-      <div class="cell"><span class="shift-lbl"></span><button class="key num" data-k="d:6" type="button">6</button></div>
-      <div class="cell"><span class="shift-lbl">Clear All</span><button class="key" data-k="op:*" type="button">&times;</button></div>
+      <div class="cell"><button class="key" data-k="rcl" type="button">Rcl</button></div>
+      <div class="cell"><button class="key num" data-k="d:4" type="button">4</button></div>
+      <div class="cell"><button class="key num" data-k="d:5" type="button">5</button></div>
+      <div class="cell"><button class="key num" data-k="d:6" type="button">6</button></div>
+      <div class="cell"><button class="key" data-k="op:*" type="button">&times;</button></div>
     </div>
     <div class="krow">
-      <div class="cell"><span class="shift-lbl">M&minus;</span><button class="key" data-k="mplus" type="button">M+</button></div>
-      <div class="cell"><span class="shift-lbl"></span><button class="key num" data-k="d:1" type="button">1</button></div>
-      <div class="cell"><span class="shift-lbl"></span><button class="key num" data-k="d:2" type="button">2</button></div>
-      <div class="cell"><span class="shift-lbl"></span><button class="key num" data-k="d:3" type="button">3</button></div>
-      <div class="cell"><span class="shift-lbl">+/&minus; &#9650;</span><button class="key" data-k="op:-" type="button">&minus;</button></div>
+      <div class="cell"><button class="key" data-k="mplus" type="button">M+</button></div>
+      <div class="cell"><button class="key num" data-k="d:1" type="button">1</button></div>
+      <div class="cell"><button class="key num" data-k="d:2" type="button">2</button></div>
+      <div class="cell"><button class="key num" data-k="d:3" type="button">3</button></div>
+      <div class="cell"><button class="key" data-k="op:-" type="button">&minus;</button></div>
     </div>
     <div class="krow">
-      <div class="cell"><span class="shift-lbl">Prefs</span><button class="key" data-k="pct" type="button">%</button></div>
-      <div class="cell"><span class="shift-lbl">wt/vol</span><button class="key num" data-k="d:0" type="button">0</button></div>
-      <div class="cell"><span class="shift-lbl">Cost</span><button class="key num" data-k="dot" type="button">&middot;</button></div>
-      <div class="cell"><span class="shift-lbl"></span><button class="key" data-k="eq" type="button">=</button></div>
-      <div class="cell"><span class="shift-lbl">&pi; &#9660;</span><button class="key" data-k="op:+" type="button">+</button></div>
+      <div class="cell"><button class="key" data-k="pct" type="button">%</button></div>
+      <div class="cell"><button class="key num" data-k="d:0" type="button">0</button></div>
+      <div class="cell"><button class="key num" data-k="dot" type="button">&middot;</button></div>
+      <div class="cell"><button class="key" data-k="eq" type="button">=</button></div>
+      <div class="cell"><button class="key" data-k="op:+" type="button">+</button></div>
     </div>
   </div>
 
-  <!-- ================= HISTORY (replaces Tape) ================= -->
+  <!-- ================= HISTORY (replaces Tape): sheet over the keypad ================= -->
   <div class="history" id="historyView" aria-label="History">
+    <div class="hist-head"><span class="hist-head-title">History</span><span class="hist-head-count" id="histHeadCount"></span></div>
     <div class="hist-list" id="historyList"></div>
     <div class="hist-empty" id="historyEmpty">No calculations yet</div>
     <div class="hist-pager">
@@ -203,17 +219,20 @@
       <button class="hist-page-btn" id="histNext" type="button">Next &darr;</button>
     </div>
   </div>
+  </div>
 
 </div>
 
 <script>
 "use strict";
 /* =====================================================================
-   ConCalc v1.3 — key rules implemented here (MMD-aligned):
-   - History: full list, newest first, fixed-height rows, discrete paged
-     scrolling (8 per page, ▲/▼ arrows + page indicator), shared header
-     row with the calculator. No wipe control — history auto-prunes to the
-     last 100 entries, oldest drops automatically.
+   ConCalc v1.4 — key rules implemented here (MMD-aligned):
+   - History: overlay sheet over the keypad area (display and top bar
+     stay visible), newest first, fixed-height rows, discrete paged
+     scrolling (8 per page, ▲/▼ arrows + page indicator), fixed 44px
+     header inside the sheet, own scroll if the sheet is short. No wipe
+     control — history auto-prunes to the last 100 entries, oldest drops
+     automatically. Persisted in localStorage (concalc.history.v1).
    - Numbers are PLAIN until tagged: type a number, then Feet/Inch/Yds/
      m/cm/mm tags it; an untagged number is a plain count (reference:
      "enter dimensions from largest to smallest", and % / board-feet /
@@ -228,6 +247,10 @@
      Everything else is idempotent: Diag always gives Diag, etc.
    - Conv (Ç) is the reference Convert prefix: Ç + unit converts the
      displayed value; Ç + another key is that key's second function.
+   - Conv swaps key labels (see SHIFT_LABELS): no small-print
+     second-function labels on the face at all — a dot marks keys
+     that have a second function. Label swap is display-only.
+   - Clear is a regular single key, same size as the others.
    - Clear is the same key with a plain label: 1st press clears
      the display, 2nd clears temporary values.
    ===================================================================== */
@@ -360,6 +383,7 @@ function renderHistory(){
   var label = total ? from + "\u2013" + to + " of " + total : "0 of 0";
   var info = $("histPageInfo"); if(info) info.textContent = "Page " + (histPage + 1) + " of " + histPageCount();
   var cnt = $("histCount"); if(cnt) cnt.textContent = label;
+  var hcnt = $("histHeadCount"); if(hcnt) hcnt.textContent = label;
   var prev = $("histPrev"), next = $("histNext");
   if(prev) prev.hidden = histPage <= 0;
   if(next) next.hidden = histPage >= histPageCount() - 1;
@@ -1230,7 +1254,9 @@ function showItem(){
 }
 function sessionAdvance(){
   if(session.phase === "prompt") acceptPrompt();
-  else showItem();
+  /* v1.4 fix: results used to re-show item 0 forever (itemIdx was never
+     incremented) while the display advertised "1 of N". Step through. */
+  else { session.itemIdx = (session.itemIdx + 1) % session.items.length; showItem(); }
 }
 function sessionCancel(){
   session = null; bMode = "num"; clearBuilder();
@@ -1484,9 +1510,40 @@ function primaryKey(k){
 }
 
 /* ---------- routing: Clear, Conv/Shift, Rcl, sessions, prefs ---------- */
+
+/* ---------- Conv label swap (v1.4) ----------
+   No small-print second-function labels on the face. Each key that has
+   a second function carries a dot (CSS .has-shift::after) and, while
+   Conv is armed, its visible label swaps to the second function.
+   Display-only: which function a press calls is unchanged (see
+   handleKey / SHIFT / TEMP_RES). Keys with no entry here have no
+   second function and keep their label (unit keys convert on Conv,
+   Weight's Conv action is the same entry point as its primary). */
+var SHIFT_LABELS = { pitch:"Ratio", diag:"Roof", hip:"Ir/Pitch",
+  bdft:"Conc", stair:"Bal", circ:"Arc", rwall:"Drywall", jack:"Ir/Jack",
+  sqrt:"x\u00b2", "d:7":"Riser Ht", "d:9":"Tread W", "op:/":"1/x",
+  rcl:"M-R/C", "d:5":"o.c.", "op:*":"Clear All", mplus:"M\u2212",
+  "op:-":"+\u2212 \u25b2", pct:"Prefs", "d:0":"wt/vol", dot:"Cost",
+  "op:+":"\u03c0 \u25bc",
+  "d:1":"1/16", "d:2":"1/2", "d:3":"1/32", "d:4":"1/4", "d:6":"1/64", "d:8":"1/8" };
+function initShiftLabels(){
+  document.querySelectorAll("button.key").forEach(function(b){
+    var alt = SHIFT_LABELS[b.getAttribute("data-k")];
+    if(!alt) return;
+    b.dataset.primary = b.textContent;
+    b.dataset.alt = alt;
+    b.classList.add("has-shift");
+  });
+}
+function applyShiftLabels(on){
+  document.querySelectorAll("button.key.has-shift").forEach(function(b){
+    b.textContent = on ? b.dataset.alt : b.dataset.primary;
+  });
+}
 function setShift(on){
   shiftArmed = on;
   document.querySelectorAll("button.key.conv").forEach(function(b){ b.classList.toggle("armed", on); });
+  applyShiftLabels(on);
   updateIndicators();
 }
 function clearTransientModes(){
@@ -1589,6 +1646,7 @@ document.addEventListener("keydown", function(ev){
   else if(ev.key.toLowerCase() === "i") handleKey("inch");
 });
 
+initShiftLabels();
 setDisplay(0, 1, "Ready");
 </script>
 </body>

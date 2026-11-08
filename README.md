@@ -16,10 +16,12 @@ and any Android phone.
   paged list of past calculations, newest first, 8 fixed-height rows per
   page with ▲ / ▼ page arrows and a page indicator ("1–8 of 23"), saved
   between sessions. Tap a row to load its answer back into the calculator.
+  History opens as a sheet over the keypad — the display stays visible —
+  with a fixed 44px header and its own scroll.
   History auto-prunes to the last 100 entries — oldest drops automatically,
   so there is no wipe control. (The calculator's Clear All, Conv+×, is
   separate: it resets stored riser/tread/o.c./wt-vol defaults.)
-- Conv is the Shift key for the small-print second functions.
+- Conv is the Shift key: press it and the keys that have a second function swap their label to show it (a small dot marks those keys); press it again, or use the second function, and the labels go back. No small-print second functions on the face.
 - Mudita style: monochrome, paper-white, flat keys, no ads, no tracking,
   no pop-ups. Works offline once loaded.
 
@@ -47,7 +49,7 @@ and any Android phone.
 
 ## APK
 
-Current release: **ConCalc 1.3** — version 1.3, versionCode 4, package
+Current release: **ConCalc 1.4** — version 1.4, versionCode 5, package
 `com.mmrice.concalc`, minSdk 21, targetSdk 33, self-signed.
 
 This is a new, personal app — a fresh package and a fresh signing key.
@@ -55,7 +57,7 @@ It will NOT update over the old builds (v0.1–v0.3):
 uninstall the old app first, then install this one fresh.
 
 The APK binary is not in this repo — GitHub's text push can't carry binaries.
-Download `ConCalcV1.3.apk` from the chat / release and sideload it, or build
+Download `ConCalcV1.4.apk` from the chat / release and sideload it, or build
 it yourself below. Keep the keystore at
 `~/workspace/apk-build/concalc-personal.keystore` — updates must use the
 same key.
@@ -131,5 +133,5 @@ permission, no other permissions.
 Untested on real Kompakt hardware as of v1.3. Core math spot-checked
 (6' 9 1/2", 6/12 rafter, 9 ft stairs, 10x10 ft x 4" concrete), and
 v1.0 passed 50/50 headless tests against the reference worked examples.
-v1.3 brings History into line with Mudita Mindful Design: fixed-height rows, discrete paged scrolling (8 per page, ▲/▼ arrows, page indicator), one header row shared by the calculator and History screens, no grey text, no dark mode, larger second-function labels in black, Clear key 44px. The wipe control is removed — history auto-prunes to the last 100. v1.2 replaces Tape with a full History screen (HIST button, top-left of the display: a list, newest first, tap a row to reuse its answer, saved between sessions) and renames the On/C key to Clear (same behaviour). v1.1 changed only the launcher icon.
+v1.4 is UI only, no math changes: Conv swaps key labels instead of small-print second functions (dot marks keys with a second function), Clear is a regular single key like the others, keys are bigger with more air, History is a sheet over the keypad (display stays visible, fixed 44px header, own scroll), and multi-result solvers now step through all their answers — Concrete/Bd Ft/etc. used to stay stuck on item 0 while advertising "1 of N". v1.3 brings History into line with Mudita Mindful Design: fixed-height rows, discrete paged scrolling (8 per page, ▲/▼ arrows, page indicator), one header row shared by the calculator and History screens, no grey text, no dark mode, larger second-function labels in black, Clear key 44px. The wipe control is removed — history auto-prunes to the last 100. v1.2 replaces Tape with a full History screen (HIST button, top-left of the display: a list, newest first, tap a row to reuse its answer, saved between sessions) and renames the On/C key to Clear (same behaviour). v1.1 changed only the launcher icon.
 Personal project, not associated with any business.
