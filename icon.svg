@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" fill="#F4F1EA"/>
+  <g fill="none" stroke="#111111" stroke-width="28" stroke-linejoin="round" stroke-linecap="round">
+    <!-- Speed square: right triangle, right angle at bottom left -->
+    <path d="M 96 416 L 96 96 L 416 416 Z"/>
+    <!-- Pivot hole -->
+    <circle cx="160" cy="352" r="28" stroke-width="20"/>
+    <!-- Degree ticks along the hypotenuse -->
+    <path d="M 176 256 L 208 256" stroke-width="16"/>
+    <path d="M 236 316 L 268 316" stroke-width="16"/>
+    <path d="M 296 376 L 328 376" stroke-width="16"/>
+    <!-- Fence lip along the bottom -->
+    <path d="M 96 416 L 416 416" stroke-width="36"/>
+  </g>
+</svg>

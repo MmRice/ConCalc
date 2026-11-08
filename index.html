@@ -1,0 +1,1497 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="light dark" />
+<meta name="theme-color" content="#ffffff" />
+<link rel="icon" href="data:," />
+<title>Construction Calculator</title>
+<style>
+  :root{
+    --page:#e8e8e6; --bg:#ffffff; --ink:#141412; --muted:#6e6e68; --faint:#a3a39c;
+    --line:#e2e2de; --key-line:#d9d9d4; --num-bg:#f3f3f1; --op-bg:#eaeae7;
+    --solid:#141412; --on-solid:#ffffff; --focus:#141412;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --page:#000000; --bg:#101010; --ink:#f2f2ef; --muted:#a6a6a0; --faint:#7c7c76;
+      --line:#2b2b2b; --key-line:#383836; --num-bg:#1e1e1e; --op-bg:#282826;
+      --solid:#f2f2ef; --on-solid:#101010; --focus:#f2f2ef; }
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{margin:0; background:var(--page); overflow:hidden; color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    display:flex; align-items:stretch; justify-content:center;}
+  /* ---------- app sheet: flat, paper-white, no device shell ---------- */
+  .device{background:var(--bg); border-left:1px solid var(--line); border-right:1px solid var(--line);
+    width:min(440px,100vw); height:min(100dvh,940px); max-height:100dvh;
+    padding:26px 20px 18px; display:flex; flex-direction:column; gap:14px;}
+  @media (max-width:480px){ .device{border:none; height:100dvh; padding:22px 16px 14px;} }
+  /* ---------- display: open paper, hairline rule underneath ---------- */
+  .lcd{color:var(--ink); padding:2px 2px 16px; border-bottom:1px solid var(--ink); flex:0 0 auto;}
+  .lcd-top{display:flex; justify-content:flex-end; gap:6px; min-height:18px;}
+  .ind{font-size:.6rem; letter-spacing:.12em; font-weight:600; border:1px solid var(--ink);
+    border-radius:999px; padding:1px 8px; line-height:1.5; display:none;}
+  .ind.on{display:block;}
+  .lcd-main{display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin-top:8px;}
+  .lcd-label{font-size:.78rem; letter-spacing:.16em; font-weight:500; color:var(--muted);
+    text-transform:uppercase; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .lcd-value{font-weight:300; letter-spacing:-.01em; font-variant-numeric:tabular-nums;
+    font-size:clamp(2.3rem,10vmin,3.4rem); line-height:1.05; text-align:right; white-space:nowrap;}
+  .lcd-units{display:flex; justify-content:space-between; align-items:baseline; margin-top:8px; gap:10px;}
+  .lcd-sub{color:var(--muted); font-size:clamp(.72rem,3vmin,.84rem); white-space:nowrap;
+    overflow:hidden; text-overflow:ellipsis; min-height:1.25em; font-variant-numeric:tabular-nums;}
+  .lcd-unitcap{font-size:.62rem; letter-spacing:.18em; font-weight:600; color:var(--faint); white-space:nowrap;}
+  /* ---------- clear row ---------- */
+  .power{display:grid; grid-template-columns:1fr; flex:0 0 auto;}
+  /* ---------- keypad: flat outlined keys, generous air ---------- */
+  .keypad{flex:1 1 auto; min-height:0; display:grid; grid-template-rows:repeat(8,1fr); gap:5px;}
+  .krow{display:grid; grid-template-columns:repeat(5,1fr); gap:8px; min-height:0;}
+  .cell{display:flex; flex-direction:column; min-height:0;}
+  .shift-lbl{color:var(--faint); font-size:clamp(.54rem,2.3vmin,.66rem); font-weight:500;
+    letter-spacing:.04em; line-height:1.3; height:1.3em; text-align:center; white-space:nowrap; overflow:hidden;}
+  button.key{font:inherit; flex:1 1 auto; min-height:0; border:1px solid var(--key-line); border-radius:14px;
+    background:var(--bg); color:var(--ink); cursor:pointer; padding:1px 2px;
+    font-size:clamp(.8rem,3.6vmin,1rem); font-weight:500; line-height:1.05;}
+  button.key.num{background:var(--num-bg); border-color:transparent;
+    font-size:clamp(1.1rem,5vmin,1.5rem); font-weight:400;}
+  button.key[data-k^="op:"], button.key[data-k="back"]{background:var(--op-bg); border-color:transparent;}
+  button.key.conv{background:var(--solid); color:var(--on-solid); border-color:transparent; font-weight:600;}
+  button.key.conv.armed{background:var(--bg); color:var(--ink); border:1.5px solid var(--ink);}
+  button.key[data-k="eq"]{background:var(--solid); color:var(--on-solid); border-color:transparent; font-weight:600;}
+  button.key:active{background:var(--solid); color:var(--on-solid); border-color:transparent;}
+  button.key.conv:active, button.key[data-k="eq"]:active{background:var(--bg); color:var(--ink); border-color:var(--ink);}
+  button.key:focus-visible{outline:2px solid var(--focus); outline-offset:2px;}
+  button.key.power-key{border-radius:999px; border:1px solid var(--ink); background:var(--bg);
+    font-size:.9rem; font-weight:500; letter-spacing:.06em; min-height:42px;}
+  .sr{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0);}
+</style>
+</head>
+<body>
+<div class="device" role="application" aria-label="Construction calculator">
+  <!-- ================= DISPLAY ================= -->
+  <div class="lcd" id="lcd">
+    <div class="lcd-top">
+      <span class="ind" id="indShift">SHIFT</span>
+      <span class="ind" id="indRcl">RCL</span>
+      <span class="ind" id="indTape">TAPE</span>
+      <span class="ind" id="indMem">MEM</span>
+    </div>
+    <div class="lcd-main">
+      <span class="lcd-label" id="dispLabel">Ready</span>
+      <span class="lcd-value" id="dispMain">0&Prime;</span>
+    </div>
+    <div class="lcd-units">
+      <span class="lcd-sub" id="dispSub"></span>
+      <span class="lcd-unitcap" id="dispUnits">FEET&nbsp;&nbsp;·&nbsp;&nbsp;INCH</span>
+    </div>
+  </div>
+
+  <div class="power">
+    <button class="key power-key" data-k="onc" type="button">On/C</button>
+  </div>
+
+  <!-- ================= KEYPAD ================= -->
+  <div class="keypad" aria-label="Keypad">
+    <div class="krow">
+      <div class="cell"><span class="shift-lbl"></span><button class="key" data-k="pitch" type="button">Pitch</button></div>
+      <div class="cell"><span class="shift-lbl"></span><button class="key" data-k="rise" type="button">Rise</button></div>
+      <div class="cell"><span class="shift-lbl"></span><button class="key" data-k="run" type="button">Run</button></div>
+      <div class="cell"><span class="shift-lbl">Roof</span><button class="key" data-k="diag" type="button">Diag</button></div>
+      <div class="cell"><span class="shift-lbl">Ir/Pitch</span><button class="key" data-k="hip" type="button">Hip/V</button></div>
+    </div>
+    <div class="krow">
+      <div class="cell"><span class="shift-lbl">Conc</span><button class="key" data-k="bdft" type="button">Bd Ft</button></div>
+      <div class="cell"><span class="shift-lbl">Bal</span><button class="key" data-k="stair" type="button">Stair</button></div>
+      <div class="cell"><span class="shift-lbl">Arc</span><button class="key" data-k="circ" type="button">Circ</button></div>
+      <div class="cell"><span class="shift-lbl">Drywall</span><button class="key" data-k="rwall" type="button">R/Wall</button></div>
+      <div class="cell"><span class="shift-lbl">Ir/Jack</span><button class="key" data-k="jack" type="button">Jack</button></div>
+    </div>
+    <div class="krow">
+      <div class="cell"><span class="shift-lbl"></span><button class="key" data-k="m" type="button">m</button></div>
+      <div class="cell"><span class="shift-lbl"></span><button class="key" data-k="cm" type="button">cm</button></div>
+      <div class="cell"><span class="shift-lbl"></span><button class="key" data-k="mm" type="button">mm</button></div>
+      <div class="cell"><span class="shift-lbl"></span><button class="key" data-k="weight" type="button">Weight</button></div>
+      <div class="cell"><span class="shift-lbl">x&sup2;</span><button class="key" data-k="sqrt" type="button">&radic;x</button></div>
+    </div>
+    <div class="krow">
+      <div class="cell"><span class="shift-lbl"></span><button class="key" data-k="yds" type="button">Yds</button></div>
+      <div class="cell"><span class="shift-lbl"></span><button class="key" data-k="feet" type="button">Feet</button></div>
+      <div class="cell"><span class="shift-lbl"></span><button class="key" data-k="inch" type="button">Inch</button></div>
+      <div class="cell"><span class="shift-lbl"></span><button class="key" data-k="frac" type="button">/</button></div>
+      <div class="cell"><span class="shift-lbl"></span><button class="key" data-k="back" type="button" aria-label="Backspace">&#8592;</button></div>
+    </div>
+    <div class="krow">
+      <div class="cell"><span class="shift-lbl"></span><button class="key conv" data-k="conv" type="button">Conv</button></div>
+      <div class="cell"><span class="shift-lbl">Riser Ht</span><button class="key num" data-k="d:7" type="button">7</button></div>
+      <div class="cell"><span class="shift-lbl"></span><button class="key num" data-k="d:8" type="button">8</button></div>
+      <div class="cell"><span class="shift-lbl">Tread W</span><button class="key num" data-k="d:9" type="button">9</button></div>
+      <div class="cell"><span class="shift-lbl">1/x</span><button class="key" data-k="op:/" type="button">&divide;</button></div>
+    </div>
+    <div class="krow">
+      <div class="cell"><span class="shift-lbl">M-R/C</span><button class="key" data-k="rcl" type="button">Rcl</button></div>
+      <div class="cell"><span class="shift-lbl"></span><button class="key num" data-k="d:4" type="button">4</button></div>
+      <div class="cell"><span class="shift-lbl">o.c.</span><button class="key num" data-k="d:5" type="button">5</button></div>
+      <div class="cell"><span class="shift-lbl"></span><button class="key num" data-k="d:6" type="button">6</button></div>
+      <div class="cell"><span class="shift-lbl">Clear All</span><button class="key" data-k="op:*" type="button">&times;</button></div>
+    </div>
+    <div class="krow">
+      <div class="cell"><span class="shift-lbl">M&minus;</span><button class="key" data-k="mplus" type="button">M+</button></div>
+      <div class="cell"><span class="shift-lbl"></span><button class="key num" data-k="d:1" type="button">1</button></div>
+      <div class="cell"><span class="shift-lbl"></span><button class="key num" data-k="d:2" type="button">2</button></div>
+      <div class="cell"><span class="shift-lbl"></span><button class="key num" data-k="d:3" type="button">3</button></div>
+      <div class="cell"><span class="shift-lbl">+/&minus; &#9650;</span><button class="key" data-k="op:-" type="button">&minus;</button></div>
+    </div>
+    <div class="krow">
+      <div class="cell"><span class="shift-lbl">Prefs</span><button class="key" data-k="pct" type="button">%</button></div>
+      <div class="cell"><span class="shift-lbl">wt/vol</span><button class="key num" data-k="d:0" type="button">0</button></div>
+      <div class="cell"><span class="shift-lbl">Cost</span><button class="key num" data-k="dot" type="button">&middot;</button></div>
+      <div class="cell"><span class="shift-lbl">Tape</span><button class="key" data-k="eq" type="button">=</button></div>
+      <div class="cell"><span class="shift-lbl">&pi; &#9660;</span><button class="key" data-k="op:+" type="button">+</button></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+"use strict";
+/* =====================================================================
+   ConCalc v0.3 — key rules implemented here:
+   - Numbers are PLAIN until tagged: type a number, then Feet/Inch/Yds/
+     m/cm/mm tags it; an untagged number is a plain count (reference:
+     "enter dimensions from largest to smallest", and % / board-feet /
+     plain-math examples use untagged numbers).
+   - Feet/Inch tag a typed number (9 + Inch = 9", 6 + Feet = 6'); a
+     decimal typed number + Feet/Inch = decimal feet/inches.
+   - Repeat presses cycle ONLY where the reference says so: Pitch
+     (in -> deg -> %grade -> slope), Circle (DIA -> AREA -> CIRC),
+     Weight (Ton -> LB -> MET Ton -> kG), Stair (12 results),
+     Jack / Rake-Wall (next stud), Prefs (% steps settings, + steps
+     options), Feet/Inch during conversions (fractional <-> decimal).
+     Everything else is idempotent: Diag always gives Diag, etc.
+   - Conv (Ç) is the reference Convert prefix: Ç + unit converts the
+     displayed value; Ç + another key is that key's second function.
+   ===================================================================== */
+function $(id){return document.getElementById(id);}
+function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){var t=a%b;a=b;b=t;}return a||1;}
+function fmtNum(x,d){ if(!isFinite(x)) return "—"; var s=Number(x).toFixed(d===undefined?2:d); if(s.indexOf(".")>=0){ s = s.replace(/0+$/,"").replace(/\.$/,""); } return s === "" || s === "-" ? "0" : s; }
+function fmtInt(x){ return Math.round(x).toLocaleString("en-US"); }
+function money(x){ return "$" + Number(x).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,","); }
+function roundRes(x, res){ return Math.round(x*res)/res; }
+
+/* ---------- preferences (reference: Prefs = Conv + %, see prefs mode) ---------- */
+var prefRes = 16, prefWaste = 10;              /* waste: internal default only */
+var prefArea = "std", prefVol = "std";         /* std | sqft | sqyd | sqm / std | cuyd | cuft | cum */
+var prefMeter = "0.000", prefDeg = "0.00", prefFracMode = "std";
+var tempRes = null;                            /* Conv+1/2/3/4/6/8, temporary */
+function res(){ return tempRes || prefRes; }
+
+function fmtFI(totalIn, r){
+  if(!isFinite(totalIn)) return "—";
+  r = r || res();
+  var sign = totalIn < 0 ? "−" : "";
+  var rounded = Math.round(Math.abs(totalIn) * r) / r;
+  var feet = Math.floor(rounded / 12);
+  var rem = rounded - feet*12;
+  var wholeIn = Math.floor(rem + 1e-9);
+  var fracVal = rem - wholeIn;
+  var num = Math.round(fracVal * r), den = r;
+  if(num === r){ wholeIn += 1; num = 0; }
+  if(wholeIn === 12){ feet += 1; wholeIn = 0; }
+  var out = sign;
+  if(feet) out += feet + "′";
+  var parts = "";
+  if(wholeIn || (!feet && !num)) parts = String(wholeIn);
+  if(num){
+    var g = gcd(num, den); num/=g; den/=g;
+    parts = (parts && parts!=="0") ? parts + " " + num + "/" + den : (wholeIn===0 && feet ? "0 " + num + "/" + den : num + "/" + den);
+    if(wholeIn===0 && !feet) parts = num + "/" + den;
+  }
+  if(!parts) parts = "0";
+  out += (feet ? " " : "") + parts + "″";
+  return out.trim();
+}
+function fmtFracInch(totalIn){
+  if(!isFinite(totalIn)) return "—";
+  var r = res();
+  var sign = totalIn < 0 ? "−" : "";
+  var rounded = Math.round(Math.abs(totalIn) * r) / r;
+  var whole = Math.floor(rounded + 1e-9);
+  var num = Math.round((rounded - whole) * r), den = r;
+  if(num === r){ whole += 1; num = 0; }
+  if(num){ var g = gcd(num, den); num/=g; den/=g; return sign + (whole ? whole + "-" + num + "/" + den : num + "/" + den) + " INCH"; }
+  return sign + whole + " INCH";
+}
+var dispMode = "ftin";   /* ftin | decft | decin | fracin | yd | m | cm | mm */
+function fmtByPref(val, dim){
+  if(dim===2){
+    if(prefArea==="sqyd") return fmtNum(val/1296,4) + " yd²";
+    if(prefArea==="sqm") return fmtNum(val/929.0304,4) + " m²";
+    return fmtNum(val/144,4) + " ft²";
+  }
+  if(dim===3){
+    if(prefVol==="cuft") return fmtNum(val/1728,2) + " ft³";
+    if(prefVol==="cum") return fmtNum(val*0.0000163871,4) + " m³";
+    return fmtNum(val/46656,6) + " yd³";
+  }
+  if(dim===0) return fmtNum(val,4);
+  if(dispMode==="decft") return fmtNum(val/12,4) + " ft";
+  if(dispMode==="decin") return fmtNum(val,3) + " in";
+  if(dispMode==="fracin") return fmtFracInch(val);
+  if(dispMode==="yd") return fmtNum(val/36,4) + " yd";
+  if(dispMode==="m" || dispMode==="cm" || dispMode==="mm"){
+    var mm = val*25.4;
+    if(prefMeter==="float") return fmtNum(mm/1000,6) + " m";
+    if(Math.abs(mm) >= 1000) return fmtNum(mm/1000,3) + " m";
+    if(Math.abs(mm) >= 10) return fmtNum(mm/10,3) + " cm";
+    return fmtNum(mm,2) + " mm";
+  }
+  return fmtFI(val);
+}
+function fmtAngle(deg){
+  if(prefDeg==="float") return fmtNum(deg,5) + "°";
+  return fmtNum(deg,2) + "°";
+}
+
+/* ---------- tape: reference = past 20 entries, TTL first, + / - scroll, = exit ---------- */
+var tape = [], tapeMode = false, tapeIdx = -1;   /* -1 = TTL, else 0..n-1 oldest-first */
+function addTape(expr, resultText, val, dim){
+  if(tape.length && tape[0].expr === expr && tape[0].result === resultText) return;
+  tape.unshift({expr:expr, result:resultText, val:val, dim:dim});
+  if(tape.length > 20) tape.pop();
+}
+function tapeTTL(){ return tape.length ? tape[0] : null; }
+function tapeShow(){
+  var t = tapeTTL(); if(!t) return;
+  if(tapeIdx < 0){ dispVal = t.val; dispDim = t.dim; showMain("Tape · TTL", t.result, "Total — + older · − newer · = exit and use it", t.val, t.dim); }
+  else {
+    var e = tape[tape.length - 1 - tapeIdx];
+    dispVal = e.val; dispDim = e.dim;
+    showMain("Tape · " + String(tapeIdx+1).padStart(2,"0"), e.expr + "  →  " + e.result,
+      (tapeIdx+1) + " of " + tape.length + " — + older · − newer · = exit", e.val, e.dim);
+  }
+  updateIndicators();
+}
+
+/* ---------- state ---------- */
+var shiftArmed = false, rclArmed = false;
+var acc = null, pendingOp = null, lastPct = null;
+var memory = null;                 /* {val, dim, count} */
+var memRecallMode = false;         /* after Rcl+M+, M+ shows AVG then CNT */
+var memCycle = 0;                  /* 0 = TTL shown, 1 = AVG, 2 = CNT */
+var tri = {rise:null, run:null, pitch:null, irPitch:null};
+var riserStore = null, treadStore = null, ocStore = 16;
+var wtvol = {val:1.5, unit:0};     /* default 1.5 Ton per CU YD (reference p.39) */
+var wtvolStoreMode = false;
+var costPerMbm = false;            /* displayed qty is board feet: price is per Mbm */
+var costPrompt = null;             /* {qty, perMbm} — waiting for a unit price */
+var justEvaluated = false;
+var dispVal = 0, dispDim = 1;
+var oncCount = 0;                  /* consecutive On/C presses */
+var pitchCycleIdx = -1;            /* pitch representation cycle */
+var circDia = null, circIdx = 0;
+var stairIdx = 0, stairSig = "";
+var jackIdx = -1, jackIr = false;
+var rwallIdx = -1, rwallBase = 0;
+var weightState = null;            /* {lb, unitIdx} */
+var lastConv = null;               /* {key, val} for conversion toggling */
+
+/* ---------- entry builder ----------
+   Numbers start PLAIN (bMode "num"). A unit key tags the typed number:
+   Feet/Inch -> ft-in fields (decimal number -> decimal ft/in),
+   Yds/m/cm/mm -> that unit. Pressing the same unit again raises the
+   dimension (5 y y y = 5 cu yd; 130 f f = 130 sq ft). */
+var bMode = "num", single = "", bDim = 1, bDimUnit = 12;
+var fields = {feet:"", inch:"", num:"", den:""};
+var activeField = "feet";
+var UNIT_TO_IN = {decin:1, decft:12, yd:36, m:39.3700787402, cm:0.3937007874, mm:0.03937007874, num:1};
+var UNIT_LBL = {decin:"in", decft:"ft", yd:"yd", m:"m", cm:"cm", mm:"mm", num:"№"};
+
+function builderHasInput(){
+  if(bMode === "num") return single !== "";
+  if(bMode === "ftin") return fields.feet!=="" || fields.inch!=="" || fields.num!=="" || fields.den!=="";
+  return single !== "";
+}
+function builderValue(){
+  if(bMode === "num"){
+    var n = parseFloat(single);
+    return {val: isNaN(n) ? 0 : n, dim:0};
+  }
+  if(bMode === "ftin"){
+    var f = parseFloat(fields.feet)||0, i = parseFloat(fields.inch)||0;
+    var nn = parseFloat(fields.num)||0, dd = parseFloat(fields.den)||0;
+    var frac = 0;
+    if(nn && dd) frac = nn/dd;
+    else if(nn && !dd) frac = nn / res();   /* reference: no denominator -> resolution setting */
+    var neg = (String(fields.feet).indexOf("-")===0);
+    var lin = Math.abs(f)*12 + Math.abs(i) + frac;
+    var val = (bDim === 1) ? lin : lin * Math.pow(bDimUnit, bDim-1);
+    return {val: neg ? -val : val, dim:bDim};
+  }
+  var v2 = parseFloat(single);
+  if(isNaN(v2)) return null;
+  var fac = UNIT_TO_IN[bMode] || 1;
+  return {val: v2 * Math.pow(fac, bDim), dim:bDim};
+}
+function clearBuilder(){
+  bMode = "num"; single = ""; bDim = 1; bDimUnit = 12;
+  fields = {feet:"", inch:"", num:"", den:""}; activeField = "feet";
+}
+function rawParts(){
+  if(bMode === "num") return single;
+  if(bMode === "ftin"){
+    var p = [];
+    if(fields.feet!=="") p.push(fields.feet + " ft");
+    if(fields.inch!=="") p.push(fields.inch + " in");
+    if(fields.num!=="" || fields.den!=="") p.push((fields.num||"?") + "/" + (fields.den||"?"));
+    if(bDim === 2) p.push("sq");
+    if(bDim === 3) p.push("cu");
+    return p.join(" · ");
+  }
+  return single + " " + (UNIT_LBL[bMode]||"") + (bDim===2 ? "²" : bDim===3 ? "³" : "");
+}
+function bareNumber(){
+  if(bMode === "num"){ var s = parseFloat(single); return isNaN(s) ? null : s; }
+  if(bMode === "ftin"){
+    if(fields.feet!=="" && fields.inch==="" && fields.num==="" && fields.den==="") return parseFloat(fields.feet);
+    if(fields.inch!=="" && fields.feet==="" && fields.num==="" && fields.den==="") return parseFloat(fields.inch);
+    return null;
+  }
+  var s2 = parseFloat(single); return isNaN(s2) ? null : s2;
+}
+
+/* ---------- display ---------- */
+function updateIndicators(){
+  $("indMem").className = "ind" + (memory !== null ? " on" : "");
+  $("indShift").className = "ind" + (shiftArmed ? " on" : "");
+  var rclEl = $("indRcl"); if(rclEl) rclEl.className = "ind" + (rclArmed ? " on" : "");
+  var tapeEl = $("indTape"); if(tapeEl) tapeEl.className = "ind" + (tapeMode ? " on" : "");
+  var cap = "";
+  if(dispDim===2) cap = "AREA";
+  else if(dispDim===3) cap = "VOLUME";
+  else if(dispDim===0) cap = "NUMBER";
+  else if(dispMode==="decft") cap = "FEET";
+  else if(dispMode==="decin" || dispMode==="fracin") cap = "INCH";
+  else if(dispMode==="yd") cap = "YARDS";
+  else if(dispMode==="m" || dispMode==="cm" || dispMode==="mm") cap = "METRIC";
+  else cap = "FEET  ·  INCH";
+  $("dispUnits").textContent = cap;
+}
+function setDisplay(val, dim, label, subOverride){
+  dispVal = val; dispDim = dim;
+  $("dispMain").textContent = fmtByPref(val, dim);
+  if(label !== undefined) $("dispLabel").textContent = label;
+  var sub = "";
+  if(subOverride !== undefined) sub = subOverride;
+  else if(dim===1) sub = fmtNum(val,3) + " in · " + fmtNum(val/12,4) + " ft · " + fmtNum(val*25.4,1) + " mm";
+  else if(dim===2) sub = fmtNum(val,1) + " in² · " + fmtNum(val/929.0304,3) + " m²";
+  else if(dim===3) sub = fmtNum(val/1728,2) + " ft³ · " + fmtNum(val*0.0000163871,4) + " m³";
+  $("dispSub").textContent = sub;
+  updateIndicators();
+}
+function showMain(label, mainText, subText, val, dim){
+  if(val !== undefined){ dispVal = val; dispDim = dim; }
+  $("dispLabel").textContent = label;
+  $("dispMain").textContent = mainText;
+  $("dispSub").textContent = subText || "";
+  updateIndicators();
+}
+function liveEntryPreview(){
+  var v = builderValue();
+  if(!v) return;
+  dispMode = (bMode === "decft") ? "decft" : (bMode === "decin") ? "decin"
+    : (bMode === "yd") ? "yd" : (bMode === "m" || bMode === "cm" || bMode === "mm") ? bMode
+    : (bMode === "ftin") ? "ftin" : dispMode;
+  if(session && session.phase === "prompt"){
+    var pr = session.def.prompts[session.idx];
+    setDisplay(v.val, v.dim, session.def.title + " · " + pr.label,
+      rawParts() + "  —  " + session.def.keyLabel + " or = to enter · " + (session.idx+1) + " of " + session.def.prompts.length);
+  } else if(costPrompt){
+    setDisplay(v.val, 0, "Cost · unit price $", "Qty " + fmtByPref(costPrompt.qty, costPrompt.dim) + (costPrompt.perMbm ? " (per Mbm)" : "") + " — = or Conv+· to total");
+  } else {
+    setDisplay(v.val, v.dim, "Entering", rawParts());
+  }
+}
+
+/* ---------- arithmetic ---------- */
+function applyOp(a, op, b){
+  if(op==="+") return {val:a.val + convDim(b,a.dim), dim:a.dim};
+  if(op==="-") return {val:a.val - convDim(b,a.dim), dim:a.dim};
+  if(op==="*") return {val:a.val * b.val, dim:Math.min(3, a.dim + b.dim)};
+  if(op==="/") return {val: b.val===0 ? NaN : a.val / b.val, dim:Math.max(0, a.dim - b.dim)};
+  return b;
+}
+function convDim(b, targetDim){
+  if(b.dim === targetDim) return b.val;
+  return b.val;   /* plain numbers (dim 0) are used as-is */
+}
+function opSymbol(op){ return {"+":"+","-":"−","*":"×","/":"÷"}[op] || op; }
+function commitEntry(){
+  if(!builderHasInput()) return null;
+  var v = builderValue(); clearBuilder(); return v;
+}
+function pressOp(op){
+  var entry = commitEntry();
+  if(acc === null){
+    if(entry) acc = entry;
+    else acc = {val:dispVal, dim:dispDim};
+  } else if(entry){
+    if(pendingOp){ acc = applyOp(acc, pendingOp, entry); }
+    else acc = entry;
+  }
+  pendingOp = op; lastPct = null; costPerMbm = false;
+  justEvaluated = false;
+  setDisplay(acc.val, acc.dim, fmtByPref(acc.val, acc.dim) + " " + opSymbol(op));
+}
+function pressEquals(){
+  var entry = commitEntry();
+  if(acc !== null && pendingOp && entry){
+    var expr = fmtByPref(acc.val, acc.dim) + " " + opSymbol(pendingOp) + " " + fmtByPref(entry.val, entry.dim);
+    var res = applyOp(acc, pendingOp, entry);
+    addTape(expr, fmtByPref(res.val, res.dim), res.val, res.dim);
+    acc = null; pendingOp = null; justEvaluated = true;
+    setDisplay(res.val, res.dim, expr + " =");
+  } else if(entry){
+    addTape("Entered", fmtByPref(entry.val, entry.dim), entry.val, entry.dim);
+    justEvaluated = true;
+    setDisplay(entry.val, entry.dim, "Entered");
+  }
+  lastPct = null;
+}
+function currentOperand(){
+  var e = commitEntry();
+  if(e) return e;
+  return {val:dispVal, dim:dispDim};
+}
+
+/* ---------- entry keys ---------- */
+function pressDigit(d){
+  if(session && session.prefilled){ clearBuilder(); session.prefilled = false; }
+  if(wtvolStoreMode && d === "0"){ cycleWtvolUnit(); return; }
+  if(justEvaluated && !builderHasInput()){ justEvaluated = false; }
+  if(bMode === "num"){
+    if(single.replace("-","").replace(".","").length >= 10) return;
+    single += d;
+  } else if(bMode === "ftin"){
+    var f = fields[activeField];
+    if(f.replace("-","").replace(".","").length >= 6) return;
+    if((activeField==="num"||activeField==="den") && d==="." ) return;
+    fields[activeField] = f + d;
+  } else {
+    if(single.replace("-","").replace(".","").length >= 10) return;
+    single += d;
+  }
+  liveEntryPreview();
+}
+function pressBack(){
+  tapeViewReset();
+  if(bMode === "num"){ if(single.length) single = single.slice(0,-1); }
+  else if(bMode === "ftin"){
+    var f = fields[activeField];
+    if(f.length){ fields[activeField] = f.slice(0,-1); }
+    else {
+      var order = ["feet","inch","num","den"]; var i = order.indexOf(activeField);
+      if(i > 0) activeField = order[i-1];
+    }
+  } else if(single.length){ single = single.slice(0,-1); }
+  if(builderHasInput()) liveEntryPreview(); else setDisplay(acc ? acc.val : 0, acc ? acc.dim : dispDim, "Ready");
+}
+function tapeViewReset(){ /* tape paging is only via tape mode now */ }
+function pressFeetKey(){
+  wtvolStoreMode = false;
+  if(bMode === "num"){
+    if(single === ""){ bMode = "ftin"; activeField = "feet"; }
+    else if(single.indexOf(".") >= 0){ bMode = "decft"; dispMode = "decft"; }
+    else { bMode = "ftin"; fields.feet = single; single = ""; activeField = "inch"; dispMode = "ftin"; }
+    liveEntryPreview(); return;
+  }
+  if(bMode !== "ftin"){
+    var s = single;
+    bMode = "ftin"; fields = {feet:"", inch:"", num:"", den:""}; single = ""; bDim = 1;
+    if(s !== ""){ fields.feet = s; activeField = "inch"; }
+    else activeField = "feet";
+    dispMode = "ftin"; liveEntryPreview(); return;
+  }
+  if(!builderHasInput()){ activeField = "feet"; return; }
+  if(fields.feet !== "" && fields.inch === "" && fields.num === "" && fields.den === "" && bDim < 3){
+    bDim++; bDimUnit = 12;   /* 130 f f = 130 sq ft; again = cu ft */
+    liveEntryPreview(); return;
+  }
+  if(activeField === "feet"){ if(fields.feet !== "") activeField = "inch"; }
+  else if(activeField === "inch" && fields.inch !== "" && fields.feet === "" && fields.num === "" && fields.den === ""){
+    fields.feet = fields.inch; fields.inch = ""; activeField = "inch";
+  }
+  liveEntryPreview();
+}
+function pressInchKey(){
+  wtvolStoreMode = false;
+  if(bMode === "num"){
+    if(single === ""){ bMode = "ftin"; activeField = "inch"; }
+    else if(single.indexOf(".") >= 0){ bMode = "decin"; dispMode = "decin"; }
+    else { bMode = "ftin"; fields.inch = single; single = ""; activeField = "num"; dispMode = "ftin"; }
+    liveEntryPreview(); return;
+  }
+  if(bMode !== "ftin"){
+    var s = single;
+    bMode = "ftin"; fields = {feet:"", inch:"", num:"", den:""}; single = ""; bDim = 1;
+    if(s !== ""){ fields.inch = s; activeField = "num"; }
+    else activeField = "inch";
+    dispMode = "ftin"; liveEntryPreview(); return;
+  }
+  if(!builderHasInput()){ activeField = "inch"; return; }
+  if(fields.inch !== "" && fields.feet === "" && fields.num === "" && fields.den === "" && bDim < 3){
+    bDim++; bDimUnit = 1; liveEntryPreview(); return;
+  }
+  if(activeField === "inch"){ if(fields.inch !== "") activeField = "num"; }
+  else if(activeField === "feet"){
+    if(fields.feet !== "" && fields.inch === "" && fields.num === "" && fields.den === ""){
+      fields.inch = fields.feet; fields.feet = ""; activeField = "num";
+    } else if(fields.feet === ""){ activeField = "inch"; }
+  }
+  liveEntryPreview();
+}
+function pressFracKey(){
+  wtvolStoreMode = false;
+  if(bMode === "num"){
+    if(single === ""){ bMode = "ftin"; activeField = "num"; }
+    else { bMode = "ftin"; fields.num = single; single = ""; activeField = "den"; dispMode = "ftin"; }
+    liveEntryPreview(); return;
+  }
+  if(bMode !== "ftin"){
+    var s = single;
+    bMode = "ftin"; fields = {feet:"", inch:"", num:"", den:""}; single = ""; bDim = 1;
+    if(s !== ""){ fields.num = s; activeField = "den"; }
+    else activeField = "num";
+    dispMode = "ftin"; liveEntryPreview(); return;
+  }
+  if(!builderHasInput()){ activeField = "num"; return; }
+  if(activeField === "num"){ if(fields.num !== "") activeField = "den"; }
+  else if(activeField === "inch"){ activeField = "num"; }
+  else if(activeField === "feet"){
+    if(fields.feet !== "" && fields.inch === "" && fields.num === "" && fields.den === ""){
+      fields.num = fields.feet; fields.feet = ""; activeField = "den";
+    } else activeField = "num";
+  }
+  liveEntryPreview();
+}
+function pressUnitKey(u){   /* Yds / m / cm / mm tag the typed number as that unit */
+  wtvolStoreMode = false;
+  if(bMode === "num"){
+    bMode = u; dispMode = u; liveEntryPreview(); return;
+  }
+  if(bMode === u && single !== "" && bDim < 3){ bDim++; liveEntryPreview(); return; }  /* 5 y y y = 5 cu yd */
+  var bare = bareNumber();
+  if(bare === null && builderHasInput()) return;   /* compound ft-in entry: leave it */
+  bMode = u; dispMode = u;
+  fields = {feet:"", inch:"", num:"", den:""};
+  single = (bare === null) ? "" : String(bare);
+  bDim = 1;
+  liveEntryPreview();
+}
+
+/* ---------- Conv conversions (reference: Ç + unit converts the value) ---------- */
+function convertDisplayTo(u){
+  var v;
+  if(builderHasInput()){ v = commitEntry(); }
+  else v = {val:dispVal, dim:dispDim};
+  if(!v || v.dim === 0){ showMain("Conv", "Lengths only", "Conv converts a length, area or volume on the display"); return; }
+  var key = u;
+  if(v.dim === 1){
+    if(u === "feet"){
+      var target = (dispMode === "decft") ? "ftin" : "decft";
+      dispMode = target;
+      showMain("Conv · " + (target === "decft" ? "FEET" : "FEET–INCH"),
+        target === "decft" ? fmtNum(v.val/12,4) + " ft" : fmtFI(v.val),
+        fmtFI(v.val) + " — same value", v.val, 1);
+      return;
+    }
+    if(u === "inch"){
+      var t2 = (dispMode === "decin") ? "fracin" : "decin";
+      dispMode = t2;
+      showMain("Conv · " + (t2 === "decin" ? "INCHES" : "INCHES (FRAC)"),
+        t2 === "decin" ? fmtNum(v.val,3) + " in" : fmtFracInch(v.val),
+        fmtFI(v.val) + " — same value", v.val, 1);
+      return;
+    }
+    var lbl = {yds:"YARDS", m:"METRES", cm:"CENTIMETRES", mm:"MILLIMETRES"}[u];
+    var txt = {yds:fmtNum(v.val/36,4)+" yd", m:fmtNum(v.val*0.0254,4)+" m",
+      cm:fmtNum(v.val*2.54,3)+" cm", mm:fmtNum(v.val*25.4,2)+" mm"}[u];
+    dispMode = (u === "yds") ? "yd" : u;
+    showMain("Conv · " + lbl, txt, fmtFI(v.val) + " — same value", v.val, 1);
+    return;
+  }
+  /* area / volume conversions (reference p.15) */
+  var per = {yds: v.dim===2 ? 1296 : 46656, feet: v.dim===2 ? 144 : 1728,
+    inch: 1, m: v.dim===2 ? 929.0304 : 0.0000163871, cm: v.dim===2 ? 6.4516 : 16.3871,
+    mm: v.dim===2 ? 645.16 : 16387.1};
+  var unitName = {yds: v.dim===2 ? "SQ YD" : "CU YD", feet: v.dim===2 ? "SQ FT" : "CU FT",
+    inch: v.dim===2 ? "SQ IN" : "CU IN", m: v.dim===2 ? "SQ M" : "CU M",
+    cm: v.dim===2 ? "SQ CM" : "CU CM", mm: v.dim===2 ? "SQ MM" : "CU MM"}[u];
+  var conv = (u === "m" || u === "cm" || u === "mm") ? v.val * per[u] : v.val / per[u];
+  showMain("Conv · " + unitName, fmtNum(conv,6) + " " + unitName.toLowerCase().replace("sq ","").replace("cu ",""),
+    fmtByPref(v.val, v.dim) + " — same value", v.val, v.dim);
+  $("dispMain").textContent = fmtNum(conv,6) + " " + (v.dim===2 ? "sq " : "cu ") + ({yds:"yd",feet:"ft",inch:"in",m:"m",cm:"cm",mm:"mm"}[u]);
+}
+
+/* ---------- triangle: Rise / Run / Diag / Hip-V / Pitch (reference p.28-33) ---------- */
+function pitchFromEntry(isRatio){
+  var raw = bareNumber();
+  var o = builderHasInput() ? builderValue() : null;
+  if(isRatio && raw !== null) return {pitch: raw*12, form:"slp"};
+  if(lastPct !== null && !builderHasInput()) return {pitch: lastPct/100*12, form:"grd"};
+  if(o && o.dim === 1) return {pitch: o.val, form:"in"};                 /* 9 i p */
+  if(raw !== null) return {pitch: Math.tan(raw*Math.PI/180)*12, form:"deg"};  /* 30 p = 30 deg */
+  return null;
+}
+var PITCH_CYCLE = ["in","deg","grd","slp"];
+function pitchShow(form){
+  var p = tri.pitch;
+  if(p === null && tri.rise !== null && tri.run !== null) p = tri.rise/tri.run*12;
+  if(p === null) return;
+  tri.pitch = p;
+  var ang = Math.atan2(p,12)*180/Math.PI;
+  if(form === "in") showMain("Pitch", fmtFI(p), "Rise per 12″ of run", p, 0);
+  else if(form === "deg") showMain("Pitch · Degrees", fmtAngle(ang), fmtFI(p) + " per 12″", ang, 0);
+  else if(form === "grd") showMain("Pitch · % Grade", fmtNum(p/12*100,5) + " %", fmtFI(p) + " per 12″", p/12*100, 0);
+  else showMain("Pitch · Slope", fmtNum(p/12,6), fmtFI(p) + " per 12″", p/12, 0);
+}
+function pitchKey(isRatio){
+  if(builderHasInput() || lastPct !== null){
+    var pe = pitchFromEntry(isRatio);
+    if(!pe){ showMain("Pitch", "Pitch takes a number", "Dimension = in/12 · plain number = degrees · Conv+p = ratio · % then p = grade"); return; }
+    tri.pitch = pe.pitch;
+    if(tri.run !== null) tri.rise = tri.run * pe.pitch / 12;
+    pitchCycleIdx = PITCH_CYCLE.indexOf(pe.form);
+    acc = null; pendingOp = null; justEvaluated = true; lastPct = null;
+    clearBuilder();
+    pitchShow(pe.form);
+    return;
+  }
+  if(tri.rise === null || tri.run === null){
+    if(tri.pitch !== null){
+      pitchCycleIdx = (pitchCycleIdx+1) % 4;
+      pitchShow(PITCH_CYCLE[pitchCycleIdx]);
+    } else showMain("Pitch", "Store a Rise and a Run first", "Or type a pitch and press Pitch");
+    return;
+  }
+  tri.pitch = tri.rise/tri.run*12;
+  pitchCycleIdx = (pitchCycleIdx+1) % 4;   /* reference: p cycles in -> deg -> %grd -> slope */
+  acc = null; pendingOp = null; justEvaluated = true;
+  pitchShow(PITCH_CYCLE[pitchCycleIdx]);
+}
+function triJump(name){
+  if(name === "rise" && tri.rise !== null) setDisplay(tri.rise, 1, "Rise");
+  else if(name === "run" && tri.run !== null) setDisplay(tri.run, 1, "Run");
+  else if(name === "diag" && tri.rise !== null && tri.run !== null){
+    var dg = Math.sqrt(tri.rise*tri.rise + tri.run*tri.run);
+    addTape("Diagonal of " + fmtFI(tri.rise) + " × " + fmtFI(tri.run), fmtFI(dg), dg, 1);
+    setDisplay(dg, 1, "Diagonal");
+  }
+  else if(name === "hip") hipKey();
+}
+function hipKey(){
+  if(tri.rise === null || tri.run === null){ showMain("Hip/V", "Store a Rise and a Run first", "Type a length, press Rise — type a length, press Run"); return; }
+  if(tri.irPitch !== null && tri.pitch !== null){
+    var rise = tri.run * tri.pitch / 12;
+    var runB = rise * 12 / tri.irPitch;
+    var hp = Math.sqrt(tri.run*tri.run + runB*runB + rise*rise);
+    addTape("Irregular hip — " + fmtNum(tri.pitch,1) + "/12 × " + fmtNum(tri.irPitch,1) + "/12", fmtFI(hp), hp, 1);
+    setDisplay(hp, 1, "Irregular Hip/V");
+    return;
+  }
+  var hipRun = tri.run * Math.SQRT2;
+  var hp2 = Math.sqrt(hipRun*hipRun + tri.rise*tri.rise);
+  addTape("Hip/valley — rise " + fmtFI(tri.rise) + " over run " + fmtFI(tri.run), fmtFI(hp2), hp2, 1);
+  setDisplay(hp2, 1, "Hip / valley");
+}
+function irPitchKey(){
+  if(builderHasInput()){
+    var o = builderValue();
+    if(o.dim !== 1){ showMain("Irregular Pitch", "Needs a length", "Type a pitch in inches, then Conv+Hip/V"); return; }
+    tri.irPitch = o.val;
+    clearBuilder();
+    showMain("Irregular Pitch", fmtFI(o.val) + "  STORED", "Hip/V now gives the irregular hip", o.val, 1);
+    return;
+  }
+  if(tri.irPitch !== null){ hipKey(); return; }
+  showMain("Irregular Pitch", "Type a pitch first", "e.g. 8 Inch, then Conv+Hip/V to store it");
+}
+
+/* ---------- Circle / Arc (reference p.4, p.24) ----------
+   Circ: enter a Diameter, press Circ -> DIA, again -> AREA, again -> CIRC.
+   Arc (Conv+Circ): enter Diameter, then an Arc Length -> degree;
+   or enter Diameter, then degrees (plain number) -> arc length. */
+var circDiaMode = "ftin";
+function circKey(){
+  if(builderHasInput()){
+    var o = builderValue();
+    if(o.dim !== 1){ showMain("Circle", "Needs a diameter", "Type a length, then Circ"); return; }
+    circDiaMode = (bMode === "decin" || (bMode === "ftin" && fields.feet === "")) ? "in" : "ftin";
+    circDia = o.val; circIdx = 0;
+    clearBuilder();
+    if(circDiaMode === "in") showMain("Diameter", fmtNum(circDia,3) + " INCH", "", circDia, 1);
+    else setDisplay(circDia, 1, "Diameter");
+    return;
+  }
+  if(circDia === null){ showMain("Circle", "Enter a diameter first", "Type a length, then Circ"); return; }
+  circIdx = (circIdx+1) % 3;
+  var r = circDia/2;
+  if(circIdx === 0){
+    if(circDiaMode === "in") showMain("Diameter", fmtNum(circDia,3) + " INCH", "", circDia, 1);
+    else setDisplay(circDia, 1, "Diameter");
+  }
+  else if(circIdx === 1) showMain("Circle · Area", fmtNum(Math.PI*r*r,4) + " SQ IN", "Diameter " + fmtFI(circDia), Math.PI*r*r, 2);
+  else showMain("Circle · Circumference", fmtFracInch(2*Math.PI*r), "Diameter " + fmtFI(circDia), 2*Math.PI*r, 1);
+}
+function arcKey(){
+  if(circDia === null){ showMain("Arc", "Enter a diameter first", "Type a diameter, press Circ, then enter the arc"); return; }
+  var r = circDia/2;
+  if(builderHasInput()){
+    var raw = bareNumber();
+    var o = builderValue();
+    if(o.dim === 1){   /* arc length entered -> degree */
+      var deg = (o.val / r) * 180/Math.PI;
+      clearBuilder();
+      showMain("Arc · Degrees", fmtAngle(deg), "Diameter " + fmtFI(circDia) + " · arc " + fmtFI(o.val), deg, 0);
+      return;
+    }
+    if(raw !== null){  /* degrees entered -> arc length */
+      var len = r * raw * Math.PI/180;
+      clearBuilder();
+      showMain("Arc · Length", fmtFI(len), "Diameter " + fmtFI(circDia) + " · " + fmtNum(raw,2) + "°", len, 1);
+      return;
+    }
+  }
+  showMain("Arc", "Enter arc length or degrees", "Diameter " + fmtFI(circDia) + " stored — type a length for degrees, a number for length");
+}
+
+/* ---------- Stair (reference p.7, p.35-37): 12 results, press Stair to step ---------- */
+function stairCompute(){
+  var total = tri.rise;
+  var wantR = riserStore !== null ? riserStore : 7.5;
+  var wantT = treadStore !== null ? treadStore : 10;
+  var risers = Math.max(1, Math.round(total / wantR));
+  var actualR = total / risers;
+  var treads = risers - 1;
+  var run, treadW;
+  if(tri.run !== null){ run = tri.run; treadW = run / treads; }
+  else { treadW = wantT; run = treads * treadW; }
+  var stringer = treads * Math.sqrt(Math.pow(roundRes(actualR, res()), 2) + Math.pow(roundRes(treadW, res()), 2));
+  var angle = Math.atan2(total, run) * 180/Math.PI;
+  var rOver = risers * roundRes(actualR, res()) - total;
+  var tOver = run - treads * roundRes(treadW, res());
+  return [
+    {k:"Riser Height", v:fmtFI(actualR), val:actualR, dim:1},
+    {k:"Risers", v:String(risers), val:risers, dim:0},
+    {k:"Riser Overage", v:fmtFI(rOver), val:rOver, dim:1},
+    {k:"Tread Width", v:fmtFI(treadW), val:treadW, dim:1},
+    {k:"Treads", v:String(treads), val:treads, dim:0},
+    {k:"Tread Overage", v:fmtFI(tOver), val:tOver, dim:1},
+    {k:"Stringer Length", v:fmtFI(stringer), val:stringer, dim:1},
+    {k:"Incline Angle", v:fmtAngle(angle), val:angle, dim:0},
+    {k:"Stored Run", v:fmtFI(run), val:run, dim:1},
+    {k:"Stored Rise", v:fmtFI(total), val:total, dim:1},
+    {k:"Stored Riser Ht", v:fmtFI(wantR) + "  STORED", val:wantR, dim:1},
+    {k:"Stored Tread W", v:fmtFI(wantT) + "  STORED", val:wantT, dim:1}
+  ];
+}
+function stairKey(){
+  if(tri.rise === null){ showMain("Stair", "Enter a Rise first", "Type the floor-to-floor rise, press Rise, then Stair"); return; }
+  var key = tri.rise + "|" + (tri.run||"") + "|" + (riserStore||7.5) + "|" + (treadStore||10);
+  if(key !== stairSig){ stairSig = key; stairIdx = 0; }
+  var items = stairCompute();
+  var it = items[stairIdx % items.length];
+  stairIdx++;
+  setDisplay(it.val, it.dim, it.k);
+  if(it.k === "Riser Height" || it.k === "Tread Width" || it.k === "Stringer Length" || it.k === "Stored Run" || it.k === "Stored Rise" || it.k === "Stored Riser Ht" || it.k === "Stored Tread W" || it.k === "Riser Overage" || it.k === "Tread Overage")
+    $("dispMain").textContent = it.v;
+  if(it.k === "Incline Angle") $("dispMain").textContent = it.v;
+}
+
+/* ---------- Jack (reference p.31-33): 1st press shows o.c., then JK1, JK2... ---------- */
+function jackKey(){
+  if(tri.rise === null || tri.run === null){ showMain("Jack", "Store Rise & Run first", "Type a length, press Rise — type a length, press Run"); return; }
+  if(jackIdx === -1){
+    showMain(jackIr ? "Irregular Jack · o.c." : "Jack · o.c.", fmtNum(ocStore,2) + " INCH  STORED", "Press Jack again for the first jack", ocStore, 1);
+    jackIdx = 0; return;
+  }
+  var common = Math.sqrt(tri.rise*tri.rise + tri.run*tri.run);
+  if(jackIr && tri.irPitch !== null && tri.pitch !== null){
+    var rise = tri.run * tri.pitch / 12;
+    var runB = rise * 12 / tri.irPitch;
+    var cB = Math.sqrt(runB*runB + rise*rise);
+    var diffB = ocStore * (cB / runB);
+    var L = cB - diffB * (jackIdx+1);
+    if(L <= 0){ showMain("Irregular Jack", "0′ 0″", "No more jacks — On/C to reset", 0, 1); return; }
+    jackIdx++;
+    setDisplay(L, 1, "Irregular Jack " + jackIdx);
+    return;
+  }
+  var diff = ocStore * (common / tri.run);
+  var Lj = common - diff * (jackIdx+1);
+  if(Lj <= 0){ showMain("Jack", "0′ 0″", "No more jacks — On/C to reset", 0, 1); return; }
+  jackIdx++;
+  setDisplay(Lj, 1, "Jack " + jackIdx);
+}
+function irJackKey(){
+  jackIr = true; jackIdx = -1;
+  showMain("Irregular Jack · o.c.", fmtNum(ocStore,2) + " INCH  STORED", "Press Jack for the irregular jacks", ocStore, 1);
+}
+
+/* ---------- Rake-Wall (reference p.34): 1st press RWOC, then RW1, RW2..., BASE, angle ---------- */
+function rwallKey(){
+  if(tri.rise === null || tri.run === null){ showMain("R/Wall", "Enter Rise and Run first", "Type a length, press Rise — type a length, press Run"); return; }
+  if(rwallIdx === -1){
+    if(builderHasInput()){
+      var o = builderValue();
+      if(o.dim === 1) rwallBase = o.val;   /* reference: enter base height before ∑ */
+      clearBuilder();
+    }
+    showMain("Rake-Wall · o.c.", fmtNum(ocStore,2) + " INCH  STORED", "Press R/Wall again for the first stud", ocStore, 1);
+    rwallIdx = 0; return;
+  }
+  if(rwallIdx === 999){
+    var ang = Math.atan2(tri.rise, tri.run) * 180/Math.PI;
+    showMain("Rake-Wall · Angle", fmtAngle(ang), "Rise " + fmtFI(tri.rise) + " over run " + fmtFI(tri.run), ang, 0);
+    rwallIdx = -1; return;
+  }
+  var i = rwallIdx + 1;
+  var h = rwallBase + tri.rise * (1 - i*ocStore/tri.run);
+  if(h > 0){
+    rwallIdx++;
+    setDisplay(h, 1, "Rake-Wall Stud " + i);
+    return;
+  }
+  showMain("Rake-Wall · Base", fmtFI(rwallBase), "Press R/Wall again for the angle", rwallBase, 1);
+  rwallIdx = 999;
+}
+
+/* ---------- Weight / wt-vol (reference p.4, p.19-20, p.39) ---------- */
+var WT_UNITS = ["Ton","LB","MET Ton","kG"];
+function wtTons(volIn3, volUnit){
+  var volYd = volIn3/46656, volFt = volIn3/1728, volM = volIn3*0.0000163871;
+  switch(wtvol.unit){
+    case 0: return volYd * wtvol.val;
+    case 1: return volYd * wtvol.val / 2000;
+    case 2: return volFt * wtvol.val / 2000;
+    case 3: return volM * wtvol.val * 1.10231;
+    case 4: return volM * wtvol.val / 907.185;
+  }
+  return volYd * wtvol.val;
+}
+function wtShow(lb, unitIdx){
+  var txt, val;
+  if(unitIdx === 0){ val = lb/2000; txt = fmtNum(val,4) + " Ton"; }
+  else if(unitIdx === 1){ val = lb; txt = fmtNum(val,2) + " LB"; }
+  else if(unitIdx === 2){ val = lb/2204.6226; txt = fmtNum(val,6) + " MET Ton"; }
+  else { val = lb*0.45359237; txt = fmtNum(val,5) + " kG"; }
+  showMain("Weight · " + WT_UNITS[unitIdx], txt, "Weight key again for the next unit", val, 0);
+}
+function weightKey(){
+  if(builderHasInput()){
+    var o = builderValue();
+    if(o.dim === 0){ clearBuilder(); weightState = {lb:o.val, unitIdx:1}; wtShow(o.val, 1); return; }
+    if(o.dim === 3){ clearBuilder(); var lb = wtTons(o.val) * 2000; weightState = {lb:lb, unitIdx:0}; wtShow(lb, 0); return; }
+    showMain("Weight", "Needs a weight or a volume", "Type a number for pounds, or a volume for wt/vol"); return;
+  }
+  if(dispDim === 3){ var lb2 = wtTons(dispVal) * 2000; weightState = {lb:lb2, unitIdx:0}; wtShow(lb2, 0); return; }
+  if(weightState){ weightState.unitIdx = (weightState.unitIdx+1) % 4; wtShow(weightState.lb, weightState.unitIdx); return; }
+  if(dispDim === 0 && dispVal !== 0){ weightState = {lb:dispVal, unitIdx:1}; wtShow(dispVal, 1); return; }
+  showMain("Weight", "Type a weight or a volume", "Number = pounds · volume uses stored wt/vol (Conv+0)");
+}
+var WTVOL_UNITS = ["Ton Per CU YD","LB Per CU YD","LB Per CU FEET","MET Ton Per CU M","kG Per CU M"];
+function wtvolShow(){
+  showMain("Weight / Vol", fmtNum(wtvol.val,3) + " " + WTVOL_UNITS[wtvol.unit] + "  STORED",
+    "Press 0 again for the next format · Rcl 0 recalls it", wtvol.val, 0);
+}
+function wtvolStore(){
+  if(builderHasInput()){
+    var o = builderValue();
+    if(o.dim !== 0){ showMain("Weight / Vol", "Needs a plain number", "Type the weight per volume, then Conv+0"); return; }
+    wtvol.val = o.val; wtvolStoreMode = true;
+    clearBuilder();
+    wtvolShow(); return;
+  }
+  wtvolShow();
+}
+function cycleWtvolUnit(){
+  wtvol.unit = (wtvol.unit+1) % WTVOL_UNITS.length;
+  wtvolShow();
+}
+function wtvolRecall(){
+  showMain("Weight / Vol", fmtNum(wtvol.val,3) + " " + WTVOL_UNITS[wtvol.unit], "Stored — Conv+0 to change it", wtvol.val, 0);
+}
+
+/* ---------- Cost (reference p.8, p.22, p.25): × price, Conv+· = total ----------
+   Quantity is priced in its natural unit: yd³ for volume, ft² for area,
+   ft for length, board feet per Mbm (price per 1000 BF). */
+function costQty(v, dim){
+  if(dim === 3) return {qty: v/46656, unit:"yd³"};
+  if(dim === 2) return {qty: v/144, unit:"ft²"};
+  if(dim === 1) return {qty: v/12, unit:"ft"};
+  return {qty: v, unit:""};
+}
+function costKey(){
+  if(acc !== null && pendingOp === "*"){
+    var entry = builderHasInput() ? commitEntry() : {val:dispVal, dim:0};
+    var cq = costQty(acc.val, acc.dim);
+    var total = cq.qty * entry.val / (costPerMbm ? 1000 : 1);
+    addTape("Cost — " + fmtNum(cq.qty,4) + " " + cq.unit + " × $" + fmtNum(entry.val,2) + (costPerMbm ? " per Mbm" : ""), money(total), total, 0);
+    acc = null; pendingOp = null; justEvaluated = true; costPerMbm = false;
+    showMain("Total Cost", money(total), "", total, 0);
+    return;
+  }
+  if(builderHasInput() || dispVal !== 0){
+    var q = builderHasInput() ? commitEntry() : {val:dispVal, dim:dispDim};
+    var cq2 = costQty(q.val, q.dim);
+    costPrompt = {qty:cq2.qty, unit:cq2.unit, perMbm:costPerMbm};
+    clearBuilder();
+    setDisplay(0, 0, "Cost · unit price $", "Qty " + fmtNum(cq2.qty,4) + " " + cq2.unit + (costPrompt.perMbm ? " (per Mbm)" : "") + " — type price, then =");
+    return;
+  }
+  showMain("Cost", "Enter a quantity first", "Then × price, Conv+· for the total");
+}
+function costFinish(){
+  var entry = builderHasInput() ? commitEntry() : null;
+  if(!costPrompt || !entry){ costPrompt = null; return; }
+  var total = costPrompt.qty * entry.val / (costPrompt.perMbm ? 1000 : 1);
+  addTape("Cost — " + fmtNum(costPrompt.qty,4) + " " + costPrompt.unit + " × $" + fmtNum(entry.val,2) + (costPrompt.perMbm ? " per Mbm" : ""), money(total), total, 0);
+  costPrompt = null; justEvaluated = true; costPerMbm = false;
+  showMain("Total Cost", money(total), "", total, 0);
+}
+
+/* ---------- Prefs (reference p.11-12, p.39): Conv+%, % steps settings, + steps options ---------- */
+var prefsMode = false, prefsIdx = 0;
+var PREFS = [
+  {name:"Fractional Resolution", get:function(){ return "1/" + prefRes; },
+   options:[32,16,64,2,4,8], cur:function(){ return prefRes; },
+   set:function(v){ prefRes = v; }},
+  {name:"Area Displays", get:function(){ return {std:"Std.",sqft:"0. SQ FEET",sqyd:"0. SQ YD",sqm:"0. SQ M"}[prefArea]; },
+   options:["std","sqft","sqyd","sqm"], cur:function(){ return prefArea; },
+   set:function(v){ prefArea = v; }},
+  {name:"Volume Displays", get:function(){ return {std:"Std.",cuyd:"0. CU YD",cuft:"0. CU FEET",cum:"0. CU M"}[prefVol]; },
+   options:["std","cuyd","cuft","cum"], cur:function(){ return prefVol; },
+   set:function(v){ prefVol = v; }},
+  {name:"Meter Linear Displays", get:function(){ return prefMeter === "0.000" ? "0.000 M" : "FLOAT M"; },
+   options:["0.000","float"], cur:function(){ return prefMeter; },
+   set:function(v){ prefMeter = v; }},
+  {name:"Decimal Degree Displays", get:function(){ return prefDeg === "0.00" ? "0.00°" : "FLOAT"; },
+   options:["0.00","float"], cur:function(){ return prefDeg; },
+   set:function(v){ prefDeg = v; }},
+  {name:"Fractional Mode", get:function(){ return prefFracMode === "std" ? "Std." : "COnSt"; },
+   options:["std","const"], cur:function(){ return prefFracMode; },
+   set:function(v){ prefFracMode = v; }}
+];
+function prefsShow(){
+  var p = PREFS[prefsIdx];
+  showMain("Prefs · " + p.name, p.get(), "% next setting · + / − change · On/C exits", prefRes, 0);
+}
+function prefsEnter(){ prefsMode = true; prefsIdx = 0; prefsShow(); }
+function prefsStep(dir){
+  var p = PREFS[prefsIdx];
+  var i = p.options.indexOf(p.cur());
+  i = (i + dir + p.options.length) % p.options.length;
+  p.set(p.options[i]);
+  prefsShow();
+}
+var TEMP_RES = {1:16, 2:2, 3:32, 4:4, 6:64, 8:8};
+function tempResKey(d){
+  tempRes = TEMP_RES[d];
+  showMain("Temp Resolution", "1/" + tempRes, "Temporary — On/C returns to 1/" + prefRes, tempRes, 0);
+}
+
+/* ---------- Memory (reference p.21) ---------- */
+function memAdd(sign){
+  if(memRecallMode){
+    memCycle = (memCycle+1) % 3;
+    if(memCycle === 1) showMain("Memory · Average", fmtByPref(memory.val/memory.count, memory.dim), "Average of " + memory.count + " entries", memory.val/memory.count, memory.dim);
+    else if(memCycle === 2) showMain("Memory · Count", String(memory.count), "Entries added to memory", memory.count, 0);
+    else showMain("Memory", fmtByPref(memory.val, memory.dim), "Total — Rcl recalls it", memory.val, memory.dim);
+    return;
+  }
+  var o = currentOperand();
+  if(memory === null) memory = {val: sign*o.val, dim:o.dim, count:1};
+  else memory = {val: memory.val + sign*o.val, dim:o.dim, count: memory.count+1};
+  showMain(sign > 0 ? "Memory +" : "Memory −", fmtByPref(memory.val, memory.dim), "Rcl brings it back", dispVal, dispDim);
+}
+function memRecall(){
+  if(memory === null){ showMain("Rcl", "Memory empty", "M+ stores the display"); return; }
+  memRecallMode = true; memCycle = 0;
+  acc = null; pendingOp = null; clearBuilder();
+  setDisplay(memory.val, memory.dim, "Memory");
+  justEvaluated = true;
+}
+function memRecallClear(){
+  if(memory === null){ showMain("Rcl", "Memory empty", "M+ stores the display"); return; }
+  var v = memory.val, d = memory.dim;
+  memory = null; memRecallMode = false;
+  setDisplay(v, d, "Memory · cleared");
+  justEvaluated = true;
+}
+function memClear(){
+  memory = null; memRecallMode = false;
+  showMain("Memory", "Cleared", "", dispVal, dispDim);
+}
+
+/* ---------- prompt sessions (extra solvers; one value at a time) ----------
+   Press a solver key: it asks for each value on the display, one at a
+   time. Type the value, press the same key (or =) to enter it. After the
+   last one, the answer shows and stays. */
+var session = null;
+function P(id, label, unit, def){ return {id:id, label:label, unit:unit || "ftin", def:(def === undefined ? null : def)}; }
+function setBuilderFromValue(val, unit){
+  clearBuilder();
+  if(unit === "ftin"){
+    var sign = val < 0 ? "-" : ""; var a = Math.abs(val);
+    var ft = Math.floor(a/12), rem = a - ft*12, inch = Math.floor(rem), six = Math.round((rem - inch)*16);
+    if(six === 16){ inch += 1; six = 0; }
+    if(inch === 12){ ft += 1; inch = 0; }
+    fields.feet = ft ? sign + ft : ""; fields.inch = inch ? String(inch) : "";
+    if(six){ fields.num = String(six); fields.den = "16"; }
+    activeField = "feet";
+  } else if(unit === "decft"){ bMode = "decft"; single = fmtNum(val/12, 4); }
+  else if(unit === "decin"){ bMode = "decin"; single = fmtNum(val, 4); }
+  else { bMode = "num"; single = fmtNum(val, 4); }
+}
+function showPrompt(){
+  var pr = session.def.prompts[session.idx];
+  clearBuilder();
+  bMode = pr.unit;
+  session.prefilled = false;
+  var def = (typeof pr.def === "function") ? pr.def() : pr.def;
+  session.curDef = def;
+  if(def !== null && def !== undefined){
+    setBuilderFromValue(def, pr.unit);
+    session.prefilled = true;
+    var dv = builderValue();
+    setDisplay(dv.val, dv.dim, session.def.title + " · " + pr.label,
+      "Shown: last / default — type to replace, " + session.def.keyLabel + " or = to enter · " + (session.idx+1) + " of " + session.def.prompts.length);
+  } else {
+    setDisplay(0, pr.unit === "num" ? 0 : 1, session.def.title + " · " + pr.label,
+      "Type a value, then " + session.def.keyLabel + " or = · " + (session.idx+1) + " of " + session.def.prompts.length + " · On/C cancels");
+  }
+}
+function startSession(name){
+  var def = SESSIONS[name];
+  if(!def) return;
+  if(def.guard && !def.guard()) return;
+  acc = null; pendingOp = null;
+  session = {name:name, def:def, idx:0, values:{}, phase:"prompt", itemIdx:0, items:null, prefilled:false, curDef:null};
+  showPrompt();
+}
+function acceptPrompt(){
+  var pr = session.def.prompts[session.idx];
+  var val;
+  if(builderHasInput()){
+    var bv = builderValue();
+    val = bv.val;
+  } else val = session.curDef;
+  session.values[pr.id] = val;
+  session.idx++;
+  if(session.idx < session.def.prompts.length){ showPrompt(); }
+  else finishSession();
+}
+function finishSession(){
+  if(session.def.onFinish) session.def.onFinish(session.values);
+  session.items = session.def.compute(session.values);
+  session.phase = "results"; session.itemIdx = 0;
+  bMode = "num"; clearBuilder();
+  if(session.def.tapeFn){
+    var t = session.def.tapeFn(session.values, session.items);
+    if(t) addTape(t[0], t[1], t[2], t[3]);
+  }
+  showItem();
+}
+function showItem(){
+  var it = session.items[session.itemIdx]; if(!it) return;
+  var n = session.items.length;
+  var sub = "";
+  if(n > 1) sub = (session.itemIdx + 1) + " of " + n;
+  if(it.val !== undefined && it.val !== null) setDisplay(it.val, (it.dim === undefined ? 0 : it.dim), it.k, sub);
+  else showMain(it.k, it.v, sub);
+  if(it.val !== undefined && it.val !== null && it.v) $("dispMain").textContent = it.v;
+}
+function sessionAdvance(){
+  if(session.phase === "prompt") acceptPrompt();
+  else showItem();
+}
+function sessionCancel(){
+  session = null; bMode = "num"; clearBuilder();
+}
+
+var SESSIONS = {
+  bal: { title:"Baluster", keyLabel:"Stair", key:"stair",
+    prompts:[ P("len","Rail length, post to post"), P("bw","Baluster width (in)","decin",1.5), P("gap","Max clear gap (in)","decin",4) ],
+    compute:function(v){
+      var L = v.len, bw = v.bw || 1.5, maxGap = v.gap || 4;
+      var n = Math.max(1, Math.ceil((L - maxGap) / (bw + maxGap)));
+      var gap = (L - n*bw) / (n+1), oc = gap + bw, first = gap + bw/2;
+      return [
+        {k:"Balusters", v:String(n), val:n, dim:0},
+        {k:"Equal clear gap", v:fmtFI(gap) + " (" + fmtNum(gap,3) + "″)", val:gap, dim:1},
+        {k:"On-centre", v:fmtFI(oc) + " (" + fmtNum(oc,3) + "″)", val:oc, dim:1},
+        {k:"First centre", v:fmtFI(first) + " off post face", val:first, dim:1},
+        {k:"Layout", v:"Start " + fmtFI(first) + ", then step " + fmtFI(oc)}
+      ];
+    }
+  },
+  bdft: { title:"Board feet", keyLabel:"Bd Ft", key:"bdft",
+    prompts:[ P("t","Thickness (in)","decin",1), P("w","Width (in)","decin",6), P("l","Length (ft)","decft",96),
+              P("q","Quantity","num",10), P("price","Price per Mbm $ (0 = skip)","num",0) ],
+    compute:function(v){
+      var bfEach = v.t * v.w * (v.l/12) / 12, total = bfEach * v.q;
+      var items = [
+        {k:"Total board feet", v:fmtNum(total,2) + " BF", val:total, dim:0},
+        {k:"Per piece", v:fmtNum(bfEach,3) + " BF", val:bfEach, dim:0},
+        {k:"With " + prefWaste + "% waste", v:fmtNum(total*(1+prefWaste/100),2) + " BF", val:total*(1+prefWaste/100), dim:0}
+      ];
+      if(v.price > 0){
+        items.push({k:"Material cost", v:money(total/1000*v.price) + " @ $" + fmtNum(v.price,2) + "/Mbm", val:total/1000*v.price, dim:0});
+        items.push({k:"Cost per piece", v:money(bfEach/1000*v.price), val:bfEach/1000*v.price, dim:0});
+      }
+      return items;
+    },
+    tapeFn:function(v){ return ["Board feet — " + fmtNum(v.t,1) + "×" + fmtNum(v.w,1) + "×" + fmtNum(v.l/12,1) + "ft × " + fmtInt(v.q), fmtNum(v.t*v.w*(v.l/12)/12*v.q,2) + " BF", v.t*v.w*(v.l/12)/12*v.q, 0]; }
+  },
+  conc: { title:"Concrete", keyLabel:"Bd Ft", key:"bdft",
+    prompts:[ P("l","Length"), P("w","Width"), P("d","Thickness (in)","decin",4) ],
+    compute:function(v){
+      var cuft = (v.l/12)*(v.w/12)*(v.d/12), cuyd = cuft/27, cuydW = cuyd * (1 + prefWaste/100);
+      return [
+        {k:"Cubic yards net", v:fmtNum(cuyd,6) + " yd³", val:cuyd*46656, dim:3},
+        {k:"Cubic yards w/ waste", v:fmtNum(cuydW,3) + " yd³", val:cuydW*46656, dim:3},
+        {k:"Order (¼ yd round-up)", v:fmtNum(Math.ceil(cuydW*4)/4,2) + " yd³", val:Math.ceil(cuydW*4)/4*46656, dim:3},
+        {k:"80 lb bags", v:fmtInt(Math.ceil(cuft*(1+prefWaste/100)/0.6)), val:Math.ceil(cuft*(1+prefWaste/100)/0.6), dim:0},
+        {k:"60 lb bags", v:fmtInt(Math.ceil(cuft*(1+prefWaste/100)/0.45)), val:Math.ceil(cuft*(1+prefWaste/100)/0.45), dim:0},
+        {k:"40 lb bags", v:fmtInt(Math.ceil(cuft*(1+prefWaste/100)/0.3)), val:Math.ceil(cuft*(1+prefWaste/100)/0.3), dim:0},
+        {k:"Approx weight", v:fmtInt(cuft*150) + " lb", val:cuft*150, dim:0}
+      ];
+    },
+    tapeFn:function(v, items){ return ["Concrete " + fmtFI(v.l) + " × " + fmtFI(v.w) + " × " + fmtNum(v.d,1) + "″", items[0].v, items[0].val, 3]; }
+  },
+  drywall: { title:"Drywall", keyLabel:"R/Wall", key:"rwall",
+    prompts:[ P("l","Room length"), P("w","Room width"), P("h","Ceiling height") ],
+    compute:function(v){
+      var wallArea = 2*(v.l+v.w)*v.h/144, ceilArea = v.l*v.w/144, total = wallArea + ceilArea;
+      var sheets = Math.ceil(total*(1+prefWaste/100)/32);
+      return [
+        {k:"Sheets 4×8 w/ waste", v:String(sheets), val:sheets, dim:0},
+        {k:"Total area", v:fmtNum(total,1) + " ft²", val:total*144, dim:2},
+        {k:"Wall area", v:fmtNum(wallArea,1) + " ft²", val:wallArea*144, dim:2},
+        {k:"Ceiling area", v:fmtNum(ceilArea,1) + " ft²", val:ceilArea*144, dim:2},
+        {k:"Joint compound", v:"≈ " + fmtNum(total/100*0.9,1) + " gal premix", val:total/100*0.9, dim:0},
+        {k:"Screws", v:"≈ " + fmtInt(Math.ceil(total*1.4)), val:Math.ceil(total*1.4), dim:0}
+      ];
+    }
+  },
+  roof: { title:"Roofing", keyLabel:"Diag", key:"diag",
+    prompts:[ P("l","Roof length (eave)"), P("s","Slope length, one side") ],
+    compute:function(v){
+      var areaOne = v.l * v.s / 144, total = areaOne * 2, totalW = total * (1 + prefWaste/100);
+      var squares = totalW / 100;
+      return [
+        {k:"Bundles (3/square)", v:String(Math.ceil(squares*3)), val:Math.ceil(squares*3), dim:0},
+        {k:"Squares", v:fmtNum(squares,2), val:squares, dim:0},
+        {k:"Area w/ waste", v:fmtNum(totalW,1) + " ft²", val:totalW*144, dim:2},
+        {k:"Total area", v:fmtNum(total,1) + " ft² (both sides)", val:total*144, dim:2},
+        {k:"Underlayment", v:String(Math.ceil(totalW/400)) + " rolls (400 ft²)", val:Math.ceil(totalW/400), dim:0}
+      ];
+    }
+  },
+};
+
+/* ---------- stored settings: riser / tread / o.c. (reference: value + Conv+key) ---------- */
+function storeSetting(which){
+  var o = builderHasInput() ? currentOperand() : {val:dispVal, dim:dispDim};
+  if(o.dim !== 1){ showMain(which === "riser" ? "Riser Ht" : which === "tread" ? "Tread W" : "On-Centre", "Needs a length", "Type a length first"); return; }
+  if(which === "riser"){ riserStore = o.val; showMain("Riser Ht", fmtFI(o.val) + "  STORED", "Stair will use it", o.val, 1); }
+  else if(which === "tread"){ treadStore = o.val; showMain("Tread W", fmtFI(o.val) + "  STORED", "Stair will use it", o.val, 1); }
+  else { ocStore = o.val; jackIdx = -1; rwallIdx = -1; showMain("On-Centre", fmtNum(o.val,2) + " INCH  STORED", "Jack and Rake-Wall will use it", o.val, 1); }
+}
+function recallStored(which){
+  if(which === "oc") showMain("On-Centre", fmtNum(ocStore,2) + " INCH", "Stored spacing", ocStore, 1);
+  else if(which === "riser") showMain("Riser Ht", fmtFI(riserStore !== null ? riserStore : 7.5) + "  STORED", "Desired riser height", riserStore !== null ? riserStore : 7.5, 1);
+  else if(which === "tread") showMain("Tread W", fmtFI(treadStore !== null ? treadStore : 10) + "  STORED", "Desired tread width", treadStore !== null ? treadStore : 10, 1);
+}
+
+/* ---------- Shift (Conv) functions ---------- */
+var SHIFT = { hip:"irpitch", circ:"arc", jack:"irjack", sqrt:"sq", "d:7":"riserht", "d:9":"treadw",
+  "op:/":"recip", rcl:"mrc", "d:5":"oc", "op:*":"clearall", mplus:"mminus", "op:-":"sign",
+  pct:"prefs", "d:0":"wtvol", dot:"cost", eq:"tape", "op:+":"pi",
+  bdft:"conc", stair:"bal", rwall:"drywall", diag:"roof" };
+function handleShift(action){
+  if(session && session.phase === "prompt" && action !== "clearall") return;
+  if(session && session.phase === "results") sessionCancel();
+  switch(action){
+    case "irpitch": irPitchKey(); break;
+    case "arc": arcKey(); break;
+    case "irjack": irJackKey(); break;
+    case "conc": startSession("conc"); break;
+    case "bal": startSession("bal"); break;
+    case "drywall": startSession("drywall"); break;
+    case "roof": startSession("roof"); break;
+    case "wtconv": weightKey(); break;
+    case "wtvol": wtvolStore(); break;
+    case "oc": storeSetting("oc"); break;
+    case "cost": costKey(); break;
+    case "prefs": prefsEnter(); break;
+    case "sq": case "recip": case "sign": case "pi": primaryKey(action); break;
+    case "riserht": storeSetting("riser"); break;
+    case "treadw": storeSetting("tread"); break;
+    case "mrc": memClear(); break;
+    case "mminus": memAdd(-1); break;
+    case "clearall":
+      sessionCancel(); tapeMode = false; prefsMode = false; costPrompt = null;
+      acc = null; pendingOp = null; clearBuilder(); justEvaluated = false; tempRes = null;
+      tri = {rise:null, run:null, pitch:null, irPitch:null};
+      riserStore = null; treadStore = null; ocStore = 16;
+      wtvol = {val:1.5, unit:0}; memory = null; memRecallMode = false;
+      stairIdx = 0; jackIdx = -1; rwallIdx = -1; circDia = null; weightState = null;
+      setDisplay(0, 1, "Clear All"); break;
+    case "tape": enterTape(); break;
+  }
+}
+function enterTape(){
+  if(!tape.length){ showMain("Tape", "Empty", "Finished calculations land here"); return; }
+  tapeMode = true; tapeIdx = -1;
+  tapeShow();
+}
+function exitTape(useTotal){
+  tapeMode = false;
+  if(useTotal){
+    var t = tapeTTL();
+    if(t){ acc = {val:t.val, dim:t.dim}; pendingOp = null; justEvaluated = false; setDisplay(t.val, t.dim, "Tape · TTL"); return; }
+  }
+  setDisplay(dispVal, dispDim, "Ready");
+}
+
+/* ---------- primary keys ---------- */
+var ENTRY_KEYS = {"dot":1,"back":1,"feet":1,"inch":1,"frac":1,"yds":1,"m":1,"cm":1,"mm":1};
+function isEntryKey(k){ return k.indexOf("d:") === 0 || !!ENTRY_KEYS[k]; }
+
+function primaryKey(k){
+  if(k.indexOf("d:") === 0) return pressDigit(k.slice(2));
+  if(k === "dot"){
+    if(bMode === "num"){ if(single.indexOf(".") < 0) pressDigit("."); }
+    else if(bMode === "ftin"){
+      if(activeField === "feet" || activeField === "inch"){ if(fields[activeField].indexOf(".") < 0) pressDigit("."); }
+    } else if(single.indexOf(".") < 0) pressDigit(".");
+    return;
+  }
+  switch(k){
+    case "back": pressBack(); break;
+    case "feet": pressFeetKey(); break;
+    case "inch": pressInchKey(); break;
+    case "frac": pressFracKey(); break;
+    case "yds": pressUnitKey("yd"); break;
+    case "m": pressUnitKey("m"); break;
+    case "cm": pressUnitKey("cm"); break;
+    case "mm": pressUnitKey("mm"); break;
+    case "op:+": pressOp("+"); break;
+    case "op:-": pressOp("-"); break;
+    case "op:*": pressOp("*"); break;
+    case "op:/": pressOp("/"); break;
+    case "eq": pressEquals(); break;
+    case "bdft": {
+      /* reference flow: 2 x 4 x 16 Bd Ft -> board feet of the pending product */
+      if(acc !== null && pendingOp === "*"){
+        var e = builderHasInput() ? commitEntry() : {val:dispVal, dim:0};
+        var prod = acc.val * e.val;
+        var bf = prod / 12;
+        addTape("Board feet — " + fmtNum(acc.val,2) + " × " + fmtNum(e.val,2) + " / 12", fmtNum(bf,5) + " BF", bf, 0);
+        acc = null; pendingOp = null; justEvaluated = true; costPerMbm = true;
+        showMain("Board Feet", fmtNum(bf,5) + " BF", "M+ adds it to memory · × price, Conv+· for cost", bf, 0);
+        break;
+      }
+      startSession("bdft"); break; }
+    case "stair": stairKey(); break;
+    case "circ": circKey(); break;
+    case "rwall": rwallKey(); break;
+    case "jack": jackKey(); break;
+    case "weight": weightKey(); break;
+    case "pitch": pitchKey(false); break;
+    case "pct": {
+      var raw = builderHasInput() ? bareNumber() : null;
+      var e = currentOperand();
+      if(raw !== null) e = {val:raw, dim:0};
+      if(acc && pendingOp){
+        var res;
+        if(pendingOp === "+" || pendingOp === "-"){
+          var pv = {val: acc.val * e.val/100, dim: acc.dim};
+          res = applyOp(acc, pendingOp, pv);
+        } else if(pendingOp === "*"){
+          res = {val: acc.val * e.val/100, dim: acc.dim};
+        } else {
+          res = {val: e.val === 0 ? NaN : acc.val / (e.val/100), dim: acc.dim};
+        }
+        var expr = fmtByPref(acc.val, acc.dim) + " " + opSymbol(pendingOp) + " " + fmtNum(e.val,2) + "%";
+        addTape(expr, fmtByPref(res.val, res.dim), res.val, res.dim);
+        acc = null; pendingOp = null; justEvaluated = true;
+        lastPct = e.val;
+        setDisplay(res.val, res.dim, expr + " =");
+      } else {
+        lastPct = e.val;
+        var pv2 = {val: e.val/100, dim: 0};
+        setDisplay(pv2.val, pv2.dim, fmtNum(e.val,2) + "% =");
+      }
+      break; }
+    case "sqrt": { var o = currentOperand(); var v = Math.sqrt(Math.abs(o.val));
+      var d3 = o.dim === 2 ? 1 : (o.dim === 0 ? 0 : 1);
+      addTape("√ " + fmtByPref(o.val, o.dim), fmtByPref(v, d3), v, d3);
+      setDisplay(v, d3, "√ " + fmtByPref(o.val, o.dim) + " ="); justEvaluated = true; break; }
+    case "sq": { var o2 = currentOperand(); var v2 = o2.val * o2.val;
+      var d4 = o2.dim === 0 ? 0 : (o2.dim === 1 ? 2 : o2.dim);
+      addTape(fmtByPref(o2.val, o2.dim) + " ²", fmtByPref(v2, d4), v2, d4);
+      setDisplay(v2, d4, fmtByPref(o2.val, o2.dim) + " squared ="); justEvaluated = true; break; }
+    case "recip": { var o3 = currentOperand(); var v3 = o3.val === 0 ? NaN : 1/o3.val;
+      setDisplay(v3, 0, "1 ÷ " + fmtByPref(o3.val, o3.dim) + " ="); justEvaluated = true; break; }
+    case "sign": {
+      if(builderHasInput()){
+        if(bMode === "ftin"){ fields.feet = fields.feet.indexOf("-") === 0 ? fields.feet.slice(1) : "-" + (fields.feet || "0"); }
+        else single = single.indexOf("-") === 0 ? single.slice(1) : "-" + single;
+        liveEntryPreview();
+      } else setDisplay(-dispVal, dispDim, "Negated");
+      break; }
+    case "pi": setDisplay(Math.PI, 0, "π"); justEvaluated = true; break;
+    case "rcl": rclArmed = true; updateIndicators(); break;
+    case "mplus": memAdd(1); break;
+    case "rise": case "run": {
+      if(builderHasInput()){
+        var o6 = currentOperand(); if(o6.dim !== 1){ setDisplay(dispVal, dispDim, "Rise/Run need a length"); break; }
+        tri[k] = o6.val;
+        if(k === "rise") tri.pitch = null;
+        if(k === "run" && tri.rise === null && tri.pitch !== null) tri.rise = o6.val * tri.pitch / 12;
+        acc = null; pendingOp = null; justEvaluated = true;
+        triJump(k);
+      } else {
+        var storedLeg = tri[k];
+        if(storedLeg === null){ setDisplay(dispVal, dispDim, "No " + k + " stored", "Type a length, then tap " + (k === "rise" ? "Rise" : "Run")); break; }
+        acc = null; pendingOp = null; clearBuilder(); justEvaluated = true;
+        triJump(k);
+      }
+      break; }
+    case "diag": {
+      if(tri.rise === null || tri.run === null){ setDisplay(dispVal, dispDim, "Diag", "Store a Rise and a Run first"); break; }
+      acc = null; pendingOp = null; clearBuilder(); justEvaluated = true;
+      triJump("diag"); break; }
+    case "hip": {
+      if(tri.rise === null || tri.run === null){ setDisplay(dispVal, dispDim, "Hip/V", "Store a Rise and a Run first"); break; }
+      acc = null; pendingOp = null; clearBuilder(); justEvaluated = true;
+      hipKey(); break; }
+  }
+}
+
+/* ---------- routing: On/C, Conv/Shift, Rcl, sessions, tape, prefs ---------- */
+function setShift(on){
+  shiftArmed = on;
+  document.querySelectorAll("button.key.conv").forEach(function(b){ b.classList.toggle("armed", on); });
+  updateIndicators();
+}
+function clearTransientModes(){
+  oncCount = 0;
+  if(memRecallMode){ memRecallMode = false; memCycle = 0; }
+}
+function handleOnC(){
+  if(prefsMode){ prefsMode = false; setDisplay(dispVal, dispDim, "Ready"); return; }
+  if(tapeMode){ exitTape(false); return; }
+  if(session){ sessionCancel(); setDisplay(0, 1, "Ready"); return; }
+  if(costPrompt){ costPrompt = null; clearBuilder(); setDisplay(dispVal, dispDim, "Ready"); return; }
+  if(rclArmed){ rclArmed = false; updateIndicators(); return; }
+  if(shiftArmed){ setShift(false); return; }
+  oncCount++;
+  if(oncCount === 1){
+    /* reference: 1st press clears the display (entry + pending op) */
+    acc = null; pendingOp = null; clearBuilder(); justEvaluated = false; lastPct = null;
+    setDisplay(0, 1, "Ready");
+  } else {
+    /* reference: 2nd press clears all temporary values (not Pitch, not Prefs) */
+    oncCount = 0;
+    acc = null; pendingOp = null; clearBuilder(); justEvaluated = false; tempRes = null;
+    tri.rise = null; tri.run = null; tri.irPitch = null;
+    stairIdx = 0; jackIdx = -1; rwallIdx = -1; circDia = null; weightState = null;
+    setDisplay(0, 1, "Cleared");
+  }
+}
+function handleKey(k){
+  if(k !== "onc") { /* On/C counting is handled in handleOnC */ }
+  if(k === "onc"){ handleOnC(); return; }
+  if(k !== "conv") oncCount = 0;
+  if(prefsMode){
+    if(k === "pct"){ prefsIdx = (prefsIdx+1) % PREFS.length; prefsShow(); return; }
+    if(k === "op:+"){ prefsStep(1); return; }
+    if(k === "op:-"){ prefsStep(-1); return; }
+    if(k === "conv"){ setShift(!shiftArmed); return; }
+    return;   /* other keys ignored in Prefs */
+  }
+  if(tapeMode){
+    if(k === "op:+"){ if(tapeIdx < tape.length-1){ tapeIdx++; tapeShow(); } return; }
+    if(k === "op:-"){ if(tapeIdx > -1){ tapeIdx--; tapeShow(); } return; }
+    if(k === "eq"){ exitTape(true); return; }
+    exitTape(false);
+    /* fall through to the key */
+  }
+  if(costPrompt){
+    if(isEntryKey(k)){ primaryKey(k); return; }
+    if(k === "eq" || (shiftArmed && k === "dot")){ setShift(false); costFinish(); return; }
+    if(k === "conv"){ setShift(!shiftArmed); return; }
+    costPrompt = null;
+  }
+  if(rclArmed){
+    rclArmed = false;
+    if(k === "eq"){ enterTape(); return; }
+    if(k === "mplus"){ memRecall(); return; }
+    if(k === "rcl"){ memRecallClear(); return; }
+    if(k === "d:0"){ wtvolRecall(); return; }
+    if(k === "d:5"){ recallStored("oc"); return; }
+    if(k === "d:7"){ recallStored("riser"); return; }
+    if(k === "d:9"){ recallStored("tread"); return; }
+    if(k === "stair"){ recallStored("riser"); return; }
+    updateIndicators();
+    /* any other key: Rcl was a no-op, process the key normally */
+  }
+  if(k === "conv"){ setShift(!shiftArmed); return; }
+  if(shiftArmed){
+    setShift(false);
+    if(k === "pitch"){ pitchKey(true); return; }   /* Conv+p = pitch ratio */
+    if(k === "weight"){ weightKey(); return; }     /* reference: Ç w converts volume to weight */
+    if(k.indexOf("d:") === 0 && TEMP_RES[k.slice(2)] !== undefined){ tempResKey(k.slice(2)); return; }
+    var action = SHIFT[k];
+    if(action){ handleShift(action); return; }
+    if(k === "feet" || k === "inch" || k === "yds" || k === "m" || k === "cm" || k === "mm"){ convertDisplayTo(k); return; }
+    /* no shift function: fall through to the primary key */
+  }
+  if(k !== "mplus" && k !== "op:+" && k !== "op:-") clearTransientModes();
+  if(session){
+    if(session.phase === "prompt"){
+      if(k === session.def.key || k === "eq"){ sessionAdvance(); return; }
+      if(isEntryKey(k) || k.indexOf("d:") === 0){ primaryKey(k); return; }
+      return;
+    }
+    if(k === session.def.key || k === "eq"){ sessionAdvance(); return; }
+    sessionCancel();
+  }
+  if(wtvolStoreMode && k !== "d:0") wtvolStoreMode = false;
+  primaryKey(k);
+}
+document.querySelectorAll("button.key").forEach(function(b){
+  b.addEventListener("click", function(){ handleKey(b.getAttribute("data-k")); });
+});
+document.addEventListener("keydown", function(ev){
+  if(/^[0-9]$/.test(ev.key)) handleKey("d:" + ev.key);
+  else if(ev.key === ".") handleKey("dot");
+  else if(ev.key === "+") handleKey("op:+");
+  else if(ev.key === "-") handleKey("op:-");
+  else if(ev.key === "*") handleKey("op:*");
+  else if(ev.key === "/"){ ev.preventDefault(); if(builderHasInput() && bMode === "ftin" && activeField === "num") handleKey("frac"); else handleKey("op:/"); }
+  else if(ev.key === "Enter" || ev.key === "="){ ev.preventDefault(); handleKey("eq"); }
+  else if(ev.key === "Backspace") handleKey("back");
+  else if(ev.key === "Escape") handleKey("onc");
+  else if(ev.key.toLowerCase() === "f") handleKey("feet");
+  else if(ev.key.toLowerCase() === "i") handleKey("inch");
+});
+
+setDisplay(0, 1, "Ready");
+</script>
+</body>
+</html>
