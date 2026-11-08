@@ -17,7 +17,13 @@
     --line:#e2e2de; --key-line:#d9d9d4; --num-bg:#f3f3f1; --op-bg:#eaeae7;
     --solid:#141412; --on-solid:#ffffff; --focus:#141412;
   }
-  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;
+    user-select:none; -webkit-user-select:none; -webkit-touch-callout:none;}
+  /* v1.8: only the result at the top is copyable. Everything else on
+     the face - keys, labels, indicators, History rows, the guide - is
+     locked against long-press copy / text selection. */
+  .lcd-value{user-select:text !important; -webkit-user-select:text !important;
+    -webkit-touch-callout:default !important;}
   html,body{height:100%;}
   body{margin:0; background:var(--page); overflow:hidden; color:var(--ink);
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
@@ -75,6 +81,16 @@
   .hist-page-btn:active{background:var(--solid); color:var(--on-solid);}
   .hist-page-btn[hidden]{visibility:hidden;}
   .hist-page-info{font-size:.78rem; font-weight:500; color:var(--ink); white-space:nowrap;}
+  /* ---------- v1.8 user guide: a sheet like History, over the keypad,
+     opened from the settings pill in the History header. ---------- */
+  .guide{display:none; position:absolute; inset:0; z-index:6; background:var(--bg);
+    flex-direction:column; gap:10px;}
+  .device.show-guide .guide{display:flex;}
+  .guide-body{flex:1 1 auto; min-height:0; overflow:auto; padding:4px 4px 12px;}
+  .guide-body h3{font-size:.85rem; letter-spacing:.1em; text-transform:uppercase;
+    margin:14px 0 4px; font-weight:600;}
+  .guide-body h3:first-child{margin-top:4px;}
+  .guide-body p{font-size:.92rem; line-height:1.45; margin:0 0 6px;}
   .ind{font-size:.6rem; letter-spacing:.12em; font-weight:600; border:1px solid var(--ink);
     border-radius:999px; padding:1px 8px; line-height:1.5; display:none;}
   .ind.on{display:block;}
@@ -210,13 +226,36 @@
 
   <!-- ================= HISTORY (replaces Tape): sheet over the keypad ================= -->
   <div class="history" id="historyView" aria-label="History">
-    <div class="hist-head"><button class="hist-btn" id="histBackSheet" type="button">&larr; Calc</button><span class="hist-head-title">History</span><span class="hist-head-count" id="histHeadCount"></span></div>
+    <div class="hist-head"><button class="hist-btn" id="histBackSheet" type="button">&larr; Calc</button><span class="hist-head-title">History</span><button class="hist-btn" id="histGuideBtn" type="button" aria-label="Open the user guide">&#9881; Guide</button><span class="hist-head-count" id="histHeadCount"></span></div>
     <div class="hist-list" id="historyList"></div>
     <div class="hist-empty" id="historyEmpty">No calculations yet</div>
     <div class="hist-pager">
       <button class="hist-page-btn" id="histPrev" type="button">&uarr; Prev</button>
       <span class="hist-page-info" id="histPageInfo"></span>
       <button class="hist-page-btn" id="histNext" type="button">Next &darr;</button>
+    </div>
+  </div>
+
+  <!-- ================= USER GUIDE (v1.8): sheet over the keypad, opened
+       from the settings pill in the History header. Closes back to
+       History. Short sections, no external links. ================= -->
+  <div class="guide" id="guideView" aria-label="User guide">
+    <div class="hist-head"><button class="hist-btn" id="guideBack" type="button">&larr; History</button><span class="hist-head-title">Guide</span><span></span></div>
+    <div class="guide-body">
+      <h3>Entering values</h3>
+      <p>Type a number, then tag it with a unit: Feet, Inch, Yds, m, cm or mm. 9 + Inch is 9&Prime;, 6 + Feet is 6&prime;. A number with no unit is a plain count. Press Feet or Inch again to raise it to square, then cubic.</p>
+      <p>For a fraction, type the whole inches, then the fraction: 12 Feet, 7 Inch, 7, /, 8 gives 12&prime; - 7 7/8&Prime;.</p>
+      <h3>Conv &mdash; second functions</h3>
+      <p>Conv is the second-function key. Press it and the keys that have a second function swap their label to show it &mdash; a small dot marks those keys. The indicator in the sub row reads CONV while it is on. Press Conv again, or use the second function, and the labels go back.</p>
+      <p>Conv + a unit converts the value on the display: Conv + Feet switches feet and inches between fractional and decimal, Conv + Inch switches inches between decimal and fractional.</p>
+      <h3>History</h3>
+      <p>Tap the display to open History. Tap a row to load its answer back into the calculator. Use the up and down arrows to page through it, 8 entries per page, newest first. The last 100 entries are kept; the oldest drops off on its own.</p>
+      <h3>Backspace and Clear</h3>
+      <p>The backspace key reads &#9003; / C. Tap it to delete one character. Hold it about half a second to clear the display; hold it again to clear the stored values too. Conv + &times; is Clear All: it resets the stored riser, tread, on-centre spacing and weight-per-volume to their defaults.</p>
+      <h3>Solvers</h3>
+      <p>Pitch, Rise, Run, Diag, Hip/V: store a Rise and a Run, then each key gives its answer. Pitch cycles through inches, degrees, % grade and slope. Stair: store a Rise, then Stair steps through riser, treads, stringer and the rest. Circ: enter a diameter, then Circ steps through diameter, area and circumference; Conv + Circ is Arc. Rake-Wall and Jack step through studs and jacks from the stored on-centre spacing. Weight turns a weight or a volume into tons, pounds, metric tons or kilograms. Cost: enter a quantity, press Conv + &middot;, type a price, press =. Board feet: enter thickness &times; width &times; length, press Bd Ft. Memory: M+ adds the value, Rcl recalls the total, Rcl + Rcl clears it.</p>
+      <h3>Prefs</h3>
+      <p>Conv + % opens Prefs. % steps through the settings, + and &minus; change the option, Clear (hold &#9003; / C) exits. The settings are fractional resolution, area display, volume display, meter display, degree display and fractional mode. Conv + 1, 2, 3, 4, 6 or 8 changes the fractional resolution just for the next value.</p>
     </div>
   </div>
   </div>
@@ -264,6 +303,12 @@
      it (no unit conversions, no pitch explanation, no
      instructions). The sub line carries only the solver position
      ("1 of N") when stepping through multi-result solvers.
+   - v1.8: only the display value is copyable; long-press copy and
+     text selection are locked down everywhere else. Entering a value
+     keeps the unit entered (12 + Inch shows 12", not 1'), and
+     feet-and-inches values show a dash between the parts
+     (12' - 7 7/8"). A user guide lives behind a settings pill in
+     the History header and closes back to History.
    - Styling follows the stock calculator inspo: airy rows, plain-text
      keys with no fill or border, operators in thin outlined rounded
      squares, = solid black. Conflicts resolved for the approved
@@ -306,7 +351,11 @@ function fmtFI(totalIn, r){
     if(wholeIn===0 && !feet) parts = num + "/" + den;
   }
   if(!parts) parts = "0";
-  out += (feet ? " " : "") + parts + "″";
+  /* v1.8: a clean feet-only value shows just the feet ("6′"), and
+     feet and inches are joined with a dash ("12′ - 7 7/8″")
+     so the two parts are easy to tell apart. */
+  if(feet && wholeIn===0 && num===0) return (sign + feet + "′").trim();
+  out += (feet ? " - " : "") + parts + "″";
   return out.trim();
 }
 function fmtFracInch(totalIn){
@@ -415,9 +464,31 @@ function openHistory(){
 }
 function closeHistory(){
   historyOpen = false;
+  closeGuide();
   document.querySelector(".device").classList.remove("show-history");
 }
 function toggleHistory(){ if(historyOpen) closeHistory(); else openHistory(); }
+var guideOpen = false;
+function openGuide(){
+  guideOpen = true;
+  document.querySelector(".device").classList.add("show-guide");
+}
+function closeGuide(){
+  guideOpen = false;
+  document.querySelector(".device").classList.remove("show-guide");
+}
+/* v1.8: only the result at the top is copyable. A long press anywhere
+   else must not bring up copy / text selection, so the context menu
+   and text selection are suppressed everywhere except on the display
+   value itself. The backspace key already suppresses its own menu. */
+document.addEventListener("contextmenu", function(ev){
+  if(ev.target && ev.target.closest && ev.target.closest("#dispMain")) return;
+  ev.preventDefault();
+});
+document.addEventListener("selectstart", function(ev){
+  if(ev.target && ev.target.closest && ev.target.closest("#dispMain")) return;
+  ev.preventDefault();
+});
 loadHistory();
 
 /* ---------- state ---------- */
@@ -507,6 +578,30 @@ function bareNumber(){
   var s2 = parseFloat(single); return isNaN(s2) ? null : s2;
 }
 
+/* ---------- v1.8 entry display: show the value as entered ----------
+   When tagging a typed number, the entry preview keeps the unit that
+   was entered (12 + Inch shows 12″, 6 + Feet shows 6′) instead
+   of normalising it into feet and inches at that point. Only the
+   entry preview does this - stored values and results still use the
+   shared formatter, so a total of 12 inches still reads as 1′. */
+function entryFtInText(){
+  var f=fields.feet, i=fields.inch, n=fields.num, d=fields.den;
+  var frac="";
+  if(n!==""){
+    if(d!==""){ var nn=parseInt(n,10), dd=parseInt(d,10);
+      if(dd){ var g=gcd(nn,dd); frac=(nn/g)+"/"+(dd/g); } else frac=n+"/"+d;
+    } else frac=n;
+  }
+  var parts=[];
+  if(f!=="") parts.push(f+"′");
+  var inchPart="";
+  if(i!=="") inchPart=i;
+  if(frac) inchPart = inchPart ? inchPart+" "+frac : frac;
+  if(inchPart) parts.push(inchPart+"″");
+  if(!parts.length) return null;
+  return parts.join(" - ");
+}
+
 /* ---------- display ---------- */
 function updateIndicators(){
   $("indMem").className = "ind" + (memory !== null ? " on" : "");
@@ -561,6 +656,7 @@ function liveEntryPreview(){
     setDisplay(v.val, 0, "Cost · unit price $", "Qty " + fmtByPref(costPrompt.qty, costPrompt.dim) + (costPrompt.perMbm ? " (per Mbm)" : "") + " — = or Conv+· to total");
   } else {
     setDisplay(v.val, v.dim, "Entering", rawParts());
+    if(bMode === "ftin"){ var et = entryFtInText(); if(et) $("dispMain").textContent = et; }
   }
 }
 
@@ -595,6 +691,10 @@ function pressOp(op){
   setDisplay(acc.val, acc.dim, fmtByPref(acc.val, acc.dim) + " " + opSymbol(op));
 }
 function pressEquals(){
+  /* v1.8: capture the entered-unit text before commitEntry clears it,
+     so an entered value keeps the unit it was entered in (12 Inch
+     stays 12″) at this point too. */
+  var etxt = (bMode === "ftin") ? entryFtInText() : null;
   var entry = commitEntry();
   if(acc !== null && pendingOp && entry){
     var expr = fmtByPref(acc.val, acc.dim) + " " + opSymbol(pendingOp) + " " + fmtByPref(entry.val, entry.dim);
@@ -603,9 +703,10 @@ function pressEquals(){
     acc = null; pendingOp = null; justEvaluated = true;
     setDisplay(res.val, res.dim, expr + " =");
   } else if(entry){
-    addHistory("Entered", fmtByPref(entry.val, entry.dim), entry.val, entry.dim);
+    addHistory("Entered", etxt || fmtByPref(entry.val, entry.dim), entry.val, entry.dim);
     justEvaluated = true;
     setDisplay(entry.val, entry.dim, "Entered");
+    if(etxt) $("dispMain").textContent = etxt;
   }
   lastPct = null;
 }
@@ -1671,6 +1772,8 @@ document.querySelectorAll("button.key").forEach(function(b){
 });
 $("lcd").addEventListener("click", function(){ toggleHistory(); });
 $("histBackSheet").addEventListener("click", function(){ closeHistory(); });
+$("histGuideBtn").addEventListener("click", function(){ openGuide(); });
+$("guideBack").addEventListener("click", function(){ closeGuide(); });
 $("histPrev").addEventListener("click", function(){ histPageStep(-1); });
 $("histNext").addEventListener("click", function(){ histPageStep(1); });
 document.addEventListener("keydown", function(ev){

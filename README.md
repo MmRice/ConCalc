@@ -4,7 +4,7 @@ Construction calculator, in stock Mudita style.
 For use on a Mudita Kompakt (4.3" E Ink, 800x480)
 and any Android phone.
 
-- Feet-inch-fraction math, just as you say it: `6 Feet 9 Inch 1/2` = 6' 9 1/2"
+- Feet-inch-fraction math, just as you say it: `6 Feet 9 Inch 1/2` = 6' - 9 1/2"
 - Fractions to 1/64, decimal feet/inches, yards, metric
 - Rise / Run / Diag / Pitch, Hip/Val, Jack, Rake-Wall, Stair layout,
   circles/arcs, board feet, concrete, flooring, drywall, studs, roofing,
@@ -60,7 +60,7 @@ and any Android phone.
 
 ## APK
 
-Current release: **ConCalc 1.7** — version 1.7, versionCode 8, package
+Current release: **ConCalc 1.8** — version 1.8, versionCode 9, package
 `com.mmrice.concalc`, minSdk 21, targetSdk 33, self-signed.
 
 This is a new, personal app — a fresh package and a fresh signing key.
@@ -68,7 +68,7 @@ It will NOT update over the old builds (v0.1–v0.3):
 uninstall the old app first, then install this one fresh.
 
 The APK binary is not in this repo — GitHub's text push can't carry binaries.
-Download `ConCalcV1.7.apk` from the chat / release and sideload it, or build
+Download `ConCalcV1.8.apk` from the chat / release and sideload it, or build
 it yourself below. Keep the keystore at
 `~/workspace/apk-build/concalc-personal.keystore` — updates must use the
 same key.
@@ -141,7 +141,13 @@ permission, no other permissions.
 
 ## Status
 
-Untested on real Kompakt hardware as of v1.3. Core math spot-checked
+Untested on real Kompakt hardware as of v1.3.
+v1.8 fixes four things Mitch found while testing v1.7: only the display
+value is copyable — long-press copy and text selection are locked down
+everywhere else; entering a value keeps the unit entered (12 + Inch
+shows 12\u2033, not 1\u2032); feet-and-inches values show a dash between
+the parts (12\u2032 - 7 \u215e\u2033); and a user guide was added behind a
+settings pill in the History header. No math changes. Core math spot-checked
 (6' 9 1/2", 6/12 rafter, 9 ft stairs, 10x10 ft x 4" concrete), and
 v1.0 passed 50/50 headless tests against the reference worked examples.
 v1.7 is UI only, no math changes: tap the display to open History (no HIST button), backspace is now "⌫ / C" — tap deletes one character, hold ~0.6s clears the display, hold again clears temporary values — so there is no Clear button and no top bar at all; the CONV / RCL / MEM indicators moved into the sub row under the display value, the Conv indicator reads CONV (not SHIFT), and the display and keypad get the freed space (with a comfortable margin, not flush to the top).
