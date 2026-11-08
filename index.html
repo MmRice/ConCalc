@@ -30,7 +30,30 @@
   @media (max-width:480px){ .device{border:none; height:100dvh; padding:22px 16px 14px;} }
   /* ---------- display: open paper, hairline rule underneath ---------- */
   .lcd{color:var(--ink); padding:2px 2px 16px; border-bottom:1px solid var(--ink); flex:0 0 auto;}
-  .lcd-top{display:flex; justify-content:flex-end; gap:6px; min-height:18px;}
+  .lcd-top{display:flex; justify-content:space-between; align-items:center; gap:6px; min-height:44px;}
+  .hist-btn{font:inherit; font-size:.7rem; letter-spacing:.14em; font-weight:600;
+    border:1px solid var(--ink); border-radius:999px; background:var(--bg); color:var(--ink);
+    padding:8px 14px; min-height:44px; cursor:pointer; flex:0 0 auto;}
+  .hist-btn:active{background:var(--solid); color:var(--on-solid);}
+  .lcd-inds{display:flex; gap:6px; margin-left:auto;}
+  /* ---------- history screen: the ONLY scrollable list ---------- */
+  .history{display:none; flex:1 1 auto; min-height:0; flex-direction:column; gap:10px;}
+  .device.show-history .lcd, .device.show-history .power, .device.show-history .keypad{display:none;}
+  .device.show-history .history{display:flex;}
+  .hist-head{display:flex; justify-content:space-between; align-items:center; gap:8px; flex:0 0 auto;}
+  .hist-title{font-size:.78rem; letter-spacing:.16em; font-weight:500; color:var(--muted); text-transform:uppercase;}
+  .hist-back, .hist-clear{font:inherit; font-size:.78rem; font-weight:500;
+    border:1px solid var(--ink); border-radius:999px; background:var(--bg); color:var(--ink);
+    padding:8px 12px; min-height:44px; cursor:pointer;}
+  .hist-clear.armed{background:var(--solid); color:var(--on-solid);}
+  .hist-list{flex:1 1 auto; min-height:0; overflow-y:auto; display:flex; flex-direction:column;}
+  .hist-row{display:flex; flex-direction:column; align-items:flex-start; gap:2px; width:100%;
+    text-align:left; background:var(--bg); border:none; border-bottom:1px solid var(--line);
+    padding:12px 4px; cursor:pointer; font:inherit; color:var(--ink);}
+  .hist-row:active{background:var(--num-bg);}
+  .hist-expr{font-size:.8rem; color:var(--muted); word-break:break-word;}
+  .hist-res{font-size:1.25rem; font-weight:300; font-variant-numeric:tabular-nums;}
+  .hist-empty{color:var(--muted); padding:28px 4px; text-align:center; font-size:.9rem;}
   .ind{font-size:.6rem; letter-spacing:.12em; font-weight:600; border:1px solid var(--ink);
     border-radius:999px; padding:1px 8px; line-height:1.5; display:none;}
   .ind.on{display:block;}
@@ -73,10 +96,12 @@
   <!-- ================= DISPLAY ================= -->
   <div class="lcd" id="lcd">
     <div class="lcd-top">
-      <span class="ind" id="indShift">SHIFT</span>
-      <span class="ind" id="indRcl">RCL</span>
-      <span class="ind" id="indTape">TAPE</span>
-      <span class="ind" id="indMem">MEM</span>
+      <button class="hist-btn" id="histBtn" type="button" aria-label="History">&#9719; HIST</button>
+      <span class="lcd-inds">
+        <span class="ind" id="indShift">SHIFT</span>
+        <span class="ind" id="indRcl">RCL</span>
+        <span class="ind" id="indMem">MEM</span>
+      </span>
     </div>
     <div class="lcd-main">
       <span class="lcd-label" id="dispLabel">Ready</span>
@@ -89,7 +114,7 @@
   </div>
 
   <div class="power">
-    <button class="key power-key" data-k="onc" type="button">On/C</button>
+    <button class="key power-key" data-k="onc" type="button">Clear</button>
   </div>
 
   <!-- ================= KEYPAD ================= -->
@@ -147,9 +172,20 @@
       <div class="cell"><span class="shift-lbl">Prefs</span><button class="key" data-k="pct" type="button">%</button></div>
       <div class="cell"><span class="shift-lbl">wt/vol</span><button class="key num" data-k="d:0" type="button">0</button></div>
       <div class="cell"><span class="shift-lbl">Cost</span><button class="key num" data-k="dot" type="button">&middot;</button></div>
-      <div class="cell"><span class="shift-lbl">Tape</span><button class="key" data-k="eq" type="button">=</button></div>
+      <div class="cell"><span class="shift-lbl"></span><button class="key" data-k="eq" type="button">=</button></div>
       <div class="cell"><span class="shift-lbl">&pi; &#9660;</span><button class="key" data-k="op:+" type="button">+</button></div>
     </div>
+  </div>
+
+  <!-- ================= HISTORY (replaces Tape) ================= -->
+  <div class="history" id="historyView" aria-label="History">
+    <div class="hist-head">
+      <button class="hist-back" id="histBack" type="button">&larr; Calc</button>
+      <span class="hist-title">History</span>
+      <button class="hist-clear" id="histClearBtn" type="button">Clear history</button>
+    </div>
+    <div class="hist-list" id="historyList"></div>
+    <div class="hist-empty" id="historyEmpty">No calculations yet</div>
   </div>
 
 </div>
@@ -157,7 +193,10 @@
 <script>
 "use strict";
 /* =====================================================================
-   ConCalc v0.3 — key rules implemented here:
+   ConCalc v1.2 — key rules implemented here:
+   - History replaces Tape: completed results are recorded and shown
+     in a full History screen (HIST button, top-left of the display).
+     Tape's stepping behaviour is gone.
    - Numbers are PLAIN until tagged: type a number, then Feet/Inch/Yds/
      m/cm/mm tags it; an untagged number is a plain count (reference:
      "enter dimensions from largest to smallest", and % / board-feet /
@@ -172,6 +211,8 @@
      Everything else is idempotent: Diag always gives Diag, etc.
    - Conv (Ç) is the reference Convert prefix: Ç + unit converts the
      displayed value; Ç + another key is that key's second function.
+   - Clear is the same key with a plain label: 1st press clears
+     the display, 2nd clears temporary values.
    ===================================================================== */
 function $(id){return document.getElementById(id);}
 function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){var t=a%b;a=b;b=t;}return a||1;}
@@ -254,25 +295,65 @@ function fmtAngle(deg){
   return fmtNum(deg,2) + "°";
 }
 
-/* ---------- tape: reference = past 20 entries, TTL first, + / - scroll, = exit ---------- */
-var tape = [], tapeMode = false, tapeIdx = -1;   /* -1 = TTL, else 0..n-1 oldest-first */
-function addTape(expr, resultText, val, dim){
-  if(tape.length && tape[0].expr === expr && tape[0].result === resultText) return;
-  tape.unshift({expr:expr, result:resultText, val:val, dim:dim});
-  if(tape.length > 20) tape.pop();
+/* ---------- history (replaces Tape): full list, newest first, persisted ---------- */
+var histEntries = [], historyOpen = false, histClearArmed = false;
+var HIST_KEY = "concalc.history.v1", HIST_MAX = 100;
+function loadHistory(){
+  try{
+    var raw = localStorage.getItem(HIST_KEY);
+    if(raw){ var arr = JSON.parse(raw); if(Array.isArray(arr)) histEntries = arr.slice(0, HIST_MAX); }
+  }catch(e){ histEntries = []; }
 }
-function tapeTTL(){ return tape.length ? tape[0] : null; }
-function tapeShow(){
-  var t = tapeTTL(); if(!t) return;
-  if(tapeIdx < 0){ dispVal = t.val; dispDim = t.dim; showMain("Tape · TTL", t.result, "Total — + older · − newer · = exit and use it", t.val, t.dim); }
-  else {
-    var e = tape[tape.length - 1 - tapeIdx];
-    dispVal = e.val; dispDim = e.dim;
-    showMain("Tape · " + String(tapeIdx+1).padStart(2,"0"), e.expr + "  →  " + e.result,
-      (tapeIdx+1) + " of " + tape.length + " — + older · − newer · = exit", e.val, e.dim);
+function saveHistory(){
+  try{ localStorage.setItem(HIST_KEY, JSON.stringify(histEntries)); }catch(e){}
+}
+function addHistory(expr, resultText, val, dim){
+  if(histEntries.length && histEntries[0].expr === expr && histEntries[0].result === resultText) return;
+  histEntries.unshift({expr:expr, result:resultText, val:val, dim:dim});
+  if(histEntries.length > HIST_MAX) histEntries.length = HIST_MAX;
+  saveHistory();
+  if(historyOpen) renderHistory();
+}
+function renderHistory(){
+  var list = $("historyList"); if(!list) return;
+  list.innerHTML = "";
+  $("historyEmpty").style.display = histEntries.length ? "none" : "";
+  histEntries.forEach(function(e){
+    var row = document.createElement("button");
+    row.type = "button"; row.className = "hist-row";
+    var ex = document.createElement("span"); ex.className = "hist-expr"; ex.textContent = e.expr;
+    var rs = document.createElement("span"); rs.className = "hist-res"; rs.textContent = e.result;
+    row.appendChild(ex); row.appendChild(rs);
+    row.addEventListener("click", function(){
+      closeHistory();
+      acc = null; pendingOp = null; clearBuilder(); justEvaluated = true;
+      setDisplay(e.val, e.dim, e.expr + " =");
+    });
+    list.appendChild(row);
+  });
+}
+function openHistory(){
+  historyOpen = true; histClearArmed = false;
+  var cb = $("histClearBtn"); if(cb){ cb.classList.remove("armed"); cb.textContent = "Clear history"; }
+  document.querySelector(".device").classList.add("show-history");
+  renderHistory();
+}
+function closeHistory(){
+  historyOpen = false;
+  document.querySelector(".device").classList.remove("show-history");
+}
+function toggleHistory(){ if(historyOpen) closeHistory(); else openHistory(); }
+function clearHistoryArm(){
+  var cb = $("histClearBtn");
+  if(!histClearArmed){
+    histClearArmed = true; cb.classList.add("armed"); cb.textContent = "Tap again to clear";
+    return;
   }
-  updateIndicators();
+  histEntries = []; saveHistory(); histClearArmed = false;
+  cb.classList.remove("armed"); cb.textContent = "Clear history";
+  renderHistory();
 }
+loadHistory();
 
 /* ---------- state ---------- */
 var shiftArmed = false, rclArmed = false;
@@ -288,7 +369,7 @@ var costPerMbm = false;            /* displayed qty is board feet: price is per 
 var costPrompt = null;             /* {qty, perMbm} — waiting for a unit price */
 var justEvaluated = false;
 var dispVal = 0, dispDim = 1;
-var oncCount = 0;                  /* consecutive On/C presses */
+var oncCount = 0;                  /* consecutive Clear presses */
 var pitchCycleIdx = -1;            /* pitch representation cycle */
 var circDia = null, circIdx = 0;
 var stairIdx = 0, stairSig = "";
@@ -366,7 +447,6 @@ function updateIndicators(){
   $("indMem").className = "ind" + (memory !== null ? " on" : "");
   $("indShift").className = "ind" + (shiftArmed ? " on" : "");
   var rclEl = $("indRcl"); if(rclEl) rclEl.className = "ind" + (rclArmed ? " on" : "");
-  var tapeEl = $("indTape"); if(tapeEl) tapeEl.className = "ind" + (tapeMode ? " on" : "");
   var cap = "";
   if(dispDim===2) cap = "AREA";
   else if(dispDim===3) cap = "VOLUME";
@@ -449,11 +529,11 @@ function pressEquals(){
   if(acc !== null && pendingOp && entry){
     var expr = fmtByPref(acc.val, acc.dim) + " " + opSymbol(pendingOp) + " " + fmtByPref(entry.val, entry.dim);
     var res = applyOp(acc, pendingOp, entry);
-    addTape(expr, fmtByPref(res.val, res.dim), res.val, res.dim);
+    addHistory(expr, fmtByPref(res.val, res.dim), res.val, res.dim);
     acc = null; pendingOp = null; justEvaluated = true;
     setDisplay(res.val, res.dim, expr + " =");
   } else if(entry){
-    addTape("Entered", fmtByPref(entry.val, entry.dim), entry.val, entry.dim);
+    addHistory("Entered", fmtByPref(entry.val, entry.dim), entry.val, entry.dim);
     justEvaluated = true;
     setDisplay(entry.val, entry.dim, "Entered");
   }
@@ -485,7 +565,6 @@ function pressDigit(d){
   liveEntryPreview();
 }
 function pressBack(){
-  tapeViewReset();
   if(bMode === "num"){ if(single.length) single = single.slice(0,-1); }
   else if(bMode === "ftin"){
     var f = fields[activeField];
@@ -497,7 +576,6 @@ function pressBack(){
   } else if(single.length){ single = single.slice(0,-1); }
   if(builderHasInput()) liveEntryPreview(); else setDisplay(acc ? acc.val : 0, acc ? acc.dim : dispDim, "Ready");
 }
-function tapeViewReset(){ /* tape paging is only via tape mode now */ }
 function pressFeetKey(){
   wtvolStoreMode = false;
   if(bMode === "num"){
@@ -685,7 +763,7 @@ function triJump(name){
   else if(name === "run" && tri.run !== null) setDisplay(tri.run, 1, "Run");
   else if(name === "diag" && tri.rise !== null && tri.run !== null){
     var dg = Math.sqrt(tri.rise*tri.rise + tri.run*tri.run);
-    addTape("Diagonal of " + fmtFI(tri.rise) + " × " + fmtFI(tri.run), fmtFI(dg), dg, 1);
+    addHistory("Diagonal of " + fmtFI(tri.rise) + " × " + fmtFI(tri.run), fmtFI(dg), dg, 1);
     setDisplay(dg, 1, "Diagonal");
   }
   else if(name === "hip") hipKey();
@@ -696,13 +774,13 @@ function hipKey(){
     var rise = tri.run * tri.pitch / 12;
     var runB = rise * 12 / tri.irPitch;
     var hp = Math.sqrt(tri.run*tri.run + runB*runB + rise*rise);
-    addTape("Irregular hip — " + fmtNum(tri.pitch,1) + "/12 × " + fmtNum(tri.irPitch,1) + "/12", fmtFI(hp), hp, 1);
+    addHistory("Irregular hip — " + fmtNum(tri.pitch,1) + "/12 × " + fmtNum(tri.irPitch,1) + "/12", fmtFI(hp), hp, 1);
     setDisplay(hp, 1, "Irregular Hip/V");
     return;
   }
   var hipRun = tri.run * Math.SQRT2;
   var hp2 = Math.sqrt(hipRun*hipRun + tri.rise*tri.rise);
-  addTape("Hip/valley — rise " + fmtFI(tri.rise) + " over run " + fmtFI(tri.run), fmtFI(hp2), hp2, 1);
+  addHistory("Hip/valley — rise " + fmtFI(tri.rise) + " over run " + fmtFI(tri.run), fmtFI(hp2), hp2, 1);
   setDisplay(hp2, 1, "Hip / valley");
 }
 function irPitchKey(){
@@ -741,8 +819,8 @@ function circKey(){
     if(circDiaMode === "in") showMain("Diameter", fmtNum(circDia,3) + " INCH", "", circDia, 1);
     else setDisplay(circDia, 1, "Diameter");
   }
-  else if(circIdx === 1) showMain("Circle · Area", fmtNum(Math.PI*r*r,4) + " SQ IN", "Diameter " + fmtFI(circDia), Math.PI*r*r, 2);
-  else showMain("Circle · Circumference", fmtFracInch(2*Math.PI*r), "Diameter " + fmtFI(circDia), 2*Math.PI*r, 1);
+  else if(circIdx === 1){ addHistory("Circle · Area — dia " + fmtFI(circDia), fmtNum(Math.PI*r*r,4) + " SQ IN", Math.PI*r*r, 2); showMain("Circle · Area", fmtNum(Math.PI*r*r,4) + " SQ IN", "Diameter " + fmtFI(circDia), Math.PI*r*r, 2); }
+  else { addHistory("Circle · Circumference — dia " + fmtFI(circDia), fmtFracInch(2*Math.PI*r), 2*Math.PI*r, 1); showMain("Circle · Circumference", fmtFracInch(2*Math.PI*r), "Diameter " + fmtFI(circDia), 2*Math.PI*r, 1); }
 }
 function arcKey(){
   if(circDia === null){ showMain("Arc", "Enter a diameter first", "Type a diameter, press Circ, then enter the arc"); return; }
@@ -803,6 +881,7 @@ function stairKey(){
   var items = stairCompute();
   var it = items[stairIdx % items.length];
   stairIdx++;
+  addHistory("Stair · " + it.k, it.v, it.val, it.dim);
   setDisplay(it.val, it.dim, it.k);
   if(it.k === "Riser Height" || it.k === "Tread Width" || it.k === "Stringer Length" || it.k === "Stored Run" || it.k === "Stored Rise" || it.k === "Stored Riser Ht" || it.k === "Stored Tread W" || it.k === "Riser Overage" || it.k === "Tread Overage")
     $("dispMain").textContent = it.v;
@@ -823,15 +902,17 @@ function jackKey(){
     var cB = Math.sqrt(runB*runB + rise*rise);
     var diffB = ocStore * (cB / runB);
     var L = cB - diffB * (jackIdx+1);
-    if(L <= 0){ showMain("Irregular Jack", "0′ 0″", "No more jacks — On/C to reset", 0, 1); return; }
+    if(L <= 0){ showMain("Irregular Jack", "0′ 0″", "No more jacks — Clear to reset", 0, 1); return; }
     jackIdx++;
+    addHistory("Irregular Jack " + jackIdx, fmtFI(L), L, 1);
     setDisplay(L, 1, "Irregular Jack " + jackIdx);
     return;
   }
   var diff = ocStore * (common / tri.run);
   var Lj = common - diff * (jackIdx+1);
-  if(Lj <= 0){ showMain("Jack", "0′ 0″", "No more jacks — On/C to reset", 0, 1); return; }
+  if(Lj <= 0){ showMain("Jack", "0′ 0″", "No more jacks — Clear to reset", 0, 1); return; }
   jackIdx++;
+  addHistory("Jack " + jackIdx, fmtFI(Lj), Lj, 1);
   setDisplay(Lj, 1, "Jack " + jackIdx);
 }
 function irJackKey(){
@@ -853,6 +934,7 @@ function rwallKey(){
   }
   if(rwallIdx === 999){
     var ang = Math.atan2(tri.rise, tri.run) * 180/Math.PI;
+    addHistory("Rake-Wall · Angle", fmtAngle(ang), ang, 0);
     showMain("Rake-Wall · Angle", fmtAngle(ang), "Rise " + fmtFI(tri.rise) + " over run " + fmtFI(tri.run), ang, 0);
     rwallIdx = -1; return;
   }
@@ -860,9 +942,11 @@ function rwallKey(){
   var h = rwallBase + tri.rise * (1 - i*ocStore/tri.run);
   if(h > 0){
     rwallIdx++;
+    addHistory("Rake-Wall Stud " + i, fmtFI(h), h, 1);
     setDisplay(h, 1, "Rake-Wall Stud " + i);
     return;
   }
+  addHistory("Rake-Wall · Base", fmtFI(rwallBase), rwallBase, 1);
   showMain("Rake-Wall · Base", fmtFI(rwallBase), "Press R/Wall again for the angle", rwallBase, 1);
   rwallIdx = 999;
 }
@@ -937,7 +1021,7 @@ function costKey(){
     var entry = builderHasInput() ? commitEntry() : {val:dispVal, dim:0};
     var cq = costQty(acc.val, acc.dim);
     var total = cq.qty * entry.val / (costPerMbm ? 1000 : 1);
-    addTape("Cost — " + fmtNum(cq.qty,4) + " " + cq.unit + " × $" + fmtNum(entry.val,2) + (costPerMbm ? " per Mbm" : ""), money(total), total, 0);
+    addHistory("Cost — " + fmtNum(cq.qty,4) + " " + cq.unit + " × $" + fmtNum(entry.val,2) + (costPerMbm ? " per Mbm" : ""), money(total), total, 0);
     acc = null; pendingOp = null; justEvaluated = true; costPerMbm = false;
     showMain("Total Cost", money(total), "", total, 0);
     return;
@@ -956,7 +1040,7 @@ function costFinish(){
   var entry = builderHasInput() ? commitEntry() : null;
   if(!costPrompt || !entry){ costPrompt = null; return; }
   var total = costPrompt.qty * entry.val / (costPrompt.perMbm ? 1000 : 1);
-  addTape("Cost — " + fmtNum(costPrompt.qty,4) + " " + costPrompt.unit + " × $" + fmtNum(entry.val,2) + (costPrompt.perMbm ? " per Mbm" : ""), money(total), total, 0);
+  addHistory("Cost — " + fmtNum(costPrompt.qty,4) + " " + costPrompt.unit + " × $" + fmtNum(entry.val,2) + (costPrompt.perMbm ? " per Mbm" : ""), money(total), total, 0);
   costPrompt = null; justEvaluated = true; costPerMbm = false;
   showMain("Total Cost", money(total), "", total, 0);
 }
@@ -985,7 +1069,7 @@ var PREFS = [
 ];
 function prefsShow(){
   var p = PREFS[prefsIdx];
-  showMain("Prefs · " + p.name, p.get(), "% next setting · + / − change · On/C exits", prefRes, 0);
+  showMain("Prefs · " + p.name, p.get(), "% next setting · + / − change · Clear exits", prefRes, 0);
 }
 function prefsEnter(){ prefsMode = true; prefsIdx = 0; prefsShow(); }
 function prefsStep(dir){
@@ -998,7 +1082,7 @@ function prefsStep(dir){
 var TEMP_RES = {1:16, 2:2, 3:32, 4:4, 6:64, 8:8};
 function tempResKey(d){
   tempRes = TEMP_RES[d];
-  showMain("Temp Resolution", "1/" + tempRes, "Temporary — On/C returns to 1/" + prefRes, tempRes, 0);
+  showMain("Temp Resolution", "1/" + tempRes, "Temporary — Clear returns to 1/" + prefRes, tempRes, 0);
 }
 
 /* ---------- Memory (reference p.21) ---------- */
@@ -1069,7 +1153,7 @@ function showPrompt(){
       "Shown: last / default — type to replace, " + session.def.keyLabel + " or = to enter · " + (session.idx+1) + " of " + session.def.prompts.length);
   } else {
     setDisplay(0, pr.unit === "num" ? 0 : 1, session.def.title + " · " + pr.label,
-      "Type a value, then " + session.def.keyLabel + " or = · " + (session.idx+1) + " of " + session.def.prompts.length + " · On/C cancels");
+      "Type a value, then " + session.def.keyLabel + " or = · " + (session.idx+1) + " of " + session.def.prompts.length + " · Clear cancels");
   }
 }
 function startSession(name){
@@ -1097,9 +1181,9 @@ function finishSession(){
   session.items = session.def.compute(session.values);
   session.phase = "results"; session.itemIdx = 0;
   bMode = "num"; clearBuilder();
-  if(session.def.tapeFn){
-    var t = session.def.tapeFn(session.values, session.items);
-    if(t) addTape(t[0], t[1], t[2], t[3]);
+  if(session.def.histFn){
+    var t = session.def.histFn(session.values, session.items);
+    if(t) addHistory(t[0], t[1], t[2], t[3]);
   }
   showItem();
 }
@@ -1152,7 +1236,7 @@ var SESSIONS = {
       }
       return items;
     },
-    tapeFn:function(v){ return ["Board feet — " + fmtNum(v.t,1) + "×" + fmtNum(v.w,1) + "×" + fmtNum(v.l/12,1) + "ft × " + fmtInt(v.q), fmtNum(v.t*v.w*(v.l/12)/12*v.q,2) + " BF", v.t*v.w*(v.l/12)/12*v.q, 0]; }
+    histFn:function(v){ return ["Board feet — " + fmtNum(v.t,1) + "×" + fmtNum(v.w,1) + "×" + fmtNum(v.l/12,1) + "ft × " + fmtInt(v.q), fmtNum(v.t*v.w*(v.l/12)/12*v.q,2) + " BF", v.t*v.w*(v.l/12)/12*v.q, 0]; }
   },
   conc: { title:"Concrete", keyLabel:"Bd Ft", key:"bdft",
     prompts:[ P("l","Length"), P("w","Width"), P("d","Thickness (in)","decin",4) ],
@@ -1168,7 +1252,7 @@ var SESSIONS = {
         {k:"Approx weight", v:fmtInt(cuft*150) + " lb", val:cuft*150, dim:0}
       ];
     },
-    tapeFn:function(v, items){ return ["Concrete " + fmtFI(v.l) + " × " + fmtFI(v.w) + " × " + fmtNum(v.d,1) + "″", items[0].v, items[0].val, 3]; }
+    histFn:function(v, items){ return ["Concrete " + fmtFI(v.l) + " × " + fmtFI(v.w) + " × " + fmtNum(v.d,1) + "″", items[0].v, items[0].val, 3]; }
   },
   drywall: { title:"Drywall", keyLabel:"R/Wall", key:"rwall",
     prompts:[ P("l","Room length"), P("w","Room width"), P("h","Ceiling height") ],
@@ -1218,7 +1302,7 @@ function recallStored(which){
 /* ---------- Shift (Conv) functions ---------- */
 var SHIFT = { hip:"irpitch", circ:"arc", jack:"irjack", sqrt:"sq", "d:7":"riserht", "d:9":"treadw",
   "op:/":"recip", rcl:"mrc", "d:5":"oc", "op:*":"clearall", mplus:"mminus", "op:-":"sign",
-  pct:"prefs", "d:0":"wtvol", dot:"cost", eq:"tape", "op:+":"pi",
+  pct:"prefs", "d:0":"wtvol", dot:"cost", "op:+":"pi",
   bdft:"conc", stair:"bal", rwall:"drywall", diag:"roof" };
 function handleShift(action){
   if(session && session.phase === "prompt" && action !== "clearall") return;
@@ -1242,30 +1326,15 @@ function handleShift(action){
     case "mrc": memClear(); break;
     case "mminus": memAdd(-1); break;
     case "clearall":
-      sessionCancel(); tapeMode = false; prefsMode = false; costPrompt = null;
+      sessionCancel(); prefsMode = false; costPrompt = null;
       acc = null; pendingOp = null; clearBuilder(); justEvaluated = false; tempRes = null;
       tri = {rise:null, run:null, pitch:null, irPitch:null};
       riserStore = null; treadStore = null; ocStore = 16;
       wtvol = {val:1.5, unit:0}; memory = null; memRecallMode = false;
       stairIdx = 0; jackIdx = -1; rwallIdx = -1; circDia = null; weightState = null;
       setDisplay(0, 1, "Clear All"); break;
-    case "tape": enterTape(); break;
   }
 }
-function enterTape(){
-  if(!tape.length){ showMain("Tape", "Empty", "Finished calculations land here"); return; }
-  tapeMode = true; tapeIdx = -1;
-  tapeShow();
-}
-function exitTape(useTotal){
-  tapeMode = false;
-  if(useTotal){
-    var t = tapeTTL();
-    if(t){ acc = {val:t.val, dim:t.dim}; pendingOp = null; justEvaluated = false; setDisplay(t.val, t.dim, "Tape · TTL"); return; }
-  }
-  setDisplay(dispVal, dispDim, "Ready");
-}
-
 /* ---------- primary keys ---------- */
 var ENTRY_KEYS = {"dot":1,"back":1,"feet":1,"inch":1,"frac":1,"yds":1,"m":1,"cm":1,"mm":1};
 function isEntryKey(k){ return k.indexOf("d:") === 0 || !!ENTRY_KEYS[k]; }
@@ -1299,7 +1368,7 @@ function primaryKey(k){
         var e = builderHasInput() ? commitEntry() : {val:dispVal, dim:0};
         var prod = acc.val * e.val;
         var bf = prod / 12;
-        addTape("Board feet — " + fmtNum(acc.val,2) + " × " + fmtNum(e.val,2) + " / 12", fmtNum(bf,5) + " BF", bf, 0);
+        addHistory("Board feet — " + fmtNum(acc.val,2) + " × " + fmtNum(e.val,2) + " / 12", fmtNum(bf,5) + " BF", bf, 0);
         acc = null; pendingOp = null; justEvaluated = true; costPerMbm = true;
         showMain("Board Feet", fmtNum(bf,5) + " BF", "M+ adds it to memory · × price, Conv+· for cost", bf, 0);
         break;
@@ -1326,7 +1395,7 @@ function primaryKey(k){
           res = {val: e.val === 0 ? NaN : acc.val / (e.val/100), dim: acc.dim};
         }
         var expr = fmtByPref(acc.val, acc.dim) + " " + opSymbol(pendingOp) + " " + fmtNum(e.val,2) + "%";
-        addTape(expr, fmtByPref(res.val, res.dim), res.val, res.dim);
+        addHistory(expr, fmtByPref(res.val, res.dim), res.val, res.dim);
         acc = null; pendingOp = null; justEvaluated = true;
         lastPct = e.val;
         setDisplay(res.val, res.dim, expr + " =");
@@ -1338,11 +1407,11 @@ function primaryKey(k){
       break; }
     case "sqrt": { var o = currentOperand(); var v = Math.sqrt(Math.abs(o.val));
       var d3 = o.dim === 2 ? 1 : (o.dim === 0 ? 0 : 1);
-      addTape("√ " + fmtByPref(o.val, o.dim), fmtByPref(v, d3), v, d3);
+      addHistory("√ " + fmtByPref(o.val, o.dim), fmtByPref(v, d3), v, d3);
       setDisplay(v, d3, "√ " + fmtByPref(o.val, o.dim) + " ="); justEvaluated = true; break; }
     case "sq": { var o2 = currentOperand(); var v2 = o2.val * o2.val;
       var d4 = o2.dim === 0 ? 0 : (o2.dim === 1 ? 2 : o2.dim);
-      addTape(fmtByPref(o2.val, o2.dim) + " ²", fmtByPref(v2, d4), v2, d4);
+      addHistory(fmtByPref(o2.val, o2.dim) + " ²", fmtByPref(v2, d4), v2, d4);
       setDisplay(v2, d4, fmtByPref(o2.val, o2.dim) + " squared ="); justEvaluated = true; break; }
     case "recip": { var o3 = currentOperand(); var v3 = o3.val === 0 ? NaN : 1/o3.val;
       setDisplay(v3, 0, "1 ÷ " + fmtByPref(o3.val, o3.dim) + " ="); justEvaluated = true; break; }
@@ -1382,7 +1451,7 @@ function primaryKey(k){
   }
 }
 
-/* ---------- routing: On/C, Conv/Shift, Rcl, sessions, tape, prefs ---------- */
+/* ---------- routing: Clear, Conv/Shift, Rcl, sessions, prefs ---------- */
 function setShift(on){
   shiftArmed = on;
   document.querySelectorAll("button.key.conv").forEach(function(b){ b.classList.toggle("armed", on); });
@@ -1393,8 +1462,8 @@ function clearTransientModes(){
   if(memRecallMode){ memRecallMode = false; memCycle = 0; }
 }
 function handleOnC(){
+  if(historyOpen){ closeHistory(); return; }
   if(prefsMode){ prefsMode = false; setDisplay(dispVal, dispDim, "Ready"); return; }
-  if(tapeMode){ exitTape(false); return; }
   if(session){ sessionCancel(); setDisplay(0, 1, "Ready"); return; }
   if(costPrompt){ costPrompt = null; clearBuilder(); setDisplay(dispVal, dispDim, "Ready"); return; }
   if(rclArmed){ rclArmed = false; updateIndicators(); return; }
@@ -1414,7 +1483,7 @@ function handleOnC(){
   }
 }
 function handleKey(k){
-  if(k !== "onc") { /* On/C counting is handled in handleOnC */ }
+  if(k !== "onc") { /* Clear counting is handled in handleOnC */ }
   if(k === "onc"){ handleOnC(); return; }
   if(k !== "conv") oncCount = 0;
   if(prefsMode){
@@ -1424,13 +1493,7 @@ function handleKey(k){
     if(k === "conv"){ setShift(!shiftArmed); return; }
     return;   /* other keys ignored in Prefs */
   }
-  if(tapeMode){
-    if(k === "op:+"){ if(tapeIdx < tape.length-1){ tapeIdx++; tapeShow(); } return; }
-    if(k === "op:-"){ if(tapeIdx > -1){ tapeIdx--; tapeShow(); } return; }
-    if(k === "eq"){ exitTape(true); return; }
-    exitTape(false);
-    /* fall through to the key */
-  }
+  if(historyOpen){ return; }  /* keypad is hidden while History is open */
   if(costPrompt){
     if(isEntryKey(k)){ primaryKey(k); return; }
     if(k === "eq" || (shiftArmed && k === "dot")){ setShift(false); costFinish(); return; }
@@ -1439,7 +1502,6 @@ function handleKey(k){
   }
   if(rclArmed){
     rclArmed = false;
-    if(k === "eq"){ enterTape(); return; }
     if(k === "mplus"){ memRecall(); return; }
     if(k === "rcl"){ memRecallClear(); return; }
     if(k === "d:0"){ wtvolRecall(); return; }
@@ -1477,6 +1539,9 @@ function handleKey(k){
 document.querySelectorAll("button.key").forEach(function(b){
   b.addEventListener("click", function(){ handleKey(b.getAttribute("data-k")); });
 });
+$("histBtn").addEventListener("click", function(){ toggleHistory(); });
+$("histBack").addEventListener("click", function(){ closeHistory(); });
+$("histClearBtn").addEventListener("click", function(){ clearHistoryArm(); });
 document.addEventListener("keydown", function(ev){
   if(/^[0-9]$/.test(ev.key)) handleKey("d:" + ev.key);
   else if(ev.key === ".") handleKey("dot");
