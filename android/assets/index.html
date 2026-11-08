@@ -37,7 +37,7 @@
   .hist-count{font-size:.78rem; font-weight:500; color:var(--ink); white-space:nowrap;
     min-height:44px; display:flex; align-items:center;}
   /* ---------- display: open paper, hairline rule underneath ---------- */
-  .lcd{color:var(--ink); padding:2px 2px 16px; border-bottom:1px solid var(--ink); flex:0 0 auto;}
+  .lcd{color:var(--ink); padding:10px 2px 16px; border-bottom:1px solid var(--ink); flex:0 0 auto;}
   .hist-btn{font:inherit; font-size:.7rem; letter-spacing:.14em; font-weight:600;
     border:1px solid var(--ink); border-radius:999px; background:var(--bg); color:var(--ink);
     padding:8px 14px; min-height:44px; cursor:pointer; flex:0 0 auto;}
@@ -84,35 +84,42 @@
   .lcd-value{font-weight:300; letter-spacing:-.01em; font-variant-numeric:tabular-nums;
     font-size:clamp(2.3rem,10vmin,3.4rem); line-height:1.05; text-align:right; white-space:nowrap;}
   .lcd-units{display:flex; justify-content:space-between; align-items:baseline; margin-top:8px; gap:10px;}
+  /* v1.5: sub line holds only the "N of N" solver indicator; empty it
+     collapses away entirely so the display is just the value. */
   .lcd-sub{color:var(--ink); font-size:clamp(.72rem,3vmin,.84rem); white-space:nowrap;
-    overflow:hidden; text-overflow:ellipsis; min-height:1.25em; font-variant-numeric:tabular-nums;}
+    overflow:hidden; text-overflow:ellipsis; font-variant-numeric:tabular-nums;}
+  .lcd-sub:empty{display:none;}
   .lcd-unitcap{font-size:.62rem; letter-spacing:.18em; font-weight:600; color:var(--ink); white-space:nowrap;}
-  /* ---------- clear row: Clear is a regular single key (col 1 of 5),
-     same size and styling as every other key. No new function fills
-     the freed slots. ---------- */
-  .power{display:grid; grid-template-columns:repeat(5,1fr); gap:8px; flex:0 0 auto;}
-  /* ---------- keypad: flat outlined keys, generous air ---------- */
-  .keypad{flex:1 1 auto; min-height:0; display:grid; grid-template-rows:repeat(8,1fr); gap:8px;}
-  .krow{display:grid; grid-template-columns:repeat(5,1fr); gap:8px; min-height:0;}
+  /* ---------- Clear: v1.5, top-right corner of the face (top bar) ----------
+     It no longer has a row of its own — the space goes back to the
+     keypad rows, which grow taller. Same key, same behaviour. */
+  .topbar .key{flex:0 0 auto; min-width:64px;}
+  /* ---------- keypad: stock-calculator air (v1.5 inspo) ----------
+     Number and function keys are plain black text — no fill, no
+     border. Operator keys (÷ × − +) sit in thin outlined rounded
+     squares. = stays a solid black rounded square with white =.
+     Conv stays solid black. Clear (top bar) is plain text too. */
+  .keypad{flex:1 1 auto; min-height:0; display:grid; grid-template-rows:repeat(8,1fr); gap:12px;}
+  .krow{display:grid; grid-template-columns:repeat(5,1fr); gap:12px; min-height:0;}
   .cell{display:flex; min-height:0;}
   /* v1.4: no small-print second-function labels anywhere on the face.
      Keys with a second function carry a small dot (top-right corner);
      pressing Conv swaps their visible label to the second function. */
-  button.key{position:relative; font:inherit; flex:1 1 auto; min-height:0; border:1px solid var(--key-line); border-radius:14px;
-    background:var(--bg); color:var(--ink); cursor:pointer; padding:1px 2px;
-    font-size:clamp(.9rem,4vmin,1.1rem); font-weight:500; line-height:1.05;}
+  button.key{position:relative; font:inherit; flex:1 1 auto; min-height:0; border:none; border-radius:14px;
+    background:transparent; color:var(--ink); cursor:pointer; padding:1px 2px;
+    font-size:clamp(1rem,4.5vmin,1.2rem); font-weight:500; line-height:1.05;}
   button.key.has-shift::after{content:"\2022"; position:absolute; top:3px; right:6px;
     font-size:.6rem; line-height:1; color:var(--ink);}
-  button.key.num{background:var(--num-bg); border-color:transparent;
-    font-size:clamp(1.2rem,5.5vmin,1.6rem); font-weight:400;}
-  button.key[data-k^="op:"], button.key[data-k="back"]{background:var(--op-bg); border-color:transparent;}
+  button.key.num{background:transparent; border:none;
+    font-size:clamp(1.3rem,6vmin,1.8rem); font-weight:400;}
+  button.key[data-k^="op:"]{background:transparent; border:1.5px solid var(--ink); border-radius:12px;}
   button.key.conv{background:var(--solid); color:var(--on-solid); border-color:transparent; font-weight:600;}
   button.key.conv.armed{background:var(--bg); color:var(--ink); border:1.5px solid var(--ink);}
   button.key[data-k="eq"]{background:var(--solid); color:var(--on-solid); border-color:transparent; font-weight:600;}
   button.key:active{background:var(--solid); color:var(--on-solid); border-color:transparent;}
   button.key.conv:active, button.key[data-k="eq"]:active{background:var(--bg); color:var(--ink); border-color:var(--ink);}
   button.key:focus-visible{outline:2px solid var(--focus); outline-offset:2px;}
-  button.key.power-key{border-radius:14px; border:1px solid var(--key-line); background:var(--bg);
+  button.key.power-key{border:none; border-radius:14px; background:transparent;
     font-size:clamp(.9rem,4vmin,1.1rem); font-weight:500; letter-spacing:0; min-height:44px;}
   .sr{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0);}
 </style>
@@ -130,6 +137,7 @@
       <span class="ind" id="indMem">MEM</span>
     </span>
     <span class="hist-count" id="histCount" style="display:none"></span>
+    <button class="key power-key" id="clearBtn" data-k="onc" type="button">Clear</button>
   </div>
   <!-- ================= DISPLAY ================= -->
   <div class="lcd" id="lcd">
@@ -144,9 +152,6 @@
   </div>
 
   <div class="calc-body">
-  <div class="power">
-    <button class="key power-key" data-k="onc" type="button">Clear</button>
-  </div>
 
   <!-- ================= KEYPAD ================= -->
   <div class="keypad" aria-label="Keypad">
@@ -176,7 +181,7 @@
       <div class="cell"><button class="key" data-k="feet" type="button">Feet</button></div>
       <div class="cell"><button class="key" data-k="inch" type="button">Inch</button></div>
       <div class="cell"><button class="key" data-k="frac" type="button">/</button></div>
-      <div class="cell"><button class="key" data-k="back" type="button" aria-label="Backspace">&#8592;</button></div>
+      <div class="cell"><button class="key" data-k="back" type="button" aria-label="Backspace">&#9003;</button></div>
     </div>
     <div class="krow">
       <div class="cell"><button class="key conv" data-k="conv" type="button">Conv</button></div>
@@ -226,7 +231,7 @@
 <script>
 "use strict";
 /* =====================================================================
-   ConCalc v1.4 — key rules implemented here (MMD-aligned):
+   ConCalc v1.5 — key rules implemented here (MMD-aligned):
    - History: overlay sheet over the keypad area (display and top bar
      stay visible), newest first, fixed-height rows, discrete paged
      scrolling (8 per page, ▲/▼ arrows + page indicator), fixed 44px
@@ -250,9 +255,18 @@
    - Conv swaps key labels (see SHIFT_LABELS): no small-print
      second-function labels on the face at all — a dot marks keys
      that have a second function. Label swap is display-only.
-   - Clear is a regular single key, same size as the others.
-   - Clear is the same key with a plain label: 1st press clears
-     the display, 2nd clears temporary values.
+   - Clear sits in the top-right corner of the face (top bar) and has
+     no row of its own; the freed space goes to the keypad rows.
+     1st press clears the display, 2nd clears temporary values.
+   - The display shows the value only: no explanatory subtext under
+     it (no unit conversions, no pitch explanation, no
+     instructions). The sub line carries only the solver position
+     ("1 of N") when stepping through multi-result solvers.
+   - Styling follows the stock calculator inspo: airy rows, plain-text
+     keys with no fill or border, operators in thin outlined rounded
+     squares, = solid black. Conflicts resolved for the approved
+     v1.5 list: 5 columns stay (inspo has 4), Clear stays top-right
+     (inspo has AC top-left).
    ===================================================================== */
 function $(id){return document.getElementById(id);}
 function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){var t=a%b;a=b;b=t;}return a||1;}
@@ -518,19 +532,24 @@ function setDisplay(val, dim, label, subOverride){
   dispVal = val; dispDim = dim;
   $("dispMain").textContent = fmtByPref(val, dim);
   if(label !== undefined) $("dispLabel").textContent = label;
-  var sub = "";
-  if(subOverride !== undefined) sub = subOverride;
-  else if(dim===1) sub = fmtNum(val,3) + " in · " + fmtNum(val/12,4) + " ft · " + fmtNum(val*25.4,1) + " mm";
-  else if(dim===2) sub = fmtNum(val,1) + " in² · " + fmtNum(val/929.0304,3) + " m²";
-  else if(dim===3) sub = fmtNum(val/1728,2) + " ft³ · " + fmtNum(val*0.0000163871,4) + " m³";
-  $("dispSub").textContent = sub;
+  $("dispSub").textContent = subIndicator(subOverride);
   updateIndicators();
+}
+/* v1.5: the display shows the value only — no explanatory subtext.
+   The sub line carries exactly one functional indicator: the solver
+   position ("1 of N") when stepping through multi-result solvers.
+   Anything else passed in as a subtext (unit conversions, pitch
+   explanations, instructions) is dropped here, so it can never render. */
+function subIndicator(text){
+  if(!text) return "";
+  var m = String(text).match(/(\d+)\s+of\s+(\d+)/);
+  return m ? m[1] + " of " + m[2] : "";
 }
 function showMain(label, mainText, subText, val, dim){
   if(val !== undefined){ dispVal = val; dispDim = dim; }
   $("dispLabel").textContent = label;
   $("dispMain").textContent = mainText;
-  $("dispSub").textContent = subText || "";
+  $("dispSub").textContent = subIndicator(subText);
   updateIndicators();
 }
 function liveEntryPreview(){
@@ -729,30 +748,28 @@ function convertDisplayTo(u){
   var v;
   if(builderHasInput()){ v = commitEntry(); }
   else v = {val:dispVal, dim:dispDim};
-  if(!v || v.dim === 0){ showMain("Conv", "Lengths only", "Conv converts a length, area or volume on the display"); return; }
+  if(!v || v.dim === 0){ showMain("Conv", "Lengths only",""); return; }
   var key = u;
   if(v.dim === 1){
     if(u === "feet"){
       var target = (dispMode === "decft") ? "ftin" : "decft";
       dispMode = target;
       showMain("Conv · " + (target === "decft" ? "FEET" : "FEET–INCH"),
-        target === "decft" ? fmtNum(v.val/12,4) + " ft" : fmtFI(v.val),
-        fmtFI(v.val) + " — same value", v.val, 1);
+        target === "decft" ? fmtNum(v.val/12,4) + " ft" : fmtFI(v.val),"", v.val, 1);
       return;
     }
     if(u === "inch"){
       var t2 = (dispMode === "decin") ? "fracin" : "decin";
       dispMode = t2;
       showMain("Conv · " + (t2 === "decin" ? "INCHES" : "INCHES (FRAC)"),
-        t2 === "decin" ? fmtNum(v.val,3) + " in" : fmtFracInch(v.val),
-        fmtFI(v.val) + " — same value", v.val, 1);
+        t2 === "decin" ? fmtNum(v.val,3) + " in" : fmtFracInch(v.val),"", v.val, 1);
       return;
     }
     var lbl = {yds:"YARDS", m:"METRES", cm:"CENTIMETRES", mm:"MILLIMETRES"}[u];
     var txt = {yds:fmtNum(v.val/36,4)+" yd", m:fmtNum(v.val*0.0254,4)+" m",
       cm:fmtNum(v.val*2.54,3)+" cm", mm:fmtNum(v.val*25.4,2)+" mm"}[u];
     dispMode = (u === "yds") ? "yd" : u;
-    showMain("Conv · " + lbl, txt, fmtFI(v.val) + " — same value", v.val, 1);
+    showMain("Conv · " + lbl, txt,"", v.val, 1);
     return;
   }
   /* area / volume conversions (reference p.15) */
@@ -763,8 +780,7 @@ function convertDisplayTo(u){
     inch: v.dim===2 ? "SQ IN" : "CU IN", m: v.dim===2 ? "SQ M" : "CU M",
     cm: v.dim===2 ? "SQ CM" : "CU CM", mm: v.dim===2 ? "SQ MM" : "CU MM"}[u];
   var conv = (u === "m" || u === "cm" || u === "mm") ? v.val * per[u] : v.val / per[u];
-  showMain("Conv · " + unitName, fmtNum(conv,6) + " " + unitName.toLowerCase().replace("sq ","").replace("cu ",""),
-    fmtByPref(v.val, v.dim) + " — same value", v.val, v.dim);
+  showMain("Conv · " + unitName, fmtNum(conv,6) + " " + unitName.toLowerCase().replace("sq ","").replace("cu ",""),"", v.val, v.dim);
   $("dispMain").textContent = fmtNum(conv,6) + " " + (v.dim===2 ? "sq " : "cu ") + ({yds:"yd",feet:"ft",inch:"in",m:"m",cm:"cm",mm:"mm"}[u]);
 }
 
@@ -785,15 +801,15 @@ function pitchShow(form){
   if(p === null) return;
   tri.pitch = p;
   var ang = Math.atan2(p,12)*180/Math.PI;
-  if(form === "in") showMain("Pitch", fmtFI(p), "Rise per 12″ of run", p, 0);
-  else if(form === "deg") showMain("Pitch · Degrees", fmtAngle(ang), fmtFI(p) + " per 12″", ang, 0);
-  else if(form === "grd") showMain("Pitch · % Grade", fmtNum(p/12*100,5) + " %", fmtFI(p) + " per 12″", p/12*100, 0);
-  else showMain("Pitch · Slope", fmtNum(p/12,6), fmtFI(p) + " per 12″", p/12, 0);
+  if(form === "in") showMain("Pitch", fmtFI(p),"", p, 0);
+  else if(form === "deg") showMain("Pitch · Degrees", fmtAngle(ang),"", ang, 0);
+  else if(form === "grd") showMain("Pitch · % Grade", fmtNum(p/12*100,5) + " %","", p/12*100, 0);
+  else showMain("Pitch · Slope", fmtNum(p/12,6),"", p/12, 0);
 }
 function pitchKey(isRatio){
   if(builderHasInput() || lastPct !== null){
     var pe = pitchFromEntry(isRatio);
-    if(!pe){ showMain("Pitch", "Pitch takes a number", "Dimension = in/12 · plain number = degrees · Conv+p = ratio · % then p = grade"); return; }
+    if(!pe){ showMain("Pitch", "Pitch takes a number",""); return; }
     tri.pitch = pe.pitch;
     if(tri.run !== null) tri.rise = tri.run * pe.pitch / 12;
     pitchCycleIdx = PITCH_CYCLE.indexOf(pe.form);
@@ -806,7 +822,7 @@ function pitchKey(isRatio){
     if(tri.pitch !== null){
       pitchCycleIdx = (pitchCycleIdx+1) % 4;
       pitchShow(PITCH_CYCLE[pitchCycleIdx]);
-    } else showMain("Pitch", "Store a Rise and a Run first", "Or type a pitch and press Pitch");
+    } else showMain("Pitch", "Store a Rise and a Run first","");
     return;
   }
   tri.pitch = tri.rise/tri.run*12;
@@ -825,7 +841,7 @@ function triJump(name){
   else if(name === "hip") hipKey();
 }
 function hipKey(){
-  if(tri.rise === null || tri.run === null){ showMain("Hip/V", "Store a Rise and a Run first", "Type a length, press Rise — type a length, press Run"); return; }
+  if(tri.rise === null || tri.run === null){ showMain("Hip/V", "Store a Rise and a Run first",""); return; }
   if(tri.irPitch !== null && tri.pitch !== null){
     var rise = tri.run * tri.pitch / 12;
     var runB = rise * 12 / tri.irPitch;
@@ -842,14 +858,14 @@ function hipKey(){
 function irPitchKey(){
   if(builderHasInput()){
     var o = builderValue();
-    if(o.dim !== 1){ showMain("Irregular Pitch", "Needs a length", "Type a pitch in inches, then Conv+Hip/V"); return; }
+    if(o.dim !== 1){ showMain("Irregular Pitch", "Needs a length",""); return; }
     tri.irPitch = o.val;
     clearBuilder();
-    showMain("Irregular Pitch", fmtFI(o.val) + "  STORED", "Hip/V now gives the irregular hip", o.val, 1);
+    showMain("Irregular Pitch", fmtFI(o.val) + "  STORED","", o.val, 1);
     return;
   }
   if(tri.irPitch !== null){ hipKey(); return; }
-  showMain("Irregular Pitch", "Type a pitch first", "e.g. 8 Inch, then Conv+Hip/V to store it");
+  showMain("Irregular Pitch", "Type a pitch first","");
 }
 
 /* ---------- Circle / Arc (reference p.4, p.24) ----------
@@ -860,26 +876,26 @@ var circDiaMode = "ftin";
 function circKey(){
   if(builderHasInput()){
     var o = builderValue();
-    if(o.dim !== 1){ showMain("Circle", "Needs a diameter", "Type a length, then Circ"); return; }
+    if(o.dim !== 1){ showMain("Circle", "Needs a diameter",""); return; }
     circDiaMode = (bMode === "decin" || (bMode === "ftin" && fields.feet === "")) ? "in" : "ftin";
     circDia = o.val; circIdx = 0;
     clearBuilder();
-    if(circDiaMode === "in") showMain("Diameter", fmtNum(circDia,3) + " INCH", "", circDia, 1);
+    if(circDiaMode === "in") showMain("Diameter", fmtNum(circDia,3) + " INCH","", circDia, 1);
     else setDisplay(circDia, 1, "Diameter");
     return;
   }
-  if(circDia === null){ showMain("Circle", "Enter a diameter first", "Type a length, then Circ"); return; }
+  if(circDia === null){ showMain("Circle", "Enter a diameter first",""); return; }
   circIdx = (circIdx+1) % 3;
   var r = circDia/2;
   if(circIdx === 0){
-    if(circDiaMode === "in") showMain("Diameter", fmtNum(circDia,3) + " INCH", "", circDia, 1);
+    if(circDiaMode === "in") showMain("Diameter", fmtNum(circDia,3) + " INCH","", circDia, 1);
     else setDisplay(circDia, 1, "Diameter");
   }
-  else if(circIdx === 1){ addHistory("Circle · Area — dia " + fmtFI(circDia), fmtNum(Math.PI*r*r,4) + " SQ IN", Math.PI*r*r, 2); showMain("Circle · Area", fmtNum(Math.PI*r*r,4) + " SQ IN", "Diameter " + fmtFI(circDia), Math.PI*r*r, 2); }
-  else { addHistory("Circle · Circumference — dia " + fmtFI(circDia), fmtFracInch(2*Math.PI*r), 2*Math.PI*r, 1); showMain("Circle · Circumference", fmtFracInch(2*Math.PI*r), "Diameter " + fmtFI(circDia), 2*Math.PI*r, 1); }
+  else if(circIdx === 1){ addHistory("Circle · Area — dia " + fmtFI(circDia), fmtNum(Math.PI*r*r,4) + " SQ IN", Math.PI*r*r, 2); showMain("Circle · Area", fmtNum(Math.PI*r*r,4) + " SQ IN","", Math.PI*r*r, 2); }
+  else { addHistory("Circle · Circumference — dia " + fmtFI(circDia), fmtFracInch(2*Math.PI*r), 2*Math.PI*r, 1); showMain("Circle · Circumference", fmtFracInch(2*Math.PI*r),"", 2*Math.PI*r, 1); }
 }
 function arcKey(){
-  if(circDia === null){ showMain("Arc", "Enter a diameter first", "Type a diameter, press Circ, then enter the arc"); return; }
+  if(circDia === null){ showMain("Arc", "Enter a diameter first",""); return; }
   var r = circDia/2;
   if(builderHasInput()){
     var raw = bareNumber();
@@ -887,17 +903,17 @@ function arcKey(){
     if(o.dim === 1){   /* arc length entered -> degree */
       var deg = (o.val / r) * 180/Math.PI;
       clearBuilder();
-      showMain("Arc · Degrees", fmtAngle(deg), "Diameter " + fmtFI(circDia) + " · arc " + fmtFI(o.val), deg, 0);
+      showMain("Arc · Degrees", fmtAngle(deg),"", deg, 0);
       return;
     }
     if(raw !== null){  /* degrees entered -> arc length */
       var len = r * raw * Math.PI/180;
       clearBuilder();
-      showMain("Arc · Length", fmtFI(len), "Diameter " + fmtFI(circDia) + " · " + fmtNum(raw,2) + "°", len, 1);
+      showMain("Arc · Length", fmtFI(len),"", len, 1);
       return;
     }
   }
-  showMain("Arc", "Enter arc length or degrees", "Diameter " + fmtFI(circDia) + " stored — type a length for degrees, a number for length");
+  showMain("Arc", "Enter arc length or degrees","");
 }
 
 /* ---------- Stair (reference p.7, p.35-37): 12 results, press Stair to step ---------- */
@@ -931,7 +947,7 @@ function stairCompute(){
   ];
 }
 function stairKey(){
-  if(tri.rise === null){ showMain("Stair", "Enter a Rise first", "Type the floor-to-floor rise, press Rise, then Stair"); return; }
+  if(tri.rise === null){ showMain("Stair", "Enter a Rise first",""); return; }
   var key = tri.rise + "|" + (tri.run||"") + "|" + (riserStore||7.5) + "|" + (treadStore||10);
   if(key !== stairSig){ stairSig = key; stairIdx = 0; }
   var items = stairCompute();
@@ -946,9 +962,9 @@ function stairKey(){
 
 /* ---------- Jack (reference p.31-33): 1st press shows o.c., then JK1, JK2... ---------- */
 function jackKey(){
-  if(tri.rise === null || tri.run === null){ showMain("Jack", "Store Rise & Run first", "Type a length, press Rise — type a length, press Run"); return; }
+  if(tri.rise === null || tri.run === null){ showMain("Jack", "Store Rise & Run first",""); return; }
   if(jackIdx === -1){
-    showMain(jackIr ? "Irregular Jack · o.c." : "Jack · o.c.", fmtNum(ocStore,2) + " INCH  STORED", "Press Jack again for the first jack", ocStore, 1);
+    showMain(jackIr ? "Irregular Jack · o.c." : "Jack · o.c.", fmtNum(ocStore,2) + " INCH  STORED","", ocStore, 1);
     jackIdx = 0; return;
   }
   var common = Math.sqrt(tri.rise*tri.rise + tri.run*tri.run);
@@ -958,7 +974,7 @@ function jackKey(){
     var cB = Math.sqrt(runB*runB + rise*rise);
     var diffB = ocStore * (cB / runB);
     var L = cB - diffB * (jackIdx+1);
-    if(L <= 0){ showMain("Irregular Jack", "0′ 0″", "No more jacks — Clear to reset", 0, 1); return; }
+    if(L <= 0){ showMain("Irregular Jack", "0′ 0″","", 0, 1); return; }
     jackIdx++;
     addHistory("Irregular Jack " + jackIdx, fmtFI(L), L, 1);
     setDisplay(L, 1, "Irregular Jack " + jackIdx);
@@ -966,32 +982,32 @@ function jackKey(){
   }
   var diff = ocStore * (common / tri.run);
   var Lj = common - diff * (jackIdx+1);
-  if(Lj <= 0){ showMain("Jack", "0′ 0″", "No more jacks — Clear to reset", 0, 1); return; }
+  if(Lj <= 0){ showMain("Jack", "0′ 0″","", 0, 1); return; }
   jackIdx++;
   addHistory("Jack " + jackIdx, fmtFI(Lj), Lj, 1);
   setDisplay(Lj, 1, "Jack " + jackIdx);
 }
 function irJackKey(){
   jackIr = true; jackIdx = -1;
-  showMain("Irregular Jack · o.c.", fmtNum(ocStore,2) + " INCH  STORED", "Press Jack for the irregular jacks", ocStore, 1);
+  showMain("Irregular Jack · o.c.", fmtNum(ocStore,2) + " INCH  STORED","", ocStore, 1);
 }
 
 /* ---------- Rake-Wall (reference p.34): 1st press RWOC, then RW1, RW2..., BASE, angle ---------- */
 function rwallKey(){
-  if(tri.rise === null || tri.run === null){ showMain("R/Wall", "Enter Rise and Run first", "Type a length, press Rise — type a length, press Run"); return; }
+  if(tri.rise === null || tri.run === null){ showMain("R/Wall", "Enter Rise and Run first",""); return; }
   if(rwallIdx === -1){
     if(builderHasInput()){
       var o = builderValue();
       if(o.dim === 1) rwallBase = o.val;   /* reference: enter base height before ∑ */
       clearBuilder();
     }
-    showMain("Rake-Wall · o.c.", fmtNum(ocStore,2) + " INCH  STORED", "Press R/Wall again for the first stud", ocStore, 1);
+    showMain("Rake-Wall · o.c.", fmtNum(ocStore,2) + " INCH  STORED","", ocStore, 1);
     rwallIdx = 0; return;
   }
   if(rwallIdx === 999){
     var ang = Math.atan2(tri.rise, tri.run) * 180/Math.PI;
     addHistory("Rake-Wall · Angle", fmtAngle(ang), ang, 0);
-    showMain("Rake-Wall · Angle", fmtAngle(ang), "Rise " + fmtFI(tri.rise) + " over run " + fmtFI(tri.run), ang, 0);
+    showMain("Rake-Wall · Angle", fmtAngle(ang),"", ang, 0);
     rwallIdx = -1; return;
   }
   var i = rwallIdx + 1;
@@ -1003,7 +1019,7 @@ function rwallKey(){
     return;
   }
   addHistory("Rake-Wall · Base", fmtFI(rwallBase), rwallBase, 1);
-  showMain("Rake-Wall · Base", fmtFI(rwallBase), "Press R/Wall again for the angle", rwallBase, 1);
+  showMain("Rake-Wall · Base", fmtFI(rwallBase),"", rwallBase, 1);
   rwallIdx = 999;
 }
 
@@ -1026,29 +1042,28 @@ function wtShow(lb, unitIdx){
   else if(unitIdx === 1){ val = lb; txt = fmtNum(val,2) + " LB"; }
   else if(unitIdx === 2){ val = lb/2204.6226; txt = fmtNum(val,6) + " MET Ton"; }
   else { val = lb*0.45359237; txt = fmtNum(val,5) + " kG"; }
-  showMain("Weight · " + WT_UNITS[unitIdx], txt, "Weight key again for the next unit", val, 0);
+  showMain("Weight · " + WT_UNITS[unitIdx], txt,"", val, 0);
 }
 function weightKey(){
   if(builderHasInput()){
     var o = builderValue();
     if(o.dim === 0){ clearBuilder(); weightState = {lb:o.val, unitIdx:1}; wtShow(o.val, 1); return; }
     if(o.dim === 3){ clearBuilder(); var lb = wtTons(o.val) * 2000; weightState = {lb:lb, unitIdx:0}; wtShow(lb, 0); return; }
-    showMain("Weight", "Needs a weight or a volume", "Type a number for pounds, or a volume for wt/vol"); return;
+    showMain("Weight", "Needs a weight or a volume",""); return;
   }
   if(dispDim === 3){ var lb2 = wtTons(dispVal) * 2000; weightState = {lb:lb2, unitIdx:0}; wtShow(lb2, 0); return; }
   if(weightState){ weightState.unitIdx = (weightState.unitIdx+1) % 4; wtShow(weightState.lb, weightState.unitIdx); return; }
   if(dispDim === 0 && dispVal !== 0){ weightState = {lb:dispVal, unitIdx:1}; wtShow(dispVal, 1); return; }
-  showMain("Weight", "Type a weight or a volume", "Number = pounds · volume uses stored wt/vol (Conv+0)");
+  showMain("Weight", "Type a weight or a volume","");
 }
 var WTVOL_UNITS = ["Ton Per CU YD","LB Per CU YD","LB Per CU FEET","MET Ton Per CU M","kG Per CU M"];
 function wtvolShow(){
-  showMain("Weight / Vol", fmtNum(wtvol.val,3) + " " + WTVOL_UNITS[wtvol.unit] + "  STORED",
-    "Press 0 again for the next format · Rcl 0 recalls it", wtvol.val, 0);
+  showMain("Weight / Vol", fmtNum(wtvol.val,3) + " " + WTVOL_UNITS[wtvol.unit] + "  STORED","", wtvol.val, 0);
 }
 function wtvolStore(){
   if(builderHasInput()){
     var o = builderValue();
-    if(o.dim !== 0){ showMain("Weight / Vol", "Needs a plain number", "Type the weight per volume, then Conv+0"); return; }
+    if(o.dim !== 0){ showMain("Weight / Vol", "Needs a plain number",""); return; }
     wtvol.val = o.val; wtvolStoreMode = true;
     clearBuilder();
     wtvolShow(); return;
@@ -1060,7 +1075,7 @@ function cycleWtvolUnit(){
   wtvolShow();
 }
 function wtvolRecall(){
-  showMain("Weight / Vol", fmtNum(wtvol.val,3) + " " + WTVOL_UNITS[wtvol.unit], "Stored — Conv+0 to change it", wtvol.val, 0);
+  showMain("Weight / Vol", fmtNum(wtvol.val,3) + " " + WTVOL_UNITS[wtvol.unit],"", wtvol.val, 0);
 }
 
 /* ---------- Cost (reference p.8, p.22, p.25): × price, Conv+· = total ----------
@@ -1079,7 +1094,7 @@ function costKey(){
     var total = cq.qty * entry.val / (costPerMbm ? 1000 : 1);
     addHistory("Cost — " + fmtNum(cq.qty,4) + " " + cq.unit + " × $" + fmtNum(entry.val,2) + (costPerMbm ? " per Mbm" : ""), money(total), total, 0);
     acc = null; pendingOp = null; justEvaluated = true; costPerMbm = false;
-    showMain("Total Cost", money(total), "", total, 0);
+    showMain("Total Cost", money(total),"", total, 0);
     return;
   }
   if(builderHasInput() || dispVal !== 0){
@@ -1090,7 +1105,7 @@ function costKey(){
     setDisplay(0, 0, "Cost · unit price $", "Qty " + fmtNum(cq2.qty,4) + " " + cq2.unit + (costPrompt.perMbm ? " (per Mbm)" : "") + " — type price, then =");
     return;
   }
-  showMain("Cost", "Enter a quantity first", "Then × price, Conv+· for the total");
+  showMain("Cost", "Enter a quantity first","");
 }
 function costFinish(){
   var entry = builderHasInput() ? commitEntry() : null;
@@ -1098,7 +1113,7 @@ function costFinish(){
   var total = costPrompt.qty * entry.val / (costPrompt.perMbm ? 1000 : 1);
   addHistory("Cost — " + fmtNum(costPrompt.qty,4) + " " + costPrompt.unit + " × $" + fmtNum(entry.val,2) + (costPrompt.perMbm ? " per Mbm" : ""), money(total), total, 0);
   costPrompt = null; justEvaluated = true; costPerMbm = false;
-  showMain("Total Cost", money(total), "", total, 0);
+  showMain("Total Cost", money(total),"", total, 0);
 }
 
 /* ---------- Prefs (reference p.11-12, p.39): Conv+%, % steps settings, + steps options ---------- */
@@ -1125,7 +1140,7 @@ var PREFS = [
 ];
 function prefsShow(){
   var p = PREFS[prefsIdx];
-  showMain("Prefs · " + p.name, p.get(), "% next setting · + / − change · Clear exits", prefRes, 0);
+  showMain("Prefs · " + p.name, p.get(),"", prefRes, 0);
 }
 function prefsEnter(){ prefsMode = true; prefsIdx = 0; prefsShow(); }
 function prefsStep(dir){
@@ -1138,32 +1153,32 @@ function prefsStep(dir){
 var TEMP_RES = {1:16, 2:2, 3:32, 4:4, 6:64, 8:8};
 function tempResKey(d){
   tempRes = TEMP_RES[d];
-  showMain("Temp Resolution", "1/" + tempRes, "Temporary — Clear returns to 1/" + prefRes, tempRes, 0);
+  showMain("Temp Resolution", "1/" + tempRes,"", tempRes, 0);
 }
 
 /* ---------- Memory (reference p.21) ---------- */
 function memAdd(sign){
   if(memRecallMode){
     memCycle = (memCycle+1) % 3;
-    if(memCycle === 1) showMain("Memory · Average", fmtByPref(memory.val/memory.count, memory.dim), "Average of " + memory.count + " entries", memory.val/memory.count, memory.dim);
-    else if(memCycle === 2) showMain("Memory · Count", String(memory.count), "Entries added to memory", memory.count, 0);
-    else showMain("Memory", fmtByPref(memory.val, memory.dim), "Total — Rcl recalls it", memory.val, memory.dim);
+    if(memCycle === 1) showMain("Memory · Average", fmtByPref(memory.val/memory.count, memory.dim),"", memory.val/memory.count, memory.dim);
+    else if(memCycle === 2) showMain("Memory · Count", String(memory.count),"", memory.count, 0);
+    else showMain("Memory", fmtByPref(memory.val, memory.dim),"", memory.val, memory.dim);
     return;
   }
   var o = currentOperand();
   if(memory === null) memory = {val: sign*o.val, dim:o.dim, count:1};
   else memory = {val: memory.val + sign*o.val, dim:o.dim, count: memory.count+1};
-  showMain(sign > 0 ? "Memory +" : "Memory −", fmtByPref(memory.val, memory.dim), "Rcl brings it back", dispVal, dispDim);
+  showMain(sign > 0 ? "Memory +" : "Memory −", fmtByPref(memory.val, memory.dim),"", dispVal, dispDim);
 }
 function memRecall(){
-  if(memory === null){ showMain("Rcl", "Memory empty", "M+ stores the display"); return; }
+  if(memory === null){ showMain("Rcl", "Memory empty",""); return; }
   memRecallMode = true; memCycle = 0;
   acc = null; pendingOp = null; clearBuilder();
   setDisplay(memory.val, memory.dim, "Memory");
   justEvaluated = true;
 }
 function memRecallClear(){
-  if(memory === null){ showMain("Rcl", "Memory empty", "M+ stores the display"); return; }
+  if(memory === null){ showMain("Rcl", "Memory empty",""); return; }
   var v = memory.val, d = memory.dim;
   memory = null; memRecallMode = false;
   setDisplay(v, d, "Memory · cleared");
@@ -1171,7 +1186,7 @@ function memRecallClear(){
 }
 function memClear(){
   memory = null; memRecallMode = false;
-  showMain("Memory", "Cleared", "", dispVal, dispDim);
+  showMain("Memory", "Cleared","", dispVal, dispDim);
 }
 
 /* ---------- prompt sessions (extra solvers; one value at a time) ----------
@@ -1346,15 +1361,15 @@ var SESSIONS = {
 /* ---------- stored settings: riser / tread / o.c. (reference: value + Conv+key) ---------- */
 function storeSetting(which){
   var o = builderHasInput() ? currentOperand() : {val:dispVal, dim:dispDim};
-  if(o.dim !== 1){ showMain(which === "riser" ? "Riser Ht" : which === "tread" ? "Tread W" : "On-Centre", "Needs a length", "Type a length first"); return; }
-  if(which === "riser"){ riserStore = o.val; showMain("Riser Ht", fmtFI(o.val) + "  STORED", "Stair will use it", o.val, 1); }
-  else if(which === "tread"){ treadStore = o.val; showMain("Tread W", fmtFI(o.val) + "  STORED", "Stair will use it", o.val, 1); }
-  else { ocStore = o.val; jackIdx = -1; rwallIdx = -1; showMain("On-Centre", fmtNum(o.val,2) + " INCH  STORED", "Jack and Rake-Wall will use it", o.val, 1); }
+  if(o.dim !== 1){ showMain(which === "riser" ? "Riser Ht" : which === "tread" ? "Tread W" : "On-Centre", "Needs a length",""); return; }
+  if(which === "riser"){ riserStore = o.val; showMain("Riser Ht", fmtFI(o.val) + "  STORED","", o.val, 1); }
+  else if(which === "tread"){ treadStore = o.val; showMain("Tread W", fmtFI(o.val) + "  STORED","", o.val, 1); }
+  else { ocStore = o.val; jackIdx = -1; rwallIdx = -1; showMain("On-Centre", fmtNum(o.val,2) + " INCH  STORED","", o.val, 1); }
 }
 function recallStored(which){
-  if(which === "oc") showMain("On-Centre", fmtNum(ocStore,2) + " INCH", "Stored spacing", ocStore, 1);
-  else if(which === "riser") showMain("Riser Ht", fmtFI(riserStore !== null ? riserStore : 7.5) + "  STORED", "Desired riser height", riserStore !== null ? riserStore : 7.5, 1);
-  else if(which === "tread") showMain("Tread W", fmtFI(treadStore !== null ? treadStore : 10) + "  STORED", "Desired tread width", treadStore !== null ? treadStore : 10, 1);
+  if(which === "oc") showMain("On-Centre", fmtNum(ocStore,2) + " INCH","", ocStore, 1);
+  else if(which === "riser") showMain("Riser Ht", fmtFI(riserStore !== null ? riserStore : 7.5) + "  STORED","", riserStore !== null ? riserStore : 7.5, 1);
+  else if(which === "tread") showMain("Tread W", fmtFI(treadStore !== null ? treadStore : 10) + "  STORED","", treadStore !== null ? treadStore : 10, 1);
 }
 
 /* ---------- Shift (Conv) functions ---------- */
@@ -1428,7 +1443,7 @@ function primaryKey(k){
         var bf = prod / 12;
         addHistory("Board feet — " + fmtNum(acc.val,2) + " × " + fmtNum(e.val,2) + " / 12", fmtNum(bf,5) + " BF", bf, 0);
         acc = null; pendingOp = null; justEvaluated = true; costPerMbm = true;
-        showMain("Board Feet", fmtNum(bf,5) + " BF", "M+ adds it to memory · × price, Conv+· for cost", bf, 0);
+        showMain("Board Feet", fmtNum(bf,5) + " BF","", bf, 0);
         break;
       }
       startSession("bdft"); break; }
@@ -1493,17 +1508,17 @@ function primaryKey(k){
         triJump(k);
       } else {
         var storedLeg = tri[k];
-        if(storedLeg === null){ setDisplay(dispVal, dispDim, "No " + k + " stored", "Type a length, then tap " + (k === "rise" ? "Rise" : "Run")); break; }
+        if(storedLeg === null){ setDisplay(dispVal, dispDim, "No " + k + " stored"); break; }
         acc = null; pendingOp = null; clearBuilder(); justEvaluated = true;
         triJump(k);
       }
       break; }
     case "diag": {
-      if(tri.rise === null || tri.run === null){ setDisplay(dispVal, dispDim, "Diag", "Store a Rise and a Run first"); break; }
+      if(tri.rise === null || tri.run === null){ setDisplay(dispVal, dispDim, "Diag"); break; }
       acc = null; pendingOp = null; clearBuilder(); justEvaluated = true;
       triJump("diag"); break; }
     case "hip": {
-      if(tri.rise === null || tri.run === null){ setDisplay(dispVal, dispDim, "Hip/V", "Store a Rise and a Run first"); break; }
+      if(tri.rise === null || tri.run === null){ setDisplay(dispVal, dispDim, "Hip/V"); break; }
       acc = null; pendingOp = null; clearBuilder(); justEvaluated = true;
       hipKey(); break; }
   }
