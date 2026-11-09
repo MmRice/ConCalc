@@ -97,15 +97,22 @@
      pager buttons: tap them, tap the track, or drag the thumb.
      v1.15: the triangles are plain small solid triangles (no button
      box), and an arrow shows as a dot-matrix dither at the end it
-     cannot go past — black dots on white, no grey pixels. */
+     cannot go past — black dots on white, no grey pixels.
+     v1.20: the bar was a hairline on the Kompakt — thin track, tiny
+     thumb, arrows barely visible. It is thicker now, on History and
+     on the Guide tab alike: 16px track with a 2px solid border so
+     the track itself reads clearly, a 16px black thumb (same width
+     as the track, as before), and bigger plain solid triangle
+     arrows. Same dithered end arrows, same black-and-white only. */
   .hist-main{flex:1 1 auto; min-height:0; display:flex; gap:8px;}
   .hist-listcol{flex:1 1 auto; min-width:0; display:flex; flex-direction:column;}
-  .hist-vscroll{flex:0 0 22px; display:flex; flex-direction:column; gap:6px; padding:2px 0;}
+  .hist-vscroll{flex:0 0 32px; display:flex; flex-direction:column; gap:6px; padding:2px 0;}
   /* v1.15: the ▲/▼ are plain small solid triangles, like the stock
-     bar — no button box, no border. */
-  .hist-vscroll-btn{font:inherit; font-size:.65rem; font-weight:500;
+     bar — no button box, no border. v1.20: bigger, so they read on
+     E Ink. */
+  .hist-vscroll-btn{font:inherit; font-size:.95rem; font-weight:500;
     border:none; background:transparent; color:var(--ink);
-    padding:0; min-height:20px; line-height:1; cursor:pointer; flex:0 0 auto;}
+    padding:0; min-height:28px; line-height:1; cursor:pointer; flex:0 0 auto;}
   /* v1.18: a pressed pager triangle inverts — solid black box
      with a white triangle. The old opacity fade was invisible on
      E Ink. A faded (end-of-list) arrow is inert and gets no
@@ -122,17 +129,26 @@
     -webkit-mask-size:3px 3px;
     mask-image:radial-gradient(circle, #000 1px, transparent 1.4px);
     mask-size:3px 3px;}
-  .hist-vtrack{flex:1 1 auto; min-height:0; width:8px; margin:0 auto;
-    border:1px solid var(--line); border-radius:999px; background:var(--bg);
+  .hist-vtrack{flex:1 1 auto; min-height:0; width:16px; margin:0 auto;
+    border:2px solid var(--ink); border-radius:999px; background:var(--bg);
     position:relative; cursor:pointer; touch-action:none;}
   .hist-vthumb{position:absolute; left:0; right:0; top:0; height:100%;
-    background:var(--solid); border-radius:999px; min-height:14px;}
-  /* v1.15: the thumb is the same width as the track (8px) — it must
-     not stick out wider than the track, like the stock bar. */
+    background:var(--solid); border-radius:999px; min-height:20px;}
+  /* v1.15: the thumb is the same width as the track (16px since
+     v1.20) — it must not stick out wider than the track, like the
+     stock bar. */
   /* ---------- v1.14 user guide: no longer its own sheet — it is the
      second tab of the History sheet (see .sheet-pane above). The
-     guide body keeps its own scroll inside its pane. ---------- */
-  .guide-body{flex:1 1 auto; min-height:0; overflow:auto; padding:4px 4px 12px;}
+     guide body keeps its own scroll inside its pane.
+     v1.20: the Guide tab has the same visible scroll bar as History
+     (same .hist-vscroll column, same paging), and the guide body is
+     swiped with pointer drag + snap-to-page (see the swipe code), so
+     native touch scrolling is off (touch-action:none) and the thin
+     native scrollbar is hidden — only the thick custom bar shows. */
+  .guide-main{flex:1 1 auto; min-height:0; display:flex; gap:8px;}
+  .guide-body{flex:1 1 auto; min-width:0; min-height:0; overflow:auto; padding:4px 4px 12px;
+    scrollbar-width:none; touch-action:none;}
+  .guide-body::-webkit-scrollbar{display:none;}
   .guide-body h3{font-size:.85rem; letter-spacing:.1em; text-transform:uppercase;
     margin:14px 0 4px; font-weight:600;}
   .guide-body h3:first-child{margin-top:4px;}
@@ -204,6 +220,20 @@
     font-size:clamp(1rem,4.5vmin,1.2rem); font-weight:500; line-height:1.05;}
   button.key.has-shift::after{content:"\2022"; position:absolute; top:3px; right:6px;
     font-size:.6rem; line-height:1; color:var(--ink);}
+  /* v1.20: Conv-swapped labels must fit INSIDE their keys. Number
+     keys use a much bigger font, so long second-function labels
+     ("Riser Ht", "Tread W") blew past the 3px border. While Conv
+     is armed, long labels get a smaller font and may wrap to two
+     clean lines inside the key; the class is assigned by label
+     length in applyShiftLabels and removed when Conv disarms, so
+     the normal labels never change and nothing else moves.
+     overflow:hidden is only a guard — the sizes below are chosen
+     so nothing is ever clipped. */
+  button.key{overflow:hidden;}
+  button.key.alt-m, button.key.num.alt-m{font-size:clamp(.8rem,3.6vmin,.95rem);
+    white-space:normal; overflow-wrap:break-word; line-height:1.1;}
+  button.key.alt-l, button.key.num.alt-l{font-size:clamp(.68rem,3vmin,.8rem);
+    white-space:normal; overflow-wrap:break-word; line-height:1.15;}
   button.key.num{background:transparent; border:3px solid var(--ink);
     font-size:clamp(1.3rem,6vmin,1.8rem); font-weight:400;}
   button.key[data-k^="op:"]{background:transparent; border-width:3px; border-style:solid; border-color:var(--ink); border-radius:12px;}
@@ -342,7 +372,8 @@
       </div>
     </div>
     <div class="sheet-pane" id="guidePane">
-      <div class="guide-body">
+      <div class="guide-main">
+      <div class="guide-body" id="guideBody">
       <h3>Entering values</h3>
       <p class="gstep lead">Type a number, then tag it with a unit.</p>
       <p class="gstep">Press: <span class="gkey">9</span> <span class="gkey">Inch</span></p>
@@ -616,6 +647,8 @@
       <p class="gstep">Tap a row to load its answer back into the calculator.</p>
       <p class="gstep">Use the up and down arrows to page through it, 8 entries per page, newest first.</p>
       <p class="gstep">Drag the bar on the right, or tap it, to jump through your history.</p>
+      <p class="gstep">Swipe up or down on the History list to move a page at a time &mdash; swipe up goes to the next page.</p>
+      <p class="gstep">The Guide tab has the same bar on the right, and you can swipe up and down on the guide to move a page at a time.</p>
       <p class="gstep">The last 100 entries are kept. The oldest drops off on its own.</p>
       <p class="gstep">Tap the Guide tab at the top to open this guide.</p>
       <p class="gstep">Tap the History tab to go back to History.</p>
@@ -624,6 +657,12 @@
       <p class="gstep">Hold it again to clear the stored values too.</p>
       <p class="gstep">Press: <span class="gkey solid">Conv</span> <span class="gkey">&times;</span></p>
       <p class="gstep">You see: Clear All &mdash; riser, tread, on-centre spacing and weight-per-volume go back to their defaults.</p>
+      </div>
+      <div class="hist-vscroll" id="guideVScroll">
+        <button class="hist-vscroll-btn" id="guidePrev" type="button" aria-label="Previous page">&#9650;</button>
+        <div class="hist-vtrack" id="guideScroll" role="slider" aria-label="Guide pages" tabindex="0"><div class="hist-vthumb" id="guideScrollThumb"></div></div>
+        <button class="hist-vscroll-btn" id="guideNext" type="button" aria-label="Next page">&#9660;</button>
+      </div>
       </div>
     </div>
   </div>
@@ -874,7 +913,7 @@ function renderHistory(){
      entries shown out of the total, so more entries = smaller
      thumb; its top moves down as you page forward. */
   var pages = histPageCount();
-  var vscroll = document.querySelector(".hist-vscroll");
+  var vscroll = document.querySelector("#histPane .hist-vscroll");
   if(vscroll) vscroll.style.display = pages <= 1 ? "none" : "";
   var thumb = $("histScrollThumb"), track = $("histScroll");
   if(thumb){
@@ -910,6 +949,7 @@ function showSheetTab(tab){
   if(hp) hp.classList.toggle("active", tab === "history");
   if(gp) gp.classList.toggle("active", tab === "guide");
   if(tab === "history") renderHistory();
+  if(tab === "guide") updateGuideScroll();
 }
 function openHistory(){
   historyOpen = true; histPage = 0;
@@ -930,6 +970,48 @@ function histScrollFromEvent(ev){
   var y = (ev.clientY !== undefined ? ev.clientY : 0) - r.top;
   var f = Math.max(0, Math.min(1, y / r.height));
   histPageGo(Math.round(f * (histPageCount() - 1)));
+}
+/* ---------- v1.20: the Guide tab gets the same scroll bar ----------
+   Same thick bar as History (same .hist-vscroll styles, same ▲/▼
+   pager buttons, same dithered end arrows), driven by the guide
+   body's native scroll position instead of discrete pages: the
+   thumb size is the visible fraction, its position follows
+   scrollTop, ▲/▼ page by one viewport height, tap/drag on the
+   track jumps. The bar hides entirely when the guide fits on one
+   screen. updateGuideScroll is called when the Guide tab opens
+   (the pane has no size while hidden) and on every guide scroll. */
+function updateGuideScroll(){
+  var body = $("guideBody"); if(!body) return;
+  var bar = $("guideVScroll"); if(!bar) return;
+  var total = body.scrollHeight, vis = body.clientHeight;
+  if(!total || total <= vis){ bar.style.display = "none"; return; }
+  bar.style.display = "";
+  var thumb = $("guideScrollThumb");
+  var h = (vis / total) * 100;
+  var maxTop = 100 - h;
+  var top = (body.scrollTop / (total - vis)) * maxTop;
+  if(isNaN(top)) top = 0;
+  if(thumb){ thumb.style.height = "calc(" + h + "% - 4px)"; thumb.style.top = "calc(" + top + "% + 2px)"; }
+  var prev = $("guidePrev"), next = $("guideNext");
+  if(prev) prev.classList.toggle("faded", body.scrollTop <= 0);
+  if(next) next.classList.toggle("faded", body.scrollTop + vis >= total - 1);
+}
+function guidePageStep(dir){
+  var body = $("guideBody"); if(!body) return;
+  var vis = body.clientHeight || 0;
+  if(vis <= 0) return;
+  body.scrollTop = Math.max(0, Math.min(body.scrollHeight - vis, body.scrollTop + dir * vis));
+  updateGuideScroll();
+}
+function guideScrollFromEvent(ev){
+  var body = $("guideBody"); if(!body) return;
+  var track = $("guideScroll"); if(!track) return;
+  var r = track.getBoundingClientRect();
+  if(!r || r.height <= 0) return;
+  var y = (ev.clientY !== undefined ? ev.clientY : 0) - r.top;
+  var f = Math.max(0, Math.min(1, y / r.height));
+  body.scrollTop = f * (body.scrollHeight - body.clientHeight);
+  updateGuideScroll();
 }
 /* v1.8: only the result at the top is copyable. A long press anywhere
    else must not bring up copy / text selection, so the context menu
@@ -2244,6 +2326,22 @@ function initShiftLabels(){
 function applyShiftLabels(on){
   document.querySelectorAll("button.key.has-shift").forEach(function(b){
     b.textContent = on ? b.dataset.alt : b.dataset.primary;
+    /* v1.20: long second-function labels get a smaller font so they
+       fit inside their keys (see the .alt-m / .alt-l CSS) — 8+ chars
+       smallest, 6–7 chars medium, the rest keep the normal size.
+       Number keys use a much bigger font, so a 4-letter label on one
+       ("Cost" on ·) is tight too — those get the medium size as
+       well, except the fraction labels (1/16, 1/32, 1/64), which
+       are narrow digits and fit. Removed again when Conv disarms,
+       so normal labels never change. */
+    b.classList.remove("alt-m", "alt-l");
+    if(on){
+      var alt = b.dataset.alt || "";
+      var len = alt.length;
+      if(len >= 8) b.classList.add("alt-l");
+      else if(len >= 6) b.classList.add("alt-m");
+      else if(len >= 4 && b.classList.contains("num") && /[A-Za-z]/.test(alt) && !/^\d+\/\d+$/.test(alt)) b.classList.add("alt-m");
+    }
   });
 }
 function setShift(on){
@@ -2372,9 +2470,35 @@ function backHoldCancel(){ clearTimeout(backHoldTimer); backHoldTimer = null; }
    pointerup clear any stuck .pressed so a press can never stick
    if the pointer slides off the key or the gesture is cancelled.
    The backspace hold-to-clear timers are untouched: the pressed
-   class simply stays visible for the whole hold. */
+   class simply stays visible for the whole hold.
+   v1.20: the v1.18 buzz was navigator.vibrate(10) on pointerdown
+   only, and Mitch found it only worked when holding a button.
+   Root cause, as far as it can be determined without the device:
+   a 10 ms pulse is below the spin-up threshold of the Kompakt's
+   eccentric-mass motor — the motor needs roughly 30 ms to move
+   enough to feel, so the pulse ended before it was perceptible.
+   The buzz felt on a hold was almost certainly the OS long-press
+   feedback (~0.5 s), not ours. Second risk: if this WebView does
+   not reliably deliver pointerdown for a quick tap, the
+   pointerdown-only call had no second chance. Fix, both halves:
+   (a) the pulse is now 30 ms — the shortest standard tap duration
+   that an ERM motor can actually render (Android's own tap
+   feedback is ~20–30 ms), still a short tap, not a long buzz.
+   (b) a document-level click listener buzzes as a fallback when
+   the press did not already buzz: pressBuzzed is set whenever
+   buzz() actually calls vibrate, the click fallback consumes it
+   (one buzz per tap, never two), and pointercancel / pointerleave
+   reset it because no click follows those. The fallback only
+   fires for interactive elements (keys, tabs, pager, History
+   rows, display, scroll track) and never for a faded/inert
+   pager arrow. A hold buzzes once at press start; the click
+   after release finds pressBuzzed set and does not buzz again.
+   The display and the scroll track never had a pointerdown buzz,
+   so they now buzz through the click fallback. */
+var BUZZ_MS = 30;
+var pressBuzzed = false;
 function buzz(){
-  try{ if(typeof navigator !== "undefined" && navigator && typeof navigator.vibrate === "function") navigator.vibrate(10); }catch(e){}
+  try{ if(typeof navigator !== "undefined" && navigator && typeof navigator.vibrate === "function"){ navigator.vibrate(BUZZ_MS); pressBuzzed = true; } }catch(e){}
 }
 function pressOn(el){ if(!el || el.disabled || el.classList.contains("faded")) return; el.classList.add("pressed"); buzz(); }
 function pressOff(el){ if(el) el.classList.remove("pressed"); }
@@ -2382,24 +2506,39 @@ function wirePressed(el){
   if(!el) return;
   el.addEventListener("pointerdown", function(){ pressOn(el); });
   el.addEventListener("pointerup", function(){ pressOff(el); });
-  el.addEventListener("pointercancel", function(){ pressOff(el); });
-  el.addEventListener("pointerleave", function(){ pressOff(el); });
+  el.addEventListener("pointercancel", function(){ pressOff(el); pressBuzzed = false; });
+  el.addEventListener("pointerleave", function(){ pressOff(el); pressBuzzed = false; });
   el.addEventListener("lostpointercapture", function(){ pressOff(el); });
 }
 document.querySelectorAll("button.key").forEach(wirePressed);
 wirePressed($("tabHistory")); wirePressed($("tabGuide"));
 wirePressed($("histPrev")); wirePressed($("histNext"));
+wirePressed($("guidePrev")); wirePressed($("guideNext"));
 /* History rows are built dynamically, so delegate on the list. */
 (function(){
   var list = $("historyList"); if(!list) return;
   function rowOf(ev){ return ev.target && ev.target.closest ? ev.target.closest(".hist-row") : null; }
   list.addEventListener("pointerdown", function(ev){ pressOn(rowOf(ev)); });
   list.addEventListener("pointerup", function(ev){ pressOff(rowOf(ev)); });
-  list.addEventListener("pointercancel", function(ev){ pressOff(rowOf(ev)); });
-  list.addEventListener("pointerleave", function(ev){ pressOff(rowOf(ev)); });
+  list.addEventListener("pointercancel", function(ev){ pressOff(rowOf(ev)); pressBuzzed = false; });
+  list.addEventListener("pointerleave", function(ev){ pressOff(rowOf(ev)); pressBuzzed = false; });
 })();
 window.addEventListener("pointerup", function(){ document.querySelectorAll(".pressed").forEach(function(el){ el.classList.remove("pressed"); }); });
 window.addEventListener("pointercancel", function(){ document.querySelectorAll(".pressed").forEach(function(el){ el.classList.remove("pressed"); }); });
+/* v1.20: click-time haptic fallback — see the comment above buzz().
+   Fires only when the press did not already buzz on pointerdown, so
+   a normal tap buzzes exactly once and a hold buzzes once at press
+   start (its release click finds pressBuzzed set and does nothing).
+   Also gives the display and the scroll track a buzz — they have no
+   pointerdown handler of their own. */
+document.addEventListener("click", function(ev){
+  if(!ev.target || !ev.target.closest) return;
+  var t = ev.target.closest("button, .hist-row, #lcd, #histScroll");
+  if(!t) return;
+  if(t.disabled || (t.classList && t.classList.contains("faded"))) return;
+  if(pressBuzzed){ pressBuzzed = false; return; }
+  buzz(); pressBuzzed = false;
+});
 document.querySelectorAll("button.key").forEach(function(b){
   if(b.getAttribute("data-k") === "back") return;  /* own handlers above */
   b.addEventListener("click", function(){ handleKey(b.getAttribute("data-k")); });
@@ -2426,6 +2565,89 @@ $("tabGuide").addEventListener("click", function(){ showSheetTab("guide"); });
 })();
 $("histPrev").addEventListener("click", function(){ histPageStep(-1); });
 $("histNext").addEventListener("click", function(){ histPageStep(1); });
+/* ---------- v1.20: Guide scroll bar wiring ----------
+   Same interaction as the History bar: ▲/▼ page by one viewport,
+   tap or drag the track to jump, and the thumb/arrows follow the
+   guide body's own scroll (listening to its scroll event). */
+$("guidePrev").addEventListener("click", function(){ guidePageStep(-1); });
+$("guideNext").addEventListener("click", function(){ guidePageStep(1); });
+(function(){
+  var body = $("guideBody"); if(body) body.addEventListener("scroll", updateGuideScroll);
+  var track = $("guideScroll"); if(!track) return;
+  var dragging = false;
+  track.addEventListener("pointerdown", function(ev){
+    dragging = true;
+    try{ track.setPointerCapture(ev.pointerId); }catch(e){}
+    guideScrollFromEvent(ev);
+  });
+  track.addEventListener("pointermove", function(ev){ if(dragging) guideScrollFromEvent(ev); });
+  track.addEventListener("pointerup", function(){ dragging = false; });
+  track.addEventListener("pointercancel", function(){ dragging = false; });
+  track.addEventListener("click", function(ev){ guideScrollFromEvent(ev); });
+  track.addEventListener("keydown", function(ev){
+    if(ev.key === "ArrowLeft" || ev.key === "ArrowUp"){ guidePageStep(-1); ev.preventDefault(); }
+    if(ev.key === "ArrowRight" || ev.key === "ArrowDown"){ guidePageStep(1); ev.preventDefault(); }
+  });
+})();
+/* ---------- v1.20: swipe to move through History and Guide ----------
+   An extra way to move, on top of the ▲/▼ buttons — buttons still
+   work exactly as before. A swipe is a scroll, a tap is a tap:
+   - History: a mostly-vertical drag of 28px or more pages once —
+     swipe up (finger moves up) goes to the next page, swipe down
+     to the previous. A short or sideways movement does nothing.
+     If the browser fires a click after a swipe, it is swallowed
+     (capture-phase, one-shot flag with a timeout backstop) so a
+     swipe can never load a History row or do anything else.
+   - Guide: the drag moves the guide with the finger, and on release
+     it snaps to the nearest page boundary — the same pages the ▲/▼
+     buttons move by. A short drag snaps back to where it started,
+     so a tap does nothing. The thumb and arrows follow via
+     updateGuideScroll on every move and on release. */
+var suppressHistClick = false;
+(function(){
+  var col = document.querySelector("#histPane .hist-listcol"); if(!col) return;
+  var startY = 0, startX = 0, swiping = false;
+  col.addEventListener("pointerdown", function(ev){
+    startY = ev.clientY; startX = ev.clientX; swiping = true;
+    suppressHistClick = false;
+  });
+  col.addEventListener("pointerup", function(ev){
+    if(!swiping) return; swiping = false;
+    var dy = ev.clientY - startY, dx = ev.clientX - startX;
+    if(Math.abs(dy) >= 28 && Math.abs(dy) > Math.abs(dx)){
+      if(dy < 0) histPageStep(1); else histPageStep(-1);
+      suppressHistClick = true;
+      setTimeout(function(){ suppressHistClick = false; }, 350);
+    }
+  });
+  col.addEventListener("pointercancel", function(){ swiping = false; });
+  col.addEventListener("click", function(ev){
+    if(suppressHistClick){ suppressHistClick = false; ev.stopPropagation(); ev.preventDefault(); }
+  }, true);
+})();
+(function(){
+  var body = $("guideBody"); if(!body) return;
+  var startY = 0, startScroll = 0, dragging = false;
+  body.addEventListener("pointerdown", function(ev){
+    dragging = true; startY = ev.clientY; startScroll = body.scrollTop;
+    try{ body.setPointerCapture(ev.pointerId); }catch(e){}
+  });
+  body.addEventListener("pointermove", function(ev){
+    if(!dragging) return;
+    body.scrollTop = startScroll - (ev.clientY - startY);
+    updateGuideScroll();
+  });
+  function endSwipe(){
+    if(!dragging) return; dragging = false;
+    var vis = body.clientHeight || 0;
+    if(vis <= 0) return;
+    var page = Math.round(body.scrollTop / vis);
+    body.scrollTop = Math.max(0, Math.min(body.scrollHeight - vis, page * vis));
+    updateGuideScroll();
+  }
+  body.addEventListener("pointerup", endSwipe);
+  body.addEventListener("pointercancel", endSwipe);
+})();
 document.addEventListener("keydown", function(ev){
   if(/^[0-9]$/.test(ev.key)) handleKey("d:" + ev.key);
   else if(ev.key === ".") handleKey("dot");
@@ -2442,6 +2664,7 @@ document.addEventListener("keydown", function(ev){
 
 initShiftLabels();
 setDisplay(0, 1, "Ready");
+updateGuideScroll(); /* v1.20: set the Guide bar's initial state (hidden when it fits) */
 </script>
 </body>
 </html>

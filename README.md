@@ -64,7 +64,7 @@ and any Android phone.
 
 ## APK
 
-Current release: **ConCalc 1.19** — version 1.19, versionCode 20, package
+Current release: **ConCalc 1.20** — version 1.20, versionCode 21, package
 `com.mmrice.concalc`, minSdk 21, targetSdk 33, self-signed.
 
 This is a new, personal app — a fresh package and a fresh signing key.
@@ -72,7 +72,7 @@ It will NOT update over the old builds (v0.1–v0.3):
 uninstall the old app first, then install this one fresh.
 
 The APK binary is not in this repo — GitHub's text push can't carry binaries.
-Download `ConCalcV1.19.apk` from the chat / release and sideload it, or build
+Download `ConCalcV1.20.apk` from the chat / release and sideload it, or build
 it yourself below. Keep the keystore at
 `~/workspace/apk-build/concalc-personal.keystore` — updates must use the
 same key.
@@ -149,6 +149,7 @@ automatically at install.
 ## Status
 
 Untested on real Kompakt hardware as of v1.3.
+v1.20 is UI only, no math changes: haptics now fire on a regular quick tap, not only on a hold. The v1.18 pulse was 10 ms on pointerdown only — too short for the Kompakt's motor to actually move (it needs roughly 30 ms to spin up), and the buzz felt on a hold was almost certainly the OS long-press feedback, not ours. The pulse is now 30 ms, and a click-time fallback buzzes when a press did not already buzz on pointerdown, so a quick tap buzzes exactly once and a hold buzzes once at press start. The display and the scroll track buzz too. Also: Conv-swapped labels now fit inside their keys — long second-function labels (Riser Ht, Tread W, Drywall, Clear All, …) get a smaller font and may wrap to two lines while Conv is armed, so nothing spills past the border. The History scroll bar is thicker (16px track with a solid border, 16px thumb, bigger ▲/▼ arrows) so it reads on E Ink, and the Guide tab has the same bar with the same paging. And both lists are swipeable: swipe up/down on the History list to move a page at a time, swipe and drag on the Guide to move a page at a time — a swipe never taps a History row, and the ▲/▼ buttons work as before.
 v1.19 is UI only, no math changes: the "Page X of Y" label at the bottom of the History tab is gone entirely — the ▲/▼ pager and the scroll bar are the navigation now, and the layout closes up cleanly with no blank gap left behind.
 v1.18 is UI only, no math changes: pressing a key now shows it — the key inverts (solid black with white text) while held, and keys that are already solid at rest (Conv when off, backspace, =) invert the other way, white with black text, so a press is always visible; the same inversion applies to the History/Guide tabs, the ▲/▼ pager triangles and History rows. A press also gives one short haptic pulse (navigator.vibrate, 10 ms, feature-detected so nothing breaks where vibration is unavailable) — the app now declares the VIBRATE permission, which the WebView vibration call needs; it is a normal permission, granted automatically at install. Pressed state never sticks (cleared on release, leave or cancel) and never shifts the layout.
 v1.17 is UI only, no math changes: an invalid selection never shows an error message — pressing a solver key with nothing to solve shows its name as a label prompt instead (Pitch, Rise, Run, Diag, Hip/V, Jack, R/Wall, Stair, Circle, Arc, Weight, Cost, ...), and typing clears the label and the entry continues. Keys with no prompt to show (memory recall with an empty memory, Conv conversions of a plain number) stay fully silent: no message, no display change. Confirmations of something done successfully (Memory · cleared, Cleared) are kept. The guide's Roof section now shows the Pitch prompt.
