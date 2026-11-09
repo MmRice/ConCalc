@@ -42,64 +42,129 @@
      The display is tappable (tap = History), so no text selection. */
   .lcd{color:var(--ink); padding:10px 2px 16px; border-bottom:1px solid var(--ink); flex:0 0 auto;
     cursor:pointer; user-select:none; -webkit-user-select:none;}
-  .hist-btn{font:inherit; font-size:.7rem; letter-spacing:.14em; font-weight:600;
-    border:1px solid var(--ink); border-radius:999px; background:var(--bg); color:var(--ink);
-    padding:8px 14px; min-height:44px; cursor:pointer; flex:0 0 auto;}
-  .hist-btn:active{background:var(--solid); color:var(--on-solid);}
+  /* v1.14: the History/Guide sheet uses TABS, not buttons, to switch
+     views. The tab bar takes the place of the old 44px header (same
+     height, so the 8 History rows still fit). The active tab is solid
+     black; the inactive tab is plain with a 3px outline, like the
+     keys on the face. */
+  .sheet-tabs{flex:0 0 44px; min-height:44px; display:flex; gap:12px;
+    border-bottom:1px solid var(--ink); padding:0 2px 10px;}
+  .sheet-tab{flex:1 1 0; min-width:0; font:inherit; font-size:.78rem;
+    letter-spacing:.16em; text-transform:uppercase; font-weight:600;
+    border:3px solid var(--ink); border-radius:12px; background:var(--bg);
+    color:var(--ink); cursor:pointer; padding:0 8px;}
+  .sheet-tab.active{background:var(--solid); color:var(--on-solid); border-color:transparent;}
+  /* v1.18: pressed indication on the History/Guide tabs — same
+     inversion: a plain tab goes solid, the solid active tab
+     inverts to white with black text. */
+  .sheet-tab:active, .sheet-tab.pressed{background:var(--solid); color:var(--on-solid); border-color:transparent;}
+  .sheet-tab.active:active, .sheet-tab.active.pressed{background:var(--bg); color:var(--ink); border-color:var(--ink);}
+  .sheet-pane{display:none; flex:1 1 auto; min-height:0; flex-direction:column; gap:10px;}
+  .sheet-pane.active{display:flex;}
   /* v1.7: indicators live in the sub row (see .lcd-units), between the
      solver "N of N" on the left and the unit cap pinned right. */
   .lcd-inds{display:flex; gap:6px; align-items:baseline;}
   /* ---------- history screen: MMD paged list, fixed rows, no scrolling ----------
      8 fixed-height rows per page; dividers in exactly the same pixels on
-     every page; discrete ▲/▼ paging with a visible page indicator. */
+     every page; discrete ▲/▼ paging, no page label — the ▲/▼ pager
+     and the scroll bar are the navigation. */
   /* History is a sheet over the keypad area only: the display and the
-     top bar stay visible above it. Own scroll so the pager is always
-     reachable on a short screen; paging (8/page) is still the primary
-     navigation. */
+     top bar stay visible above it. v1.13: the list never scrolls — a
+     page is exactly the 8 rows that fit, and the ▲/▼ pager buttons are
+     the only way to move between pages. */
   .calc-body{position:relative; flex:1 1 auto; min-height:0; display:flex; flex-direction:column; gap:12px;}
   .history{display:none; position:absolute; inset:0; z-index:5; background:var(--bg);
     flex-direction:column; gap:10px;}
   .device.show-history .history{display:flex;}
-  .hist-head{flex:0 0 44px; min-height:44px; display:flex; align-items:center; justify-content:space-between;
-    border-bottom:1px solid var(--ink); padding:0 2px;}
-  .hist-head-title{font-size:.78rem; letter-spacing:.16em; font-weight:500; text-transform:uppercase;}
-  .hist-head-count{font-size:.78rem; font-weight:500;}
-  .hist-list{flex:1 1 auto; min-height:0; overflow:auto; display:flex; flex-direction:column;}
+  .hist-list{flex:1 1 auto; min-height:0; overflow:hidden; display:flex; flex-direction:column;}
   .hist-row{display:flex; flex-direction:column; align-items:flex-start; justify-content:center; gap:2px; width:100%;
     height:64px; flex:0 0 64px; box-sizing:border-box;
     text-align:left; background:var(--bg); border:none; border-bottom:1px solid var(--line);
     padding:8px 4px; cursor:pointer; font:inherit; color:var(--ink);}
-  .hist-row:active{background:var(--num-bg);}
+  /* v1.18: a pressed History row inverts (solid black, white text),
+     like the keys — the old light-fill :active was barely visible. */
+  .hist-row:active, .hist-row.pressed{background:var(--solid); color:var(--on-solid);}
+  .hist-row:active .hist-expr, .hist-row:active .hist-res,
+  .hist-row.pressed .hist-expr, .hist-row.pressed .hist-res{color:var(--on-solid);}
   .hist-expr{font-size:.8rem; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%;}
   .hist-res{font-size:1.25rem; font-weight:300; font-variant-numeric:tabular-nums;
     white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%;}
   .hist-empty{color:var(--ink); padding:28px 4px; text-align:center; font-size:.9rem;}
-  .hist-pager{display:flex; justify-content:space-between; align-items:center; gap:8px; flex:0 0 auto; min-height:56px;}
-  .hist-page-btn{font:inherit; font-size:.9rem; font-weight:500;
-    border:1px solid var(--ink); border-radius:999px; background:var(--bg); color:var(--ink);
-    padding:8px 18px; min-height:44px; cursor:pointer; flex:0 0 auto;}
-  .hist-page-btn:active{background:var(--solid); color:var(--on-solid);}
-  .hist-page-btn[hidden]{visibility:hidden;}
-  .hist-page-info{font-size:.78rem; font-weight:500; color:var(--ink); white-space:nowrap;}
-  /* ---------- v1.8 user guide: a sheet like History, over the keypad,
-     opened from the settings pill in the History header. ---------- */
-  .guide{display:none; position:absolute; inset:0; z-index:6; background:var(--bg);
-    flex-direction:column; gap:10px;}
-  .device.show-guide .guide{display:flex;}
+  /* v1.14: the History list has a VERTICAL scroll bar down its right
+     edge, like the Settings list — a thin light track, a black thumb
+     the same width as the track showing your position, with a ▲ at
+     the top end and a ▼ at the bottom end. Those triangles ARE the
+     pager buttons: tap them, tap the track, or drag the thumb.
+     v1.15: the triangles are plain small solid triangles (no button
+     box), and an arrow shows as a dot-matrix dither at the end it
+     cannot go past — black dots on white, no grey pixels. */
+  .hist-main{flex:1 1 auto; min-height:0; display:flex; gap:8px;}
+  .hist-listcol{flex:1 1 auto; min-width:0; display:flex; flex-direction:column;}
+  .hist-vscroll{flex:0 0 22px; display:flex; flex-direction:column; gap:6px; padding:2px 0;}
+  /* v1.15: the ▲/▼ are plain small solid triangles, like the stock
+     bar — no button box, no border. */
+  .hist-vscroll-btn{font:inherit; font-size:.65rem; font-weight:500;
+    border:none; background:transparent; color:var(--ink);
+    padding:0; min-height:20px; line-height:1; cursor:pointer; flex:0 0 auto;}
+  /* v1.18: a pressed pager triangle inverts — solid black box
+     with a white triangle. The old opacity fade was invisible on
+     E Ink. A faded (end-of-list) arrow is inert and gets no
+     pressed state at all. */
+  .hist-vscroll-btn:not(.faded):active, .hist-vscroll-btn:not(.faded).pressed{background:var(--solid); color:var(--on-solid); border-radius:8px;}
+  /* v1.15: an arrow is DITHERED at the end it cannot go past — a
+     dot-matrix pattern, black dots on white, like the stock bar:
+     ▲ dithered on the first page, ▼ dithered on the last page,
+     solid black again when you can move that way. No grey pixels
+     at all (E Ink is black and white only): the mask punches a
+     dot grid out of the solid black triangle. */
+  .hist-vscroll-btn.faded{opacity:1; color:var(--ink);
+    -webkit-mask-image:radial-gradient(circle, #000 1px, transparent 1.4px);
+    -webkit-mask-size:3px 3px;
+    mask-image:radial-gradient(circle, #000 1px, transparent 1.4px);
+    mask-size:3px 3px;}
+  .hist-vtrack{flex:1 1 auto; min-height:0; width:8px; margin:0 auto;
+    border:1px solid var(--line); border-radius:999px; background:var(--bg);
+    position:relative; cursor:pointer; touch-action:none;}
+  .hist-vthumb{position:absolute; left:0; right:0; top:0; height:100%;
+    background:var(--solid); border-radius:999px; min-height:14px;}
+  /* v1.15: the thumb is the same width as the track (8px) — it must
+     not stick out wider than the track, like the stock bar. */
+  /* ---------- v1.14 user guide: no longer its own sheet — it is the
+     second tab of the History sheet (see .sheet-pane above). The
+     guide body keeps its own scroll inside its pane. ---------- */
   .guide-body{flex:1 1 auto; min-height:0; overflow:auto; padding:4px 4px 12px;}
   .guide-body h3{font-size:.85rem; letter-spacing:.1em; text-transform:uppercase;
     margin:14px 0 4px; font-weight:600;}
   .guide-body h3:first-child{margin-top:4px;}
   .guide-body p{font-size:.92rem; line-height:1.45; margin:0 0 6px;}
+  /* v1.10: guide steps use little key icons, like the keys on the
+     face. One action per line, no long paragraphs. */
+  .guide-body p.gstep{margin:0 0 3px;}
+  .guide-body p.gstep.lead{font-weight:600;}
+  .gkey{display:inline-block; border:3px solid var(--ink); border-radius:6px;
+    padding:0 7px; margin:0 1px; font-size:.82rem; font-weight:600;
+    line-height:1.6; white-space:nowrap; background:var(--bg);}
+  .gkey.solid{background:var(--solid); color:var(--on-solid); border-color:transparent;}
+  /* v1.16: the CONV / RCL / MEM indicators must never push the UI
+     down. They used to be display:none until they appeared, so the
+     sub row grew and the whole keypad shifted down a few pixels.
+     Now they are visibility:hidden instead — always in the layout,
+     taking their space, just invisible until armed — so arming Conv
+     or storing a memory changes nothing below the display. */
   .ind{font-size:.6rem; letter-spacing:.12em; font-weight:600; border:1px solid var(--ink);
-    border-radius:999px; padding:1px 8px; line-height:1.5; display:none;}
-  .ind.on{display:block;}
+    border-radius:999px; padding:1px 8px; line-height:1.5; visibility:hidden;}
+  .ind.on{visibility:visible;}
   .lcd-main{display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin-top:8px;}
   .lcd-label{font-size:.78rem; letter-spacing:.16em; font-weight:500; color:var(--ink);
     text-transform:uppercase; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
   .lcd-value{font-weight:300; letter-spacing:-.01em; font-variant-numeric:tabular-nums;
     font-size:clamp(2.3rem,10vmin,3.4rem); line-height:1.05; text-align:right; white-space:nowrap;}
-  .lcd-units{display:flex; justify-content:space-between; align-items:baseline; margin-top:8px; gap:10px;}
+  /* v1.16: the sub row has a fixed minimum height (taller than the
+     indicator pills), so it can never grow or shrink when the
+     indicators appear or the "N of N" sub comes and goes. Together
+     with the visibility-based .ind above, the display and the
+     keypad below it stay exactly where they are at all times. */
+  .lcd-units{display:flex; justify-content:space-between; align-items:baseline; margin-top:8px; gap:10px; min-height:20px;}
   /* v1.5: sub line holds only the "N of N" solver indicator; empty it
      collapses away entirely so the display is just the value. */
   .lcd-sub{color:var(--ink); font-size:clamp(.72rem,3vmin,.84rem); white-space:nowrap;
@@ -116,39 +181,72 @@
      so it reads at a glance. */
   .back-ico{font-size:1.4em; line-height:1; vertical-align:-0.1em;}
   /* ---------- keypad: stock-calculator air (v1.5 inspo) ----------
-     Number and function keys are plain black text — no fill, no
-     border. Operator keys (÷ × − +) sit in thin outlined rounded
-     squares. = stays a solid black rounded square with white =.
-     Conv stays solid black. Clear (top bar) is plain text too. */
+     v1.10: every key gets a thin black outline (no fill) to neaten
+     the face up — operators keep their slightly heavier outline,
+     = stays a solid black rounded square with white =.
+     v1.11: Conv reverts to its v1.9 look — solid black when off,
+     plain when armed (Mitch's call: the v1.10 inversion was wrong
+     for him). Backspace / C gets the same treatment: solid black
+     as its resting style. Key outlines go a little bolder too:
+     plain keys 1.5px, operators 2px.
+     v1.12: 3px outlines on ALL keys (Mitch, after seeing the
+     stock calculator's thick operator outlines) — plain keys,
+     operators and the guide key icons alike. Solid keys (Conv
+     off, backspace, =) stay solid with no outline ring. */
   .keypad{flex:1 1 auto; min-height:0; display:grid; grid-template-rows:repeat(8,1fr); gap:12px;}
   .krow{display:grid; grid-template-columns:repeat(5,1fr); gap:12px; min-height:0;}
   .cell{display:flex; min-height:0;}
   /* v1.4: no small-print second-function labels anywhere on the face.
      Keys with a second function carry a small dot (top-right corner);
      pressing Conv swaps their visible label to the second function. */
-  button.key{position:relative; font:inherit; flex:1 1 auto; min-height:0; border:none; border-radius:14px;
+  button.key{position:relative; font:inherit; flex:1 1 auto; min-height:0; border:3px solid var(--ink); border-radius:14px;
     background:transparent; color:var(--ink); cursor:pointer; padding:1px 2px;
     font-size:clamp(1rem,4.5vmin,1.2rem); font-weight:500; line-height:1.05;}
   button.key.has-shift::after{content:"\2022"; position:absolute; top:3px; right:6px;
     font-size:.6rem; line-height:1; color:var(--ink);}
-  button.key.num{background:transparent; border:none;
+  button.key.num{background:transparent; border:3px solid var(--ink);
     font-size:clamp(1.3rem,6vmin,1.8rem); font-weight:400;}
-  button.key[data-k^="op:"]{background:transparent; border:1.5px solid var(--ink); border-radius:12px;}
+  button.key[data-k^="op:"]{background:transparent; border-width:3px; border-style:solid; border-color:var(--ink); border-radius:12px;}
+  /* v1.11: Conv reverts to its v1.9 look — solid black when off,
+     plain when armed. (v1.10 had flipped it: plain until armed,
+     solid when armed. Mitch asked for the v1.9 way back.) */
   button.key.conv{background:var(--solid); color:var(--on-solid); border-color:transparent; font-weight:600;}
-  button.key.conv.armed{background:var(--bg); color:var(--ink); border:1.5px solid var(--ink);}
+  button.key.conv.armed{background:transparent; color:var(--ink); border:3px solid var(--ink);}
+  /* v1.11: backspace / C gets the same treatment as Conv — solid
+     black as its resting style. It has no armed state, so it stays
+     solid. = stays solid black, as before. */
+  button.key.back{background:var(--solid); color:var(--on-solid); border-color:transparent;}
   button.key[data-k="eq"]{background:var(--solid); color:var(--on-solid); border-color:transparent; font-weight:600;}
-  button.key:active{background:var(--solid); color:var(--on-solid); border-color:transparent;}
-  button.key.conv:active, button.key[data-k="eq"]:active{background:var(--bg); color:var(--ink); border-color:var(--ink);}
+  /* v1.18: pressed-key indication — inversion, the black-and-white
+     way. :active alone is not reliable in the Kompakt WebView (the
+     default tap highlight is suppressed and touch :active does not
+     always fire), so a JS-driven .pressed class does the same job
+     on pointerdown and is cleared on release / leave / cancel.
+     Plain keys go solid black with white text; keys that are
+     already solid at rest (Conv off, backspace, =) invert the
+     other way — white fill, black text — so a press is always
+     visible. Conv armed is plain at rest, so it goes solid like
+     any plain key. Only colours change: border width never does,
+     so pressing a key can never shift the layout. The dot on a
+     second-function key flips colour with its key. */
+  button.key:active, button.key.pressed{background:var(--solid); color:var(--on-solid); border-color:transparent;}
+  button.key[data-k="eq"]:active, button.key[data-k="eq"].pressed,
+  button.key.conv:active, button.key.conv.pressed,
+  button.key.back:active, button.key.back.pressed{background:var(--bg); color:var(--ink); border-color:var(--ink);}
+  button.key.conv.armed:active, button.key.conv.armed.pressed{background:var(--solid); color:var(--on-solid); border-color:transparent;}
+  button.key.has-shift:active::after, button.key.has-shift.pressed::after{color:var(--on-solid);}
+  button.key.conv.has-shift:active::after, button.key.conv.has-shift.pressed::after,
+  button.key.back.has-shift:active::after, button.key.back.has-shift.pressed::after{color:var(--ink);}
   button.key:focus-visible{outline:2px solid var(--focus); outline-offset:2px;}
   .sr{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0);}
 </style>
 </head>
 <body>
 <div class="device" role="application" aria-label="Construction calculator">
-  <!-- ================= DISPLAY (tap it to open History) ================= -->
-  <div class="lcd" id="lcd" title="Tap for History">
+  <!-- ================= DISPLAY (tap it to open History, tap again to close) ================= -->
+  <div class="lcd" id="lcd" title="Tap for History — tap again to close">
     <div class="lcd-main">
-      <span class="lcd-label" id="dispLabel">Ready</span>
+      <span class="lcd-label" id="dispLabel"></span>
       <span class="lcd-value" id="dispMain">0&Prime;</span>
     </div>
     <div class="lcd-units">
@@ -158,7 +256,7 @@
         <span class="ind" id="indRcl">RCL</span>
         <span class="ind" id="indMem">MEM</span>
       </span>
-      <span class="lcd-unitcap" id="dispUnits">FEET&nbsp;&nbsp;·&nbsp;&nbsp;INCH</span>
+      <span class="lcd-unitcap" id="dispUnits">INCH</span>
     </div>
   </div>
 
@@ -192,7 +290,7 @@
       <div class="cell"><button class="key" data-k="feet" type="button">Feet</button></div>
       <div class="cell"><button class="key" data-k="inch" type="button">Inch</button></div>
       <div class="cell"><button class="key" data-k="frac" type="button">/</button></div>
-      <div class="cell"><button class="key" id="backBtn" data-k="back" type="button" aria-label="Backspace — hold to Clear"><span class="back-ico">&#9003;</span> / C</button></div>
+      <div class="cell"><button class="key back" id="backBtn" data-k="back" type="button" aria-label="Backspace — hold to Clear"><span class="back-ico">&#9003;</span> / C</button></div>
     </div>
     <div class="krow">
       <div class="cell"><button class="key conv" data-k="conv" type="button">Conv</button></div>
@@ -225,39 +323,312 @@
   </div>
 
   <!-- ================= HISTORY (replaces Tape): sheet over the keypad ================= -->
-  <div class="history" id="historyView" aria-label="History">
-    <div class="hist-head"><button class="hist-btn" id="histBackSheet" type="button">&larr; Calc</button><span class="hist-head-title">History</span><button class="hist-btn" id="histGuideBtn" type="button" aria-label="Open the user guide">&#9881; Guide</button><span class="hist-head-count" id="histHeadCount"></span></div>
-    <div class="hist-list" id="historyList"></div>
-    <div class="hist-empty" id="historyEmpty">No calculations yet</div>
-    <div class="hist-pager">
-      <button class="hist-page-btn" id="histPrev" type="button">&uarr; Prev</button>
-      <span class="hist-page-info" id="histPageInfo"></span>
-      <button class="hist-page-btn" id="histNext" type="button">Next &darr;</button>
+  <div class="history" id="historyView" aria-label="History and guide">
+    <div class="sheet-tabs" role="tablist" aria-label="History and guide">
+      <button class="sheet-tab active" id="tabHistory" type="button" role="tab" aria-selected="true">History</button>
+      <button class="sheet-tab" id="tabGuide" type="button" role="tab" aria-selected="false">Guide</button>
+    </div>
+    <div class="sheet-pane active" id="histPane">
+      <div class="hist-main">
+        <div class="hist-listcol">
+          <div class="hist-list" id="historyList"></div>
+          <div class="hist-empty" id="historyEmpty">No calculations yet</div>
+        </div>
+        <div class="hist-vscroll">
+          <button class="hist-vscroll-btn" id="histPrev" type="button" aria-label="Previous page">&#9650;</button>
+          <div class="hist-vtrack" id="histScroll" role="slider" aria-label="History pages" aria-valuemin="1" aria-valuemax="1" aria-valuenow="1" tabindex="0"><div class="hist-vthumb" id="histScrollThumb"></div></div>
+          <button class="hist-vscroll-btn" id="histNext" type="button" aria-label="Next page">&#9660;</button>
+        </div>
+      </div>
+    </div>
+    <div class="sheet-pane" id="guidePane">
+      <div class="guide-body">
+      <h3>Entering values</h3>
+      <p class="gstep lead">Type a number, then tag it with a unit.</p>
+      <p class="gstep">Press: <span class="gkey">9</span> <span class="gkey">Inch</span></p>
+      <p class="gstep">You see: 9&Prime;</p>
+      <p class="gstep">Press: <span class="gkey">6</span> <span class="gkey">Feet</span></p>
+      <p class="gstep">You see: 6&prime;</p>
+      <p class="gstep">Press: <span class="gkey">1</span><span class="gkey">2</span> <span class="gkey">Feet</span> <span class="gkey">7</span> <span class="gkey">Inch</span> <span class="gkey">7</span> <span class="gkey">/</span> <span class="gkey">8</span></p>
+      <p class="gstep">You see: 12&prime; - 7 7/8&Prime;</p>
+      <p class="gstep">Press: <span class="gkey">7</span> <span class="gkey">/</span> <span class="gkey">8</span> <span class="gkey">Inch</span></p>
+      <p class="gstep">You see: 7/8&Prime;</p>
+      <p class="gstep">Press: <span class="gkey">1</span><span class="gkey">2</span> <span class="gkey">Inch</span></p>
+      <p class="gstep">You see: 12&Prime; &mdash; it stays 12&Prime;, it does not turn into 1&prime;.</p>
+      <p class="gstep">Press: <span class="gkey">5</span></p>
+      <p class="gstep">You see: 5 &mdash; a number with no unit is a plain count.</p>
+      <h3>Square and cubic values</h3>
+      <p class="gstep lead">Press the same unit key again to raise the value.</p>
+      <p class="gstep">Press: <span class="gkey">1</span><span class="gkey">3</span><span class="gkey">0</span> <span class="gkey">Feet</span> <span class="gkey">Feet</span></p>
+      <p class="gstep">You see: 130 ft&sup2;</p>
+      <p class="gstep">Press: <span class="gkey">5</span> <span class="gkey">Yds</span> <span class="gkey">Yds</span> <span class="gkey">Yds</span></p>
+      <p class="gstep">You see: 5 yd&sup3;</p>
+      <p class="gstep">Press the unit a third time for cubic, as above.</p>
+      <h3>Converting units</h3>
+      <p class="gstep lead">Press Conv first, then the unit.</p>
+      <p class="gstep">Press: <span class="gkey">1</span><span class="gkey">8</span> <span class="gkey">Inch</span></p>
+      <p class="gstep">You see: 18&Prime;</p>
+      <p class="gstep">Press: <span class="gkey solid">Conv</span> <span class="gkey">Feet</span></p>
+      <p class="gstep">You see: 1.5 ft</p>
+      <p class="gstep">Press: <span class="gkey solid">Conv</span> <span class="gkey">Feet</span></p>
+      <p class="gstep">You see: 1&prime; - 6&Prime;</p>
+      <p class="gstep">Press: <span class="gkey solid">Conv</span> <span class="gkey">Inch</span></p>
+      <p class="gstep">You see: 18 in</p>
+      <p class="gstep">Press: <span class="gkey solid">Conv</span> <span class="gkey">Inch</span></p>
+      <p class="gstep">You see: 18 INCH</p>
+      <p class="gstep">Press: <span class="gkey solid">Conv</span> <span class="gkey">Yds</span></p>
+      <p class="gstep">You see: 0.5 yd</p>
+      <p class="gstep">Press: <span class="gkey solid">Conv</span> <span class="gkey">m</span></p>
+      <p class="gstep">You see: 0.4572 m</p>
+      <p class="gstep">Conv + Feet switches between decimal feet and feet-inches.</p>
+      <p class="gstep">Conv + Inch switches between decimal and fractional inches.</p>
+      <p class="gstep lead">Conv is also the second-function key.</p>
+      <p class="gstep">Press <span class="gkey solid">Conv</span> and the keys swap their labels to their second functions.</p>
+      <p class="gstep">A small dot marks the keys that have one.</p>
+      <p class="gstep">The CONV indicator lights up in the sub row while it is on.</p>
+      <p class="gstep">Press <span class="gkey solid">Conv</span> again, or use the second function, and the labels go back.</p>
+      <h3>Basic math</h3>
+      <p class="gstep lead">Add, subtract, multiply and divide, the same way every time.</p>
+      <p class="gstep">Press: <span class="gkey">6</span> <span class="gkey">Feet</span> <span class="gkey">9</span> <span class="gkey">Inch</span> <span class="gkey">1</span> <span class="gkey">/</span> <span class="gkey">2</span> <span class="gkey">+</span> <span class="gkey">4</span> <span class="gkey">Feet</span> <span class="gkey">3</span> <span class="gkey">Inch</span> <span class="gkey solid">=</span></p>
+      <p class="gstep">You see: 11&prime; - 0 1/2&Prime;</p>
+      <p class="gstep">Press: <span class="gkey">1</span><span class="gkey">0</span> <span class="gkey">Feet</span> <span class="gkey">&times;</span> <span class="gkey">1</span><span class="gkey">2</span> <span class="gkey">Feet</span> <span class="gkey solid">=</span></p>
+      <p class="gstep">You see: 120 ft&sup2;</p>
+      <p class="gstep">Press: <span class="gkey">1</span><span class="gkey">2</span><span class="gkey">0</span> <span class="gkey">Feet</span> <span class="gkey">Feet</span> <span class="gkey">&divide;</span> <span class="gkey">1</span><span class="gkey">0</span> <span class="gkey">Feet</span> <span class="gkey solid">=</span></p>
+      <p class="gstep">You see: 12&prime;</p>
+      <p class="gstep">Press: <span class="gkey">5</span> <span class="gkey">+</span> <span class="gkey">3</span> <span class="gkey solid">=</span></p>
+      <p class="gstep">You see: 8</p>
+      <h3>Percent</h3>
+      <p class="gstep lead">% works with the operation you already have going.</p>
+      <p class="gstep">Press: <span class="gkey">2</span><span class="gkey">0</span><span class="gkey">0</span> <span class="gkey">+</span> <span class="gkey">1</span><span class="gkey">0</span> <span class="gkey">%</span></p>
+      <p class="gstep">You see: 220</p>
+      <p class="gstep">Press: <span class="gkey">5</span><span class="gkey">0</span> <span class="gkey">&times;</span> <span class="gkey">1</span><span class="gkey">0</span> <span class="gkey">%</span></p>
+      <p class="gstep">You see: 5</p>
+      <p class="gstep">Press: <span class="gkey">1</span><span class="gkey">0</span> <span class="gkey">%</span></p>
+      <p class="gstep">You see: 0.1</p>
+      <h3>Area and volume</h3>
+      <p class="gstep lead">Multiply two lengths for area. For volume, use the Concrete solver.</p>
+      <p class="gstep">Press: <span class="gkey solid">Conv</span> <span class="gkey">Bd Ft</span></p>
+      <p class="gstep">You see: Concrete &middot; Length, 1 of 3</p>
+      <p class="gstep">Press: <span class="gkey">1</span><span class="gkey">0</span> <span class="gkey">Bd Ft</span></p>
+      <p class="gstep">You see: Concrete &middot; Width, 2 of 3</p>
+      <p class="gstep">Press: <span class="gkey">1</span><span class="gkey">0</span> <span class="gkey">Bd Ft</span></p>
+      <p class="gstep">You see: Concrete &middot; Thickness (in), 3 of 3</p>
+      <p class="gstep">Press: <span class="gkey">4</span> <span class="gkey">Bd Ft</span></p>
+      <p class="gstep">You see: 1.234568 yd&sup3; &mdash; Cubic yards net, 1 of 7</p>
+      <p class="gstep">Press: <span class="gkey">Bd Ft</span></p>
+      <p class="gstep">You see: 1.358 yd&sup3; &mdash; Cubic yards w/ waste, 2 of 7</p>
+      <p class="gstep">Press: <span class="gkey">Bd Ft</span></p>
+      <p class="gstep">You see: 1.5 yd&sup3; &mdash; Order (&frac14; yd round-up), 3 of 7</p>
+      <p class="gstep">Press: <span class="gkey">Bd Ft</span></p>
+      <p class="gstep">You see: 62 &mdash; 80 lb bags, 4 of 7</p>
+      <p class="gstep">Press: <span class="gkey">Bd Ft</span></p>
+      <p class="gstep">You see: 82 &mdash; 60 lb bags, 5 of 7</p>
+      <p class="gstep">Press: <span class="gkey">Bd Ft</span></p>
+      <p class="gstep">You see: 123 &mdash; 40 lb bags, 6 of 7</p>
+      <p class="gstep">Press: <span class="gkey">Bd Ft</span></p>
+      <p class="gstep">You see: 5,000 lb &mdash; Approx weight, 7 of 7</p>
+      <p class="gstep">In a solver, type the number, then press the solver key again to enter it.</p>
+      <h3>Weight</h3>
+      <p class="gstep lead">Type a weight, or a volume, then press Weight.</p>
+      <p class="gstep">Press: <span class="gkey">5</span><span class="gkey">0</span><span class="gkey">0</span> <span class="gkey">Weight</span></p>
+      <p class="gstep">You see: 500 LB</p>
+      <p class="gstep">Press: <span class="gkey">Weight</span></p>
+      <p class="gstep">You see: 0.226796 MET Ton</p>
+      <p class="gstep">Press: <span class="gkey">Weight</span></p>
+      <p class="gstep">You see: 226.79619 kG</p>
+      <p class="gstep">Press: <span class="gkey">Weight</span></p>
+      <p class="gstep">You see: 0.25 Ton</p>
+      <p class="gstep">Press: <span class="gkey">Weight</span></p>
+      <p class="gstep">You see: 500 LB again</p>
+      <p class="gstep">Press: <span class="gkey">1</span> <span class="gkey">Yds</span> <span class="gkey">Yds</span> <span class="gkey">Yds</span> <span class="gkey">Weight</span></p>
+      <p class="gstep">You see: 1.5 Ton &mdash; one cubic yard at the stored weight per volume.</p>
+      <p class="gstep">Press: <span class="gkey solid">Conv</span> <span class="gkey">0</span></p>
+      <p class="gstep">You see: 1.5 Ton Per CU YD STORED</p>
+      <p class="gstep">Type a new number, press <span class="gkey solid">Conv</span> <span class="gkey">0</span> again, and it stores that instead.</p>
+      <h3>Board feet and cost</h3>
+      <p class="gstep lead">Board feet has its own solver. Cost prices a quantity you already have.</p>
+      <p class="gstep">Press: <span class="gkey">Bd Ft</span></p>
+      <p class="gstep">You see: Board feet &middot; Thickness (in), 1 of 5</p>
+      <p class="gstep">Press: <span class="gkey">Bd Ft</span> five more times to take the shown values.</p>
+      <p class="gstep">You see: 40 BF &mdash; Total board feet, 1 of 3</p>
+      <p class="gstep">Press: <span class="gkey">Bd Ft</span></p>
+      <p class="gstep">You see: 4 BF &mdash; Per piece, 2 of 3</p>
+      <p class="gstep">Press: <span class="gkey">Bd Ft</span></p>
+      <p class="gstep">You see: 44 BF &mdash; With 10% waste, 3 of 3</p>
+      <p class="gstep">Press: <span class="gkey">2</span> <span class="gkey">&times;</span> <span class="gkey">4</span> <span class="gkey">&times;</span> <span class="gkey">1</span><span class="gkey">6</span> <span class="gkey">Bd Ft</span></p>
+      <p class="gstep">You see: 10.66667 BF</p>
+      <p class="gstep">Press: <span class="gkey">1</span><span class="gkey">0</span> <span class="gkey">Feet</span> <span class="gkey solid">Conv</span> <span class="gkey">&middot;</span></p>
+      <p class="gstep">You see: Cost &middot; unit price $</p>
+      <p class="gstep">Press: <span class="gkey">2</span> <span class="gkey">&middot;</span> <span class="gkey">5</span> <span class="gkey">0</span> <span class="gkey solid">=</span></p>
+      <p class="gstep">You see: $25.00 &mdash; Total Cost</p>
+      <p class="gstep">Press: <span class="gkey">2</span> <span class="gkey">&times;</span> <span class="gkey">4</span> <span class="gkey">&times;</span> <span class="gkey">1</span><span class="gkey">6</span> <span class="gkey">Bd Ft</span> <span class="gkey solid">Conv</span> <span class="gkey">&middot;</span></p>
+      <p class="gstep">You see: Cost &middot; unit price $</p>
+      <p class="gstep">Press: <span class="gkey">5</span><span class="gkey">0</span><span class="gkey">0</span> <span class="gkey solid">=</span></p>
+      <p class="gstep">You see: $5.33 &mdash; Total Cost, at $500 per thousand board feet.</p>
+      <h3>Circle and arc</h3>
+      <p class="gstep lead">Circ works from a diameter. Conv + Circ is Arc.</p>
+      <p class="gstep">Press: <span class="gkey">2</span><span class="gkey">5</span> <span class="gkey">Inch</span> <span class="gkey">Circ</span></p>
+      <p class="gstep">You see: 25 INCH &mdash; Diameter</p>
+      <p class="gstep">Press: <span class="gkey">Circ</span></p>
+      <p class="gstep">You see: 490.8739 SQ IN &mdash; Circle &middot; Area</p>
+      <p class="gstep">Press: <span class="gkey">Circ</span></p>
+      <p class="gstep">You see: 78-9/16 INCH &mdash; Circle &middot; Circumference</p>
+      <p class="gstep">Press: <span class="gkey">5</span> <span class="gkey">Feet</span> <span class="gkey">Circ</span></p>
+      <p class="gstep">You see: 5&prime; &mdash; Diameter</p>
+      <p class="gstep">Press: <span class="gkey">3</span> <span class="gkey">Feet</span> <span class="gkey">3</span> <span class="gkey">Inch</span> <span class="gkey solid">Conv</span> <span class="gkey">Circ</span></p>
+      <p class="gstep">You see: 74.48&deg; &mdash; Arc &middot; Degrees, from a 3&prime; - 3&Prime; arc length</p>
+      <p class="gstep">Press: <span class="gkey">9</span><span class="gkey">0</span> <span class="gkey solid">Conv</span> <span class="gkey">Circ</span></p>
+      <p class="gstep">You see: 3&prime; - 11 1/8&Prime; &mdash; Arc &middot; Length, from 90 degrees</p>
+      <h3>Roof framing</h3>
+      <p class="gstep lead">Store any two of Pitch, Rise and Run, then press the third key to solve for it.</p>
+      <p class="gstep">Press: <span class="gkey">Pitch</span></p>
+      <p class="gstep">You see: Pitch</p>
+      <p class="gstep">Press: <span class="gkey">6</span> <span class="gkey">Inch</span> <span class="gkey">Pitch</span></p>
+      <p class="gstep">You see: 6&Prime; &mdash; Pitch, stored</p>
+      <p class="gstep">Press: <span class="gkey">1</span><span class="gkey">2</span> <span class="gkey">Feet</span> <span class="gkey">Rise</span></p>
+      <p class="gstep">You see: 12&prime; &mdash; Rise, stored</p>
+      <p class="gstep">Press: <span class="gkey">Run</span></p>
+      <p class="gstep">You see: 24&prime; &mdash; Run</p>
+      <p class="gstep">Press: <span class="gkey solid">Conv</span> <span class="gkey">&times;</span></p>
+      <p class="gstep">You see: Clear All</p>
+      <p class="gstep">Press: <span class="gkey">6</span> <span class="gkey">Inch</span> <span class="gkey">Pitch</span></p>
+      <p class="gstep">You see: 6&Prime; &mdash; Pitch, stored</p>
+      <p class="gstep">Press: <span class="gkey">1</span><span class="gkey">2</span> <span class="gkey">Feet</span> <span class="gkey">Run</span></p>
+      <p class="gstep">You see: 12&prime; &mdash; Run, stored</p>
+      <p class="gstep">Press: <span class="gkey">Rise</span></p>
+      <p class="gstep">You see: 6&prime;</p>
+      <p class="gstep">Press: <span class="gkey">Diag</span></p>
+      <p class="gstep">You see: 13&prime; - 5&Prime; &mdash; Diagonal</p>
+      <p class="gstep">Press: <span class="gkey">Hip/V</span></p>
+      <p class="gstep">You see: 18&prime; &mdash; Hip / valley</p>
+      <p class="gstep">Press: <span class="gkey">Pitch</span></p>
+      <p class="gstep">You see: 26.57&deg; &mdash; Pitch &middot; Degrees</p>
+      <p class="gstep">Press: <span class="gkey">Pitch</span></p>
+      <p class="gstep">You see: 50 % &mdash; Pitch &middot; % Grade</p>
+      <p class="gstep">Press: <span class="gkey">Pitch</span></p>
+      <p class="gstep">You see: 0.5 &mdash; Pitch &middot; Slope</p>
+      <p class="gstep">Press: <span class="gkey">Pitch</span></p>
+      <p class="gstep">You see: 6&Prime; &mdash; Pitch, back to inches</p>
+      <p class="gstep">Press: <span class="gkey">8</span> <span class="gkey">Inch</span> <span class="gkey solid">Conv</span> <span class="gkey">Hip/V</span></p>
+      <p class="gstep">You see: 8&Prime; STORED &mdash; Irregular Pitch</p>
+      <p class="gstep">Press: <span class="gkey">Hip/V</span></p>
+      <p class="gstep">You see: 16&prime; - 1 7/8&Prime; &mdash; Irregular Hip/V, with a 6&Prime; pitch and a 12 ft run</p>
+      <h3>Jack rafters and rake-wall</h3>
+      <p class="gstep lead">Jack and Rake-Wall step down from the stored on-centre spacing, 16&Prime; unless you change it.</p>
+      <p class="gstep">Press: <span class="gkey">6</span> <span class="gkey">Feet</span> <span class="gkey">Rise</span> <span class="gkey">1</span><span class="gkey">2</span> <span class="gkey">Feet</span> <span class="gkey">Run</span></p>
+      <p class="gstep">You see: 12&prime; &mdash; Run, stored</p>
+      <p class="gstep">Press: <span class="gkey">Jack</span></p>
+      <p class="gstep">You see: 16 INCH STORED &mdash; Jack &middot; o.c.</p>
+      <p class="gstep">Press: <span class="gkey">Jack</span></p>
+      <p class="gstep">You see: 11&prime; - 11 1/8&Prime; &mdash; Jack 1</p>
+      <p class="gstep">Press: <span class="gkey">Jack</span></p>
+      <p class="gstep">You see: 10&prime; - 5 1/4&Prime; &mdash; Jack 2</p>
+      <p class="gstep">Press: <span class="gkey">Jack</span></p>
+      <p class="gstep">You see: 8&prime; - 11 5/16&Prime; &mdash; Jack 3</p>
+      <p class="gstep">Press: <span class="gkey">R/Wall</span></p>
+      <p class="gstep">You see: 16 INCH STORED &mdash; Rake-Wall &middot; o.c.</p>
+      <p class="gstep">Press: <span class="gkey">R/Wall</span></p>
+      <p class="gstep">You see: 5&prime; - 4&Prime; &mdash; Rake-Wall Stud 1</p>
+      <p class="gstep">Press: <span class="gkey">R/Wall</span></p>
+      <p class="gstep">You see: 4&prime; - 8&Prime; &mdash; Rake-Wall Stud 2</p>
+      <p class="gstep">Press: <span class="gkey">R/Wall</span></p>
+      <p class="gstep">You see: 4&prime; &mdash; Rake-Wall Stud 3</p>
+      <p class="gstep">Press: <span class="gkey">2</span><span class="gkey">4</span> <span class="gkey">Inch</span> <span class="gkey solid">Conv</span> <span class="gkey">5</span></p>
+      <p class="gstep">You see: 24 INCH STORED &mdash; On-Centre, now 24&Prime;</p>
+      <p class="gstep">Press: <span class="gkey solid">Conv</span> <span class="gkey">Jack</span></p>
+      <p class="gstep">You see: Irregular Jack &middot; o.c. &mdash; press Jack again for Irregular Jack 1, and keep pressing to step down.</p>
+      <h3>Stairs</h3>
+      <p class="gstep lead">Store a Rise, then press Stair to step through the answers, one at a time.</p>
+      <p class="gstep">Press: <span class="gkey">9</span> <span class="gkey">Feet</span> <span class="gkey">Rise</span></p>
+      <p class="gstep">You see: 9&prime; &mdash; Rise, stored</p>
+      <p class="gstep">Press: <span class="gkey">Stair</span></p>
+      <p class="gstep">You see: 7 11/16&Prime; &mdash; Riser Height</p>
+      <p class="gstep">Press: <span class="gkey">Stair</span></p>
+      <p class="gstep">You see: 14 &mdash; Risers</p>
+      <p class="gstep">Press: <span class="gkey">Stair</span></p>
+      <p class="gstep">You see: &minus;3/8&Prime; &mdash; Riser Overage</p>
+      <p class="gstep">Press: <span class="gkey">Stair</span></p>
+      <p class="gstep">You see: 10&Prime; &mdash; Tread Width</p>
+      <p class="gstep">Press: <span class="gkey">Stair</span></p>
+      <p class="gstep">You see: 13 &mdash; Treads</p>
+      <p class="gstep">Press: <span class="gkey">Stair</span></p>
+      <p class="gstep">You see: 0&Prime; &mdash; Tread Overage</p>
+      <p class="gstep">Press: <span class="gkey">Stair</span></p>
+      <p class="gstep">You see: 13&prime; - 8&Prime; &mdash; Stringer Length</p>
+      <p class="gstep">Press: <span class="gkey">Stair</span></p>
+      <p class="gstep">You see: 39.72&deg; &mdash; Incline Angle</p>
+      <p class="gstep">Press: <span class="gkey">Stair</span></p>
+      <p class="gstep">You see: 10&prime; - 10&Prime; &mdash; Stored Run</p>
+      <p class="gstep">Press: <span class="gkey">Stair</span></p>
+      <p class="gstep">You see: 9&prime; &mdash; Stored Rise</p>
+      <p class="gstep">Press: <span class="gkey">Stair</span></p>
+      <p class="gstep">You see: 7 1/2&Prime; STORED &mdash; Stored Riser Ht</p>
+      <p class="gstep">Press: <span class="gkey">Stair</span></p>
+      <p class="gstep">You see: 10&Prime; STORED &mdash; Stored Tread W</p>
+      <p class="gstep">Press: <span class="gkey">8</span> <span class="gkey">Inch</span> <span class="gkey solid">Conv</span> <span class="gkey">7</span></p>
+      <p class="gstep">You see: 8&Prime; STORED &mdash; Riser Ht, your own riser height</p>
+      <p class="gstep">Press: <span class="gkey">1</span><span class="gkey">2</span> <span class="gkey">Inch</span> <span class="gkey solid">Conv</span> <span class="gkey">9</span></p>
+      <p class="gstep">You see: 1&prime; STORED &mdash; Tread W, your own tread width</p>
+      <p class="gstep">Press: <span class="gkey solid">Conv</span> <span class="gkey">Stair</span></p>
+      <p class="gstep">You see: Baluster &middot; Rail length, post to post, 1 of 3 &mdash; the baluster solver.</p>
+      <h3>Memory</h3>
+      <p class="gstep lead">M+ adds the value on screen to memory. Rcl brings it back.</p>
+      <p class="gstep">Press: <span class="gkey">1</span><span class="gkey">0</span> <span class="gkey">M+</span></p>
+      <p class="gstep">You see: 10 &mdash; Memory +</p>
+      <p class="gstep">Press: <span class="gkey">5</span> <span class="gkey">M+</span></p>
+      <p class="gstep">You see: 15 &mdash; Memory +</p>
+      <p class="gstep">Press: <span class="gkey">Rcl</span> <span class="gkey">M+</span></p>
+      <p class="gstep">You see: 15 &mdash; Memory</p>
+      <p class="gstep">Press: <span class="gkey">M+</span></p>
+      <p class="gstep">You see: 7.5 &mdash; Memory &middot; Average</p>
+      <p class="gstep">Press: <span class="gkey">M+</span></p>
+      <p class="gstep">You see: 2 &mdash; Memory &middot; Count</p>
+      <p class="gstep">Press: <span class="gkey">Rcl</span> <span class="gkey">Rcl</span></p>
+      <p class="gstep">You see: 15 &mdash; Memory &middot; cleared</p>
+      <p class="gstep">Press: <span class="gkey solid">Conv</span> <span class="gkey">M+</span> to subtract from memory.</p>
+      <p class="gstep">Press: <span class="gkey solid">Conv</span> <span class="gkey">Rcl</span> to clear memory.</p>
+      <h3>Prefs</h3>
+      <p class="gstep lead">Conv + % opens Prefs. % steps through the settings, + and &minus; change them.</p>
+      <p class="gstep">Press: <span class="gkey solid">Conv</span> <span class="gkey">%</span></p>
+      <p class="gstep">You see: 1/16 &mdash; Prefs &middot; Fractional Resolution</p>
+      <p class="gstep">Press: <span class="gkey">%</span></p>
+      <p class="gstep">You see: Std. &mdash; Prefs &middot; Area Displays</p>
+      <p class="gstep">Press: <span class="gkey">+</span></p>
+      <p class="gstep">You see: 0. SQ FEET &mdash; Prefs &middot; Area Displays</p>
+      <p class="gstep">Press: <span class="gkey">%</span></p>
+      <p class="gstep">You see: Std. &mdash; Prefs &middot; Volume Displays</p>
+      <p class="gstep">Press: <span class="gkey">%</span></p>
+      <p class="gstep">You see: 0.000 M &mdash; Prefs &middot; Meter Linear Displays</p>
+      <p class="gstep">Press: <span class="gkey">%</span></p>
+      <p class="gstep">You see: 0.00&deg; &mdash; Prefs &middot; Decimal Degree Displays</p>
+      <p class="gstep">Press: <span class="gkey">%</span></p>
+      <p class="gstep">You see: Std. &mdash; Prefs &middot; Fractional Mode</p>
+      <p class="gstep">Press: <span class="gkey">%</span></p>
+      <p class="gstep">You see: 1/16 &mdash; Prefs &middot; Fractional Resolution, back at the start</p>
+      <p class="gstep">Hold <span class="gkey">&#9003; / C</span> to leave Prefs.</p>
+      <p class="gstep">Press: <span class="gkey solid">Conv</span> <span class="gkey">1</span></p>
+      <p class="gstep">You see: 1/16 &mdash; Temp Resolution, just for the next value</p>
+      <p class="gstep">Press: <span class="gkey solid">Conv</span> <span class="gkey">8</span></p>
+      <p class="gstep">You see: 1/8 &mdash; Temp Resolution</p>
+      <h3>History and clear</h3>
+      <p class="gstep lead">Tap the display to open History.</p>
+      <p class="gstep">Tap the display again to close History.</p>
+      <p class="gstep">Tap a row to load its answer back into the calculator.</p>
+      <p class="gstep">Use the up and down arrows to page through it, 8 entries per page, newest first.</p>
+      <p class="gstep">Drag the bar on the right, or tap it, to jump through your history.</p>
+      <p class="gstep">The last 100 entries are kept. The oldest drops off on its own.</p>
+      <p class="gstep">Tap the Guide tab at the top to open this guide.</p>
+      <p class="gstep">Tap the History tab to go back to History.</p>
+      <p class="gstep">Tap <span class="gkey">&#9003; / C</span> to delete one character.</p>
+      <p class="gstep">Hold <span class="gkey">&#9003; / C</span> about half a second to clear the display.</p>
+      <p class="gstep">Hold it again to clear the stored values too.</p>
+      <p class="gstep">Press: <span class="gkey solid">Conv</span> <span class="gkey">&times;</span></p>
+      <p class="gstep">You see: Clear All &mdash; riser, tread, on-centre spacing and weight-per-volume go back to their defaults.</p>
+      </div>
     </div>
   </div>
 
-  <!-- ================= USER GUIDE (v1.8): sheet over the keypad, opened
-       from the settings pill in the History header. Closes back to
-       History. Short sections, no external links. ================= -->
-  <div class="guide" id="guideView" aria-label="User guide">
-    <div class="hist-head"><button class="hist-btn" id="guideBack" type="button">&larr; History</button><span class="hist-head-title">Guide</span><span></span></div>
-    <div class="guide-body">
-      <h3>Entering values</h3>
-      <p>Type a number, then tag it with a unit: Feet, Inch, Yds, m, cm or mm. 9 + Inch is 9&Prime;, 6 + Feet is 6&prime;. A number with no unit is a plain count. Press Feet or Inch again to raise it to square, then cubic.</p>
-      <p>For a fraction, type the whole inches, then the fraction: 12 Feet, 7 Inch, 7, /, 8 gives 12&prime; - 7 7/8&Prime;.</p>
-      <h3>Conv &mdash; second functions</h3>
-      <p>Conv is the second-function key. Press it and the keys that have a second function swap their label to show it &mdash; a small dot marks those keys. The indicator in the sub row reads CONV while it is on. Press Conv again, or use the second function, and the labels go back.</p>
-      <p>Conv + a unit converts the value on the display: Conv + Feet switches feet and inches between fractional and decimal, Conv + Inch switches inches between decimal and fractional.</p>
-      <h3>History</h3>
-      <p>Tap the display to open History. Tap a row to load its answer back into the calculator. Use the up and down arrows to page through it, 8 entries per page, newest first. The last 100 entries are kept; the oldest drops off on its own.</p>
-      <h3>Backspace and Clear</h3>
-      <p>The backspace key reads &#9003; / C. Tap it to delete one character. Hold it about half a second to clear the display; hold it again to clear the stored values too. Conv + &times; is Clear All: it resets the stored riser, tread, on-centre spacing and weight-per-volume to their defaults.</p>
-      <h3>Solvers</h3>
-      <p>Pitch, Rise, Run, Diag, Hip/V: store a Rise and a Run, then each key gives its answer. Pitch cycles through inches, degrees, % grade and slope. Stair: store a Rise, then Stair steps through riser, treads, stringer and the rest. Circ: enter a diameter, then Circ steps through diameter, area and circumference; Conv + Circ is Arc. Rake-Wall and Jack step through studs and jacks from the stored on-centre spacing. Weight turns a weight or a volume into tons, pounds, metric tons or kilograms. Cost: enter a quantity, press Conv + &middot;, type a price, press =. Board feet: enter thickness &times; width &times; length, press Bd Ft. Memory: M+ adds the value, Rcl recalls the total, Rcl + Rcl clears it.</p>
-      <h3>Prefs</h3>
-      <p>Conv + % opens Prefs. % steps through the settings, + and &minus; change the option, Clear (hold &#9003; / C) exits. The settings are fractional resolution, area display, volume display, meter display, degree display and fractional mode. Conv + 1, 2, 3, 4, 6 or 8 changes the fractional resolution just for the next value.</p>
-    </div>
-  </div>
+
   </div>
 
 </div>
@@ -268,13 +639,18 @@
    ConCalc v1.7 — key rules implemented here (MMD-aligned):
    - History: overlay sheet over the keypad area (display stays
      visible), newest first, fixed-height rows, discrete paged
-     scrolling (8 per page, ▲/▼ arrows + page indicator), fixed 44px
-     header inside the sheet, own scroll if the sheet is short. No wipe
-     control — history auto-prunes to the last 100 entries, oldest drops
-     automatically. Persisted in localStorage (concalc.history.v1).
+     scrolling (8 per page, ▲/▼ arrows), fixed 44px
+     header inside the sheet. No wipe control — history auto-prunes
+     to the last 100 entries, oldest drops automatically. Persisted
+     in localStorage (concalc.history.v1).
      v1.7: tap the display to open History (no HIST button, no top
-     bar); the sheet's own "← Calc" button, or tapping the display
-     again, closes it.
+     bar); tapping the display again closes it.
+     v1.13: the History list never scrolls — a page is exactly the 8
+     rows that fit, and the ▲/▼ pager buttons are the only way to move
+     between pages. The "← Calc" back button is gone; the close is the
+     display tap. The header is a 3-column grid so the title is truly
+     centred, and the header pills are a fixed 32px tall so their text
+     sits dead centre in the 44px header.
    - Numbers are PLAIN until tagged: type a number, then Feet/Inch/Yds/
      m/cm/mm tags it; an untagged number is a plain count (reference:
      "enter dimensions from largest to smallest", and % / board-feet /
@@ -307,13 +683,47 @@
      text selection are locked down everywhere else. Entering a value
      keeps the unit entered (12 + Inch shows 12", not 1'), and
      feet-and-inches values show a dash between the parts
-     (12' - 7 7/8"). A user guide lives behind a settings pill in
-     the History header and closes back to History.
-   - Styling follows the stock calculator inspo: airy rows, plain-text
-     keys with no fill or border, operators in thin outlined rounded
-     squares, = solid black. Conflicts resolved for the approved
-     v1.5 list: 5 columns stay (inspo has 4), Clear stays top-right
-     (inspo has AC top-left).
+     (12' - 7 7/8"). A user guide lives on the Guide tab of the
+     History sheet.
+   - v1.9: pressing a different unit key after a value is already
+     tagged converts it (18 + Inch, then Feet, shows 1' - 6";
+     6 + Feet, then Inch, shows 72"). Pressing the same unit key
+     again still raises the dimension (Inch, Inch = sq in, again =
+     cu in). The user guide is unchanged in v1.9.
+   - v1.10: the unit cap is read off the displayed text, so it names
+     only the units on screen (feet-inches / feet / inch / nothing
+     for a plain number; square/cubic and metric likewise). Conv was
+     lit backwards — now plain until armed, solid black when armed
+     (= stays solid). Every key has a thin black outline, no fill.
+     The guide is rewritten step-by-step (Press / You see, key
+     icons), 15 sections, conversion documented as Conv + unit.
+   - v1.13: History header is a 3-column grid (count / centred title /
+     Guide pill) with 32px pills so everything sits centred in the
+     44px header; the History list never scrolls (overflow hidden, 8
+     rows/page, pager buttons only); the "← Calc" button is gone —
+     tap the display to open History, tap it again to close it.
+   - v1.14: History and Guide are TABS at the top of the sheet
+     (History / Guide, active tab solid black) — no Guide pill, no
+     "← History" button. The header count ("1–8 of 12") is gone;
+     the page info stays at the bottom in the pager.
+     v1.19: that page info ("Page X of Y") is gone too — the ▲/▼
+     pager and the scroll bar are the navigation now. The History
+     list has a VERTICAL scroll bar down its right edge — thin
+     light track, black thumb the same width as the track, ▲ at the
+     top end and ▼ at the bottom end (those triangles are the pager
+     buttons, plain small triangles like the stock bar). Tap the
+     track or drag the thumb to move through History. The bar is
+     hidden entirely when there is nothing to scroll (empty, or
+     everything fits on one page); the thumb is sized by the
+     visible fraction — 8 entries shown out of the total — so
+     more entries means a smaller thumb. An arrow shows as a
+     dot-matrix dither at the end it cannot go past (▲ on the first
+     page, ▼ on the last) and returns to solid black when you can
+     move again — black dots on white, no grey pixels.
+   - Styling follows the stock calculator inspo: airy rows, operators
+     in thin outlined rounded squares, = solid black. Conflicts
+     resolved for the approved v1.5 list: 5 columns stay (inspo has
+     4), Clear stays top-right (inspo has AC top-left).
    ===================================================================== */
 function $(id){return document.getElementById(id);}
 function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){var t=a%b;a=b;b=t;}return a||1;}
@@ -368,6 +778,19 @@ function fmtFracInch(totalIn){
   if(num === r){ whole += 1; num = 0; }
   if(num){ var g = gcd(num, den); num/=g; den/=g; return sign + (whole ? whole + "-" + num + "/" + den : num + "/" + den) + " INCH"; }
   return sign + whole + " INCH";
+}
+/* v1.15: pitch in inches is stated as inches, never rolled up into
+   feet — a 12″ pitch must read "12″", not "1′". */
+function fmtPitchIn(p){
+  if(!isFinite(p)) return "—";
+  var r = res();
+  var sign = p < 0 ? "−" : "";
+  var rounded = Math.round(Math.abs(p) * r) / r;
+  var whole = Math.floor(rounded + 1e-9);
+  var num = Math.round((rounded - whole) * r), den = r;
+  if(num === r){ whole += 1; num = 0; }
+  if(num){ var g = gcd(num, den); num/=g; den/=g; return sign + whole + " " + num + "/" + den + "″"; }
+  return sign + whole + "″";
 }
 var dispMode = "ftin";   /* ftin | decft | decin | fracin | yd | m | cm | mm */
 function fmtByPref(val, dim){
@@ -444,38 +867,69 @@ function renderHistory(){
     });
     list.appendChild(row);
   });
-  var from = total ? start + 1 : 0, to = Math.min(total, start + HIST_PER_PAGE);
-  var label = total ? from + "\u2013" + to + " of " + total : "0 of 0";
-  var info = $("histPageInfo"); if(info) info.textContent = "Page " + (histPage + 1) + " of " + histPageCount();
-  var hcnt = $("histHeadCount"); if(hcnt) hcnt.textContent = label;
+  /* v1.14: the scroll bar only exists when there is something to
+     scroll — empty History, or everything fitting on one page,
+     hides the whole bar (track and ▲/▼) and the list takes the
+     full width. The thumb is sized by the visible fraction: 8
+     entries shown out of the total, so more entries = smaller
+     thumb; its top moves down as you page forward. */
+  var pages = histPageCount();
+  var vscroll = document.querySelector(".hist-vscroll");
+  if(vscroll) vscroll.style.display = pages <= 1 ? "none" : "";
+  var thumb = $("histScrollThumb"), track = $("histScroll");
+  if(thumb){
+    var h = total <= HIST_PER_PAGE ? 100 : (HIST_PER_PAGE / total) * 100;
+    var top = pages <= 1 ? 0 : (histPage / (pages - 1)) * (100 - h);
+    thumb.style.height = "calc(" + h + "% - 4px)";
+    thumb.style.top = "calc(" + top + "% + 2px)";
+  }
+  if(track){ track.setAttribute("aria-valuemax", String(pages)); track.setAttribute("aria-valuenow", String(histPage + 1)); }
   var prev = $("histPrev"), next = $("histNext");
-  if(prev) prev.hidden = histPage <= 0;
-  if(next) next.hidden = histPage >= histPageCount() - 1;
+  /* v1.15: arrows dither at the ends instead of disappearing —
+     ▲ dot-matrix on the first page, ▼ dot-matrix on the last page,
+     solid black again when you can move that way. */
+  if(prev){ prev.disabled = histPage <= 0; prev.classList.toggle("faded", histPage <= 0); }
+  if(next){ next.disabled = histPage >= histPageCount() - 1; next.classList.toggle("faded", histPage >= histPageCount() - 1); }
 }
-function histPageStep(dir){
-  var n = histPage + dir;
-  if(n < 0 || n > histPageCount() - 1) return;
+function histPageStep(dir){ histPageGo(histPage + dir); }
+function histPageGo(n){
+  if(n < 0) n = 0;
+  if(n > histPageCount() - 1) n = histPageCount() - 1;
   histPage = n; renderHistory();
+}
+/* v1.14: the sheet has two tabs — History and Guide. The History tab
+   is the default when the sheet opens. Tapping the display closes
+   the whole sheet from either tab. */
+var sheetTab = "history";
+function showSheetTab(tab){
+  sheetTab = tab;
+  var th = $("tabHistory"), tg = $("tabGuide");
+  if(th){ th.classList.toggle("active", tab === "history"); th.setAttribute("aria-selected", tab === "history" ? "true" : "false"); }
+  if(tg){ tg.classList.toggle("active", tab === "guide"); tg.setAttribute("aria-selected", tab === "guide" ? "true" : "false"); }
+  var hp = $("histPane"), gp = $("guidePane");
+  if(hp) hp.classList.toggle("active", tab === "history");
+  if(gp) gp.classList.toggle("active", tab === "guide");
+  if(tab === "history") renderHistory();
 }
 function openHistory(){
   historyOpen = true; histPage = 0;
   document.querySelector(".device").classList.add("show-history");
-  renderHistory();
+  showSheetTab("history");
 }
 function closeHistory(){
   historyOpen = false;
-  closeGuide();
   document.querySelector(".device").classList.remove("show-history");
+  sheetTab = "history";
 }
 function toggleHistory(){ if(historyOpen) closeHistory(); else openHistory(); }
-var guideOpen = false;
-function openGuide(){
-  guideOpen = true;
-  document.querySelector(".device").classList.add("show-guide");
-}
-function closeGuide(){
-  guideOpen = false;
-  document.querySelector(".device").classList.remove("show-guide");
+/* v1.14: vertical scroll bar — tap the track to jump, or drag the thumb. */
+function histScrollFromEvent(ev){
+  var track = $("histScroll"); if(!track) return;
+  var r = track.getBoundingClientRect();
+  if(!r || r.height <= 0) return;
+  var y = (ev.clientY !== undefined ? ev.clientY : 0) - r.top;
+  var f = Math.max(0, Math.min(1, y / r.height));
+  histPageGo(Math.round(f * (histPageCount() - 1)));
 }
 /* v1.8: only the result at the top is copyable. A long press anywhere
    else must not bring up copy / text selection, so the context menu
@@ -541,7 +995,7 @@ function builderValue(){
     var frac = 0;
     if(nn && dd) frac = nn/dd;
     else if(nn && !dd) frac = nn / res();   /* reference: no denominator -> resolution setting */
-    var neg = (String(fields.feet).indexOf("-")===0);
+    var neg = (String(fields.feet).indexOf("-")===0 || String(fields.inch).indexOf("-")===0);
     var lin = Math.abs(f)*12 + Math.abs(i) + frac;
     var val = (bDim === 1) ? lin : lin * Math.pow(bDimUnit, bDim-1);
     return {val: neg ? -val : val, dim:bDim};
@@ -607,21 +1061,84 @@ function updateIndicators(){
   $("indMem").className = "ind" + (memory !== null ? " on" : "");
   $("indConv").className = "ind" + (shiftArmed ? " on" : "");
   var rclEl = $("indRcl"); if(rclEl) rclEl.className = "ind" + (rclArmed ? " on" : "");
+  /* v1.10: the unit cap names only the units actually in the value
+     on screen, so it is read off the displayed text, not the stored
+     number. A feet-and-inches value shows "FEET - INCH", a
+     feet-only value "FEET", an inches-only value "INCH", and a plain
+     number shows nothing at all. Square/cubic values show their
+     square/cubic unit; metric and yard values show their own unit.
+     (Reading the stored value would be wrong here: 18″ as-entered
+     and a 25″ diameter are inches on screen even though the stored
+     total is more than a foot, and a circle area reads "SQ IN".) */
+  var txt = $("dispMain").textContent || "";
   var cap = "";
-  if(dispDim===2) cap = "AREA";
-  else if(dispDim===3) cap = "VOLUME";
-  else if(dispDim===0) cap = "NUMBER";
-  else if(dispMode==="decft") cap = "FEET";
-  else if(dispMode==="decin" || dispMode==="fracin") cap = "INCH";
-  else if(dispMode==="yd") cap = "YARDS";
-  else if(dispMode==="m" || dispMode==="cm" || dispMode==="mm") cap = "METRIC";
-  else cap = "FEET  ·  INCH";
+  if(/′/.test(txt) && /″/.test(txt)) cap = "FEET - INCH";
+  else if(/′/.test(txt)) cap = "FEET";
+  else if(/″/.test(txt) || /INCH/.test(txt)) cap = "INCH";
+  else if(/yd²/.test(txt)) cap = "SQ YD";
+  else if(/yd³/.test(txt)) cap = "CU YD";
+  else if(/ft²/.test(txt)) cap = "SQ FT";
+  else if(/ft³/.test(txt)) cap = "CU FT";
+  else if(/m²/.test(txt)) cap = "SQ M";
+  else if(/m³/.test(txt)) cap = "CU M";
+  else if(/SQ IN/.test(txt)) cap = "SQ IN";
+  else if(/CU IN/.test(txt)) cap = "CU IN";
+  else if(/\bin\b/.test(txt)) cap = "INCH";
+  else if(/\byd\b/.test(txt)) cap = "YARDS";
+  else if(/\bcm\b/.test(txt)) cap = "CENTIMETRES";
+  else if(/\bmm\b/.test(txt)) cap = "MILLIMETRES";
+  else if(/\bm\b/.test(txt)) cap = "METRES";
+  else if(/\bft\b/.test(txt)) cap = "FEET";
+  else if(dispDim===2) cap = prefArea==="sqyd" ? "SQ YD" : prefArea==="sqm" ? "SQ M" : "SQ FT";
+  else if(dispDim===3) cap = prefVol==="cuft" ? "CU FT" : prefVol==="cum" ? "CU M" : "CU YD";
+  else if(dispDim===1 && dispMode==="decft") cap = "FEET";
+  else if(dispDim===1 && (dispMode==="decin" || dispMode==="fracin")) cap = "INCH";
+  else if(dispDim===1 && dispMode==="yd") cap = "YARDS";
+  else if(dispDim===1 && dispMode==="m") cap = "METRES";
+  else if(dispDim===1 && dispMode==="cm") cap = "CENTIMETRES";
+  else if(dispDim===1 && dispMode==="mm") cap = "MILLIMETRES";
+  else cap = "";
   $("dispUnits").textContent = cap;
 }
+/* ---------- v1.16: the label on the left of the display stays
+   blank unless something is worth naming. Routine states (Ready,
+   Entering, Entered, Cleared, Clear All, Negated), bare key echoes
+   with no result (Diag, Hip/V), and arithmetic echoes (a label that
+   ends in an operator or "=") show nothing — the display is just
+   the value. Named solver results (Diagonal, Hip / valley, Run,
+   Riser Height, Total Cost, ...) still show. If in doubt, blank.
+   v1.17: an invalid selection never shows an error — the error
+   messages (Store a Rise and a Run first, Memory empty, Needs a
+   length, ...) were removed at the source. A solver key pressed
+   with nothing to solve shows its name as a label prompt instead
+   (Pitch, Rise, Run, ...); typing clears the label and the entry
+   continues. Keys with no prompt to show (memory recall with an
+   empty memory, Conv conversions of a plain number) stay fully
+   silent. Confirmations of something done successfully (Memory ·
+   cleared, Cleared) are kept. */
+var ROUTINE_LABELS = {"Ready":1,"Entering":1,"Entered":1,"Cleared":1,
+  "Clear All":1,"Negated":1};
+function displayLabel(label){
+  if(label === undefined || label === null) return "";
+  var t = String(label).trim();
+  if(!t || ROUTINE_LABELS[t]) return "";
+  if(/=$/.test(t)) return "";                 /* "12′ + 5″ =", "25% =" */
+  if(/[+\-−×÷]$/.test(t)) return "";          /* operator echo: "12′ +" */
+  if(/^√/.test(t)) return "";                 /* "√ 9 =" */
+  return t;
+}
+/* v1.17: a solver key pressed with nothing to solve shows its name as a
+   label prompt — the reference shows "pitch" when you press Pitch, then
+   the label clears when you type (typing goes through liveEntryPreview,
+   which blanks the label). Only the label changes: the value, sub row
+   and History are untouched. Keys with no prompt to show (memory recall
+   with an empty memory, Conv conversions of a plain number) stay fully
+   silent. */
+function promptLabel(name){ $("dispLabel").textContent = displayLabel(name); updateIndicators(); }
 function setDisplay(val, dim, label, subOverride){
   dispVal = val; dispDim = dim;
   $("dispMain").textContent = fmtByPref(val, dim);
-  if(label !== undefined) $("dispLabel").textContent = label;
+  if(label !== undefined) $("dispLabel").textContent = displayLabel(label);
   $("dispSub").textContent = subIndicator(subOverride);
   updateIndicators();
 }
@@ -637,7 +1154,7 @@ function subIndicator(text){
 }
 function showMain(label, mainText, subText, val, dim){
   if(val !== undefined){ dispVal = val; dispDim = dim; }
-  $("dispLabel").textContent = label;
+  $("dispLabel").textContent = displayLabel(label);
   $("dispMain").textContent = mainText;
   $("dispSub").textContent = subIndicator(subText);
   updateIndicators();
@@ -656,7 +1173,10 @@ function liveEntryPreview(){
     setDisplay(v.val, 0, "Cost · unit price $", "Qty " + fmtByPref(costPrompt.qty, costPrompt.dim) + (costPrompt.perMbm ? " (per Mbm)" : "") + " — = or Conv+· to total");
   } else {
     setDisplay(v.val, v.dim, "Entering", rawParts());
-    if(bMode === "ftin"){ var et = entryFtInText(); if(et) $("dispMain").textContent = et; }
+    /* v1.9: the as-entered text only applies to a linear entry. A
+       square/cubic entry (same unit pressed again) keeps the
+       area/volume display, so the dimension change stays visible. */
+    if(bMode === "ftin" && bDim === 1){ var et = entryFtInText(); if(et){ $("dispMain").textContent = et; updateIndicators(); } }
   }
 }
 
@@ -694,7 +1214,7 @@ function pressEquals(){
   /* v1.8: capture the entered-unit text before commitEntry clears it,
      so an entered value keeps the unit it was entered in (12 Inch
      stays 12″) at this point too. */
-  var etxt = (bMode === "ftin") ? entryFtInText() : null;
+  var etxt = (bMode === "ftin" && bDim === 1) ? entryFtInText() : null;
   var entry = commitEntry();
   if(acc !== null && pendingOp && entry){
     var expr = fmtByPref(acc.val, acc.dim) + " " + opSymbol(pendingOp) + " " + fmtByPref(entry.val, entry.dim);
@@ -706,7 +1226,7 @@ function pressEquals(){
     addHistory("Entered", etxt || fmtByPref(entry.val, entry.dim), entry.val, entry.dim);
     justEvaluated = true;
     setDisplay(entry.val, entry.dim, "Entered");
-    if(etxt) $("dispMain").textContent = etxt;
+    if(etxt){ $("dispMain").textContent = etxt; updateIndicators(); }
   }
   lastPct = null;
 }
@@ -747,6 +1267,46 @@ function pressBack(){
   } else if(single.length){ single = single.slice(0,-1); }
   if(builderHasInput()) liveEntryPreview(); else setDisplay(acc ? acc.val : 0, acc ? acc.dim : dispDim, "Ready");
 }
+/* ---------- v1.9: convert between Feet and Inch on entry ----------
+   Pressing a *different* unit key after a value is already tagged
+   converts it: 18 + Inch, then Feet, shows 1′ - 6″; 6 + Feet, then
+   Inch, shows 72″. Pressing the *same* unit key again still raises
+   the dimension instead (Inch, Inch = sq in, again = cu in), and a
+   compound feet-and-inches entry keeps its normal flow — typing
+   12 Feet, 7 Inch, 7, /, 8 still gives 12′ - 7 7/8″, because the
+   Inch press there follows inch digits that were just typed. */
+function splitTotalIn(totalIn){
+  var r = res();
+  var sign = totalIn < 0 ? "-" : "";
+  var rounded = Math.round(Math.abs(totalIn) * r) / r;
+  var feet = Math.floor(rounded / 12);
+  var rem = rounded - feet*12;
+  var wholeIn = Math.floor(rem + 1e-9);
+  var num = Math.round((rem - wholeIn) * r), den = r;
+  if(num === r){ wholeIn += 1; num = 0; }
+  if(wholeIn === 12){ feet += 1; wholeIn = 0; }
+  if(num){ var g = gcd(num, den); num /= g; den /= g; }
+  return {sign:sign, feet:feet, wholeIn:wholeIn, num:num, den:den};
+}
+function setFtInEntry(totalIn){
+  var p = splitTotalIn(totalIn);
+  bMode = "ftin"; bDim = 1; bDimUnit = 12; dispMode = "ftin";
+  fields = {feet:"", inch:"", num:"", den:""}; single = "";
+  if(p.feet) fields.feet = p.sign + p.feet;
+  if(p.wholeIn || p.num) fields.inch = (p.feet ? "" : p.sign) + p.wholeIn;
+  else if(!p.feet) fields.inch = p.sign + "0";
+  if(p.num){ fields.num = String(p.num); fields.den = String(p.den); }
+  activeField = "inch";
+}
+function setInchOnlyEntry(totalIn){
+  var p = splitTotalIn(totalIn);
+  var totalWhole = p.feet*12 + p.wholeIn;
+  bMode = "ftin"; bDim = 1; bDimUnit = 1; dispMode = "ftin";
+  fields = {feet:"", inch:"", num:"", den:""}; single = "";
+  fields.inch = p.sign + totalWhole;
+  if(p.num){ fields.num = String(p.num); fields.den = String(p.den); }
+  activeField = "num";
+}
 function pressFeetKey(){
   wtvolStoreMode = false;
   if(bMode === "num"){
@@ -756,13 +1316,20 @@ function pressFeetKey(){
     liveEntryPreview(); return;
   }
   if(bMode !== "ftin"){
-    var s = single;
-    bMode = "ftin"; fields = {feet:"", inch:"", num:"", den:""}; single = ""; bDim = 1;
-    if(s !== ""){ fields.feet = s; activeField = "inch"; }
-    else activeField = "feet";
-    dispMode = "ftin"; liveEntryPreview(); return;
+    /* A decimal/metric value already tagged in another unit: convert
+       its total to feet-and-inches instead of re-reading the number
+       as feet (18.5 decimal inches + Feet is 1′ - 6 1/2″, not 18′). */
+    var s = parseFloat(single);
+    if(single !== "" && !isNaN(s)){ setFtInEntry(s * (UNIT_TO_IN[bMode] || 1)); }
+    else { bMode = "ftin"; fields = {feet:"", inch:"", num:"", den:""}; single = ""; bDim = 1; activeField = "feet"; dispMode = "ftin"; }
+    liveEntryPreview(); return;
   }
   if(!builderHasInput()){ activeField = "feet"; return; }
+  if(fields.feet === "" && fields.inch !== "" && bDim === 1){
+    /* Inches-only value, Feet pressed: convert it (18″ -> 1′ - 6″). */
+    setFtInEntry(builderValue().val);
+    liveEntryPreview(); return;
+  }
   if(fields.feet !== "" && fields.inch === "" && fields.num === "" && fields.den === "" && bDim < 3){
     bDim++; bDimUnit = 12;   /* 130 f f = 130 sq ft; again = cu ft */
     liveEntryPreview(); return;
@@ -782,13 +1349,22 @@ function pressInchKey(){
     liveEntryPreview(); return;
   }
   if(bMode !== "ftin"){
-    var s = single;
-    bMode = "ftin"; fields = {feet:"", inch:"", num:"", den:""}; single = ""; bDim = 1;
-    if(s !== ""){ fields.inch = s; activeField = "num"; }
-    else activeField = "inch";
-    dispMode = "ftin"; liveEntryPreview(); return;
+    /* A value already tagged in another unit: convert its total to
+       inches instead of re-reading the number as inches (1.5 decimal
+       feet + Inch is 18″, not 1 1/2″). */
+    var s = parseFloat(single);
+    if(single !== "" && !isNaN(s)){ setInchOnlyEntry(s * (UNIT_TO_IN[bMode] || 1)); }
+    else { bMode = "ftin"; fields = {feet:"", inch:"", num:"", den:""}; single = ""; bDim = 1; activeField = "inch"; dispMode = "ftin"; }
+    liveEntryPreview(); return;
   }
   if(!builderHasInput()){ activeField = "inch"; return; }
+  if(fields.inch === "" && fields.feet !== "" && fields.num === "" && fields.den === "" && bDim === 1){
+    /* Feet-only value, Inch pressed: convert it (6′ -> 72″). Only
+       when no inch digits have been typed yet — 12 Feet, 7, Inch
+       still moves on to the fraction, it does not convert. */
+    setInchOnlyEntry(builderValue().val);
+    liveEntryPreview(); return;
+  }
   if(fields.inch !== "" && fields.feet === "" && fields.num === "" && fields.den === "" && bDim < 3){
     bDim++; bDimUnit = 1; liveEntryPreview(); return;
   }
@@ -844,7 +1420,7 @@ function convertDisplayTo(u){
   var v;
   if(builderHasInput()){ v = commitEntry(); }
   else v = {val:dispVal, dim:dispDim};
-  if(!v || v.dim === 0){ showMain("Conv", "Lengths only",""); return; }
+  if(!v || v.dim === 0){ return; }  /* v1.17: invalid selection is silent */
   var key = u;
   if(v.dim === 1){
     if(u === "feet"){
@@ -878,6 +1454,7 @@ function convertDisplayTo(u){
   var conv = (u === "m" || u === "cm" || u === "mm") ? v.val * per[u] : v.val / per[u];
   showMain("Conv · " + unitName, fmtNum(conv,6) + " " + unitName.toLowerCase().replace("sq ","").replace("cu ",""),"", v.val, v.dim);
   $("dispMain").textContent = fmtNum(conv,6) + " " + (v.dim===2 ? "sq " : "cu ") + ({yds:"yd",feet:"ft",inch:"in",m:"m",cm:"cm",mm:"mm"}[u]);
+  updateIndicators();   /* v1.10: the cap follows the shown text */
 }
 
 /* ---------- triangle: Rise / Run / Diag / Hip-V / Pitch (reference p.28-33) ---------- */
@@ -897,7 +1474,7 @@ function pitchShow(form){
   if(p === null) return;
   tri.pitch = p;
   var ang = Math.atan2(p,12)*180/Math.PI;
-  if(form === "in") showMain("Pitch", fmtFI(p),"", p, 0);
+  if(form === "in") showMain("Pitch", fmtPitchIn(p),"", p, 0);
   else if(form === "deg") showMain("Pitch · Degrees", fmtAngle(ang),"", ang, 0);
   else if(form === "grd") showMain("Pitch · % Grade", fmtNum(p/12*100,5) + " %","", p/12*100, 0);
   else showMain("Pitch · Slope", fmtNum(p/12,6),"", p/12, 0);
@@ -905,9 +1482,10 @@ function pitchShow(form){
 function pitchKey(isRatio){
   if(builderHasInput() || lastPct !== null){
     var pe = pitchFromEntry(isRatio);
-    if(!pe){ showMain("Pitch", "Pitch takes a number",""); return; }
+    if(!pe){ promptLabel("Pitch"); return; }
     tri.pitch = pe.pitch;
     if(tri.run !== null) tri.rise = tri.run * pe.pitch / 12;
+    else if(tri.rise !== null && pe.pitch !== 0) tri.run = tri.rise * 12 / pe.pitch;  /* v1.15: any order — Pitch + Rise solves Run */
     pitchCycleIdx = PITCH_CYCLE.indexOf(pe.form);
     acc = null; pendingOp = null; justEvaluated = true; lastPct = null;
     clearBuilder();
@@ -918,7 +1496,7 @@ function pitchKey(isRatio){
     if(tri.pitch !== null){
       pitchCycleIdx = (pitchCycleIdx+1) % 4;
       pitchShow(PITCH_CYCLE[pitchCycleIdx]);
-    } else showMain("Pitch", "Store a Rise and a Run first","");
+    } else { promptLabel("Pitch"); }
     return;
   }
   tri.pitch = tri.rise/tri.run*12;
@@ -937,7 +1515,7 @@ function triJump(name){
   else if(name === "hip") hipKey();
 }
 function hipKey(){
-  if(tri.rise === null || tri.run === null){ showMain("Hip/V", "Store a Rise and a Run first",""); return; }
+  if(tri.rise === null || tri.run === null){ promptLabel("Hip/V"); return; }
   if(tri.irPitch !== null && tri.pitch !== null){
     var rise = tri.run * tri.pitch / 12;
     var runB = rise * 12 / tri.irPitch;
@@ -954,14 +1532,14 @@ function hipKey(){
 function irPitchKey(){
   if(builderHasInput()){
     var o = builderValue();
-    if(o.dim !== 1){ showMain("Irregular Pitch", "Needs a length",""); return; }
+    if(o.dim !== 1){ promptLabel("Irregular Pitch"); return; }
     tri.irPitch = o.val;
     clearBuilder();
     showMain("Irregular Pitch", fmtFI(o.val) + "  STORED","", o.val, 1);
     return;
   }
   if(tri.irPitch !== null){ hipKey(); return; }
-  showMain("Irregular Pitch", "Type a pitch first","");
+  promptLabel("Irregular Pitch"); return;
 }
 
 /* ---------- Circle / Arc (reference p.4, p.24) ----------
@@ -972,7 +1550,7 @@ var circDiaMode = "ftin";
 function circKey(){
   if(builderHasInput()){
     var o = builderValue();
-    if(o.dim !== 1){ showMain("Circle", "Needs a diameter",""); return; }
+    if(o.dim !== 1){ promptLabel("Circle"); return; }
     circDiaMode = (bMode === "decin" || (bMode === "ftin" && fields.feet === "")) ? "in" : "ftin";
     circDia = o.val; circIdx = 0;
     clearBuilder();
@@ -980,7 +1558,7 @@ function circKey(){
     else setDisplay(circDia, 1, "Diameter");
     return;
   }
-  if(circDia === null){ showMain("Circle", "Enter a diameter first",""); return; }
+  if(circDia === null){ promptLabel("Circle"); return; }
   circIdx = (circIdx+1) % 3;
   var r = circDia/2;
   if(circIdx === 0){
@@ -991,7 +1569,7 @@ function circKey(){
   else { addHistory("Circle · Circumference — dia " + fmtFI(circDia), fmtFracInch(2*Math.PI*r), 2*Math.PI*r, 1); showMain("Circle · Circumference", fmtFracInch(2*Math.PI*r),"", 2*Math.PI*r, 1); }
 }
 function arcKey(){
-  if(circDia === null){ showMain("Arc", "Enter a diameter first",""); return; }
+  if(circDia === null){ promptLabel("Arc"); return; }
   var r = circDia/2;
   if(builderHasInput()){
     var raw = bareNumber();
@@ -1009,7 +1587,7 @@ function arcKey(){
       return;
     }
   }
-  showMain("Arc", "Enter arc length or degrees","");
+  promptLabel("Arc"); return;
 }
 
 /* ---------- Stair (reference p.7, p.35-37): 12 results, press Stair to step ---------- */
@@ -1043,7 +1621,7 @@ function stairCompute(){
   ];
 }
 function stairKey(){
-  if(tri.rise === null){ showMain("Stair", "Enter a Rise first",""); return; }
+  if(tri.rise === null){ promptLabel("Stair"); return; }
   var key = tri.rise + "|" + (tri.run||"") + "|" + (riserStore||7.5) + "|" + (treadStore||10);
   if(key !== stairSig){ stairSig = key; stairIdx = 0; }
   var items = stairCompute();
@@ -1054,11 +1632,12 @@ function stairKey(){
   if(it.k === "Riser Height" || it.k === "Tread Width" || it.k === "Stringer Length" || it.k === "Stored Run" || it.k === "Stored Rise" || it.k === "Stored Riser Ht" || it.k === "Stored Tread W" || it.k === "Riser Overage" || it.k === "Tread Overage")
     $("dispMain").textContent = it.v;
   if(it.k === "Incline Angle") $("dispMain").textContent = it.v;
+  updateIndicators();   /* v1.10: the cap follows the shown text */
 }
 
 /* ---------- Jack (reference p.31-33): 1st press shows o.c., then JK1, JK2... ---------- */
 function jackKey(){
-  if(tri.rise === null || tri.run === null){ showMain("Jack", "Store Rise & Run first",""); return; }
+  if(tri.rise === null || tri.run === null){ promptLabel("Jack"); return; }
   if(jackIdx === -1){
     showMain(jackIr ? "Irregular Jack · o.c." : "Jack · o.c.", fmtNum(ocStore,2) + " INCH  STORED","", ocStore, 1);
     jackIdx = 0; return;
@@ -1090,7 +1669,7 @@ function irJackKey(){
 
 /* ---------- Rake-Wall (reference p.34): 1st press RWOC, then RW1, RW2..., BASE, angle ---------- */
 function rwallKey(){
-  if(tri.rise === null || tri.run === null){ showMain("R/Wall", "Enter Rise and Run first",""); return; }
+  if(tri.rise === null || tri.run === null){ promptLabel("R/Wall"); return; }
   if(rwallIdx === -1){
     if(builderHasInput()){
       var o = builderValue();
@@ -1145,12 +1724,12 @@ function weightKey(){
     var o = builderValue();
     if(o.dim === 0){ clearBuilder(); weightState = {lb:o.val, unitIdx:1}; wtShow(o.val, 1); return; }
     if(o.dim === 3){ clearBuilder(); var lb = wtTons(o.val) * 2000; weightState = {lb:lb, unitIdx:0}; wtShow(lb, 0); return; }
-    showMain("Weight", "Needs a weight or a volume",""); return;
+    promptLabel("Weight"); return;
   }
   if(dispDim === 3){ var lb2 = wtTons(dispVal) * 2000; weightState = {lb:lb2, unitIdx:0}; wtShow(lb2, 0); return; }
   if(weightState){ weightState.unitIdx = (weightState.unitIdx+1) % 4; wtShow(weightState.lb, weightState.unitIdx); return; }
   if(dispDim === 0 && dispVal !== 0){ weightState = {lb:dispVal, unitIdx:1}; wtShow(dispVal, 1); return; }
-  showMain("Weight", "Type a weight or a volume","");
+  promptLabel("Weight"); return;
 }
 var WTVOL_UNITS = ["Ton Per CU YD","LB Per CU YD","LB Per CU FEET","MET Ton Per CU M","kG Per CU M"];
 function wtvolShow(){
@@ -1159,7 +1738,7 @@ function wtvolShow(){
 function wtvolStore(){
   if(builderHasInput()){
     var o = builderValue();
-    if(o.dim !== 0){ showMain("Weight / Vol", "Needs a plain number",""); return; }
+    if(o.dim !== 0){ promptLabel("Weight / Vol"); return; }
     wtvol.val = o.val; wtvolStoreMode = true;
     clearBuilder();
     wtvolShow(); return;
@@ -1201,7 +1780,7 @@ function costKey(){
     setDisplay(0, 0, "Cost · unit price $", "Qty " + fmtNum(cq2.qty,4) + " " + cq2.unit + (costPrompt.perMbm ? " (per Mbm)" : "") + " — type price, then =");
     return;
   }
-  showMain("Cost", "Enter a quantity first","");
+  promptLabel("Cost"); return;
 }
 function costFinish(){
   var entry = builderHasInput() ? commitEntry() : null;
@@ -1267,14 +1846,14 @@ function memAdd(sign){
   showMain(sign > 0 ? "Memory +" : "Memory −", fmtByPref(memory.val, memory.dim),"", dispVal, dispDim);
 }
 function memRecall(){
-  if(memory === null){ showMain("Rcl", "Memory empty",""); return; }
+  if(memory === null){ return; }  /* v1.17: silent */
   memRecallMode = true; memCycle = 0;
   acc = null; pendingOp = null; clearBuilder();
   setDisplay(memory.val, memory.dim, "Memory");
   justEvaluated = true;
 }
 function memRecallClear(){
-  if(memory === null){ showMain("Rcl", "Memory empty",""); return; }
+  if(memory === null){ return; }  /* v1.17: silent */
   var v = memory.val, d = memory.dim;
   memory = null; memRecallMode = false;
   setDisplay(v, d, "Memory · cleared");
@@ -1361,7 +1940,7 @@ function showItem(){
   if(n > 1) sub = (session.itemIdx + 1) + " of " + n;
   if(it.val !== undefined && it.val !== null) setDisplay(it.val, (it.dim === undefined ? 0 : it.dim), it.k, sub);
   else showMain(it.k, it.v, sub);
-  if(it.val !== undefined && it.val !== null && it.v) $("dispMain").textContent = it.v;
+  if(it.val !== undefined && it.val !== null && it.v){ $("dispMain").textContent = it.v; updateIndicators(); }
 }
 function sessionAdvance(){
   if(session.phase === "prompt") acceptPrompt();
@@ -1457,7 +2036,7 @@ var SESSIONS = {
 /* ---------- stored settings: riser / tread / o.c. (reference: value + Conv+key) ---------- */
 function storeSetting(which){
   var o = builderHasInput() ? currentOperand() : {val:dispVal, dim:dispDim};
-  if(o.dim !== 1){ showMain(which === "riser" ? "Riser Ht" : which === "tread" ? "Tread W" : "On-Centre", "Needs a length",""); return; }
+  if(o.dim !== 1){ promptLabel(which === "riser" ? "Riser Ht" : which === "tread" ? "Tread W" : "On-Centre"); return; }
   if(which === "riser"){ riserStore = o.val; showMain("Riser Ht", fmtFI(o.val) + "  STORED","", o.val, 1); }
   else if(which === "tread"){ treadStore = o.val; showMain("Tread W", fmtFI(o.val) + "  STORED","", o.val, 1); }
   else { ocStore = o.val; jackIdx = -1; rwallIdx = -1; showMain("On-Centre", fmtNum(o.val,2) + " INCH  STORED","", o.val, 1); }
@@ -1596,25 +2175,41 @@ function primaryKey(k){
     case "mplus": memAdd(1); break;
     case "rise": case "run": {
       if(builderHasInput()){
-        var o6 = currentOperand(); if(o6.dim !== 1){ setDisplay(dispVal, dispDim, "Rise/Run need a length"); break; }
+        var o6 = currentOperand(); if(o6.dim !== 1){ promptLabel(k === "rise" ? "Rise" : "Run"); break; }
         tri[k] = o6.val;
-        if(k === "rise") tri.pitch = null;
-        if(k === "run" && tri.rise === null && tri.pitch !== null) tri.rise = o6.val * tri.pitch / 12;
+        /* v1.15: any order — never wipe the stored pitch on a leg entry.
+           If both legs are now known, derive the pitch from them;
+           if only the other leg is missing and a pitch is stored, solve it. */
+        if(k === "rise"){
+          if(tri.run !== null) tri.pitch = tri.rise / tri.run * 12;
+          else if(tri.pitch !== null && tri.pitch !== 0) tri.run = tri.rise * 12 / tri.pitch;
+        } else {
+          if(tri.rise !== null) tri.pitch = tri.rise / tri.run * 12;
+          else if(tri.pitch !== null) tri.rise = o6.val * tri.pitch / 12;
+        }
         acc = null; pendingOp = null; justEvaluated = true;
         triJump(k);
       } else {
         var storedLeg = tri[k];
-        if(storedLeg === null){ setDisplay(dispVal, dispDim, "No " + k + " stored"); break; }
+        if(storedLeg === null){
+          /* v1.15: any order — solve the missing leg from Pitch + the other leg */
+          if(k === "rise" && tri.run !== null && tri.pitch !== null){
+            tri.rise = tri.run * tri.pitch / 12;
+          } else if(k === "run" && tri.rise !== null && tri.pitch !== null && tri.pitch !== 0){
+            tri.run = tri.rise * 12 / tri.pitch;
+          } else { promptLabel(k === "rise" ? "Rise" : "Run"); break; }
+          storedLeg = tri[k];
+        }
         acc = null; pendingOp = null; clearBuilder(); justEvaluated = true;
         triJump(k);
       }
       break; }
     case "diag": {
-      if(tri.rise === null || tri.run === null){ setDisplay(dispVal, dispDim, "Diag"); break; }
+      if(tri.rise === null || tri.run === null){ promptLabel("Diag"); break; }
       acc = null; pendingOp = null; clearBuilder(); justEvaluated = true;
       triJump("diag"); break; }
     case "hip": {
-      if(tri.rise === null || tri.run === null){ setDisplay(dispVal, dispDim, "Hip/V"); break; }
+      if(tri.rise === null || tri.run === null){ promptLabel("Hip/V"); break; }
       acc = null; pendingOp = null; clearBuilder(); justEvaluated = true;
       hipKey(); break; }
   }
@@ -1766,14 +2361,69 @@ function backHoldCancel(){ clearTimeout(backHoldTimer); backHoldTimer = null; }
     });
   }
 })();
+/* ---------- v1.18: pressed-key indication + haptics ----------
+   :active does not fire reliably for touch in the Kompakt WebView,
+   so pointer events drive a .pressed class (inversion, see CSS)
+   and a short vibration pulse. One 10 ms pulse per press, on
+   pointerdown only. navigator.vibrate is feature-detected: where
+   it is missing the visual indication still works and nothing
+   throws. A faded pager arrow (end of list) is inert — no visual
+   press and no buzz. pointerleave / pointercancel / a window-level
+   pointerup clear any stuck .pressed so a press can never stick
+   if the pointer slides off the key or the gesture is cancelled.
+   The backspace hold-to-clear timers are untouched: the pressed
+   class simply stays visible for the whole hold. */
+function buzz(){
+  try{ if(typeof navigator !== "undefined" && navigator && typeof navigator.vibrate === "function") navigator.vibrate(10); }catch(e){}
+}
+function pressOn(el){ if(!el || el.disabled || el.classList.contains("faded")) return; el.classList.add("pressed"); buzz(); }
+function pressOff(el){ if(el) el.classList.remove("pressed"); }
+function wirePressed(el){
+  if(!el) return;
+  el.addEventListener("pointerdown", function(){ pressOn(el); });
+  el.addEventListener("pointerup", function(){ pressOff(el); });
+  el.addEventListener("pointercancel", function(){ pressOff(el); });
+  el.addEventListener("pointerleave", function(){ pressOff(el); });
+  el.addEventListener("lostpointercapture", function(){ pressOff(el); });
+}
+document.querySelectorAll("button.key").forEach(wirePressed);
+wirePressed($("tabHistory")); wirePressed($("tabGuide"));
+wirePressed($("histPrev")); wirePressed($("histNext"));
+/* History rows are built dynamically, so delegate on the list. */
+(function(){
+  var list = $("historyList"); if(!list) return;
+  function rowOf(ev){ return ev.target && ev.target.closest ? ev.target.closest(".hist-row") : null; }
+  list.addEventListener("pointerdown", function(ev){ pressOn(rowOf(ev)); });
+  list.addEventListener("pointerup", function(ev){ pressOff(rowOf(ev)); });
+  list.addEventListener("pointercancel", function(ev){ pressOff(rowOf(ev)); });
+  list.addEventListener("pointerleave", function(ev){ pressOff(rowOf(ev)); });
+})();
+window.addEventListener("pointerup", function(){ document.querySelectorAll(".pressed").forEach(function(el){ el.classList.remove("pressed"); }); });
+window.addEventListener("pointercancel", function(){ document.querySelectorAll(".pressed").forEach(function(el){ el.classList.remove("pressed"); }); });
 document.querySelectorAll("button.key").forEach(function(b){
   if(b.getAttribute("data-k") === "back") return;  /* own handlers above */
   b.addEventListener("click", function(){ handleKey(b.getAttribute("data-k")); });
 });
 $("lcd").addEventListener("click", function(){ toggleHistory(); });
-$("histBackSheet").addEventListener("click", function(){ closeHistory(); });
-$("histGuideBtn").addEventListener("click", function(){ openGuide(); });
-$("guideBack").addEventListener("click", function(){ closeGuide(); });
+$("tabHistory").addEventListener("click", function(){ showSheetTab("history"); });
+$("tabGuide").addEventListener("click", function(){ showSheetTab("guide"); });
+(function(){
+  var track = $("histScroll"); if(!track) return;
+  var dragging = false;
+  track.addEventListener("pointerdown", function(ev){
+    dragging = true;
+    try{ track.setPointerCapture(ev.pointerId); }catch(e){}
+    histScrollFromEvent(ev);
+  });
+  track.addEventListener("pointermove", function(ev){ if(dragging) histScrollFromEvent(ev); });
+  track.addEventListener("pointerup", function(){ dragging = false; });
+  track.addEventListener("pointercancel", function(){ dragging = false; });
+  track.addEventListener("click", function(ev){ histScrollFromEvent(ev); });
+  track.addEventListener("keydown", function(ev){
+    if(ev.key === "ArrowLeft" || ev.key === "ArrowUp"){ histPageStep(-1); ev.preventDefault(); }
+    if(ev.key === "ArrowRight" || ev.key === "ArrowDown"){ histPageStep(1); ev.preventDefault(); }
+  });
+})();
 $("histPrev").addEventListener("click", function(){ histPageStep(-1); });
 $("histNext").addEventListener("click", function(){ histPageStep(1); });
 document.addEventListener("keydown", function(ev){

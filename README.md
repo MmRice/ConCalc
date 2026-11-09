@@ -13,12 +13,16 @@ and any Android phone.
   Punch Diag and you get Diag. Punch it again and you get Diag again.
   No tables, no scrolling, no panels underneath.
 - History (replaces Tape): tap the display to open a paged list of past
-  calculations, newest first, 8 fixed-height rows per page with ▲ / ▼
-  page arrows and a page indicator ("1–8 of 23"), saved between sessions.
-  Tap a row to load its answer back into the calculator. History opens
-  as a sheet over the keypad — the display stays visible — with a fixed
-  44px header and its own scroll; tap the display again, or the sheet's
-  "← Calc" button, to go back. There is no HIST button and no top bar.
+  calculations, newest first, 8 fixed-height rows per page, saved between
+  sessions. Tap a row to load its answer back into the calculator. History
+  opens as a sheet over the keypad — the display stays visible — with two
+  tabs at the top, History and Guide (active tab solid black); tap the
+  display again to go back. There is no HIST button and no top bar. A
+  vertical scroll bar runs down the right edge of the list (thin light
+  track, thick black thumb, ▲ at the top and ▼ at the bottom — those
+  triangles are the pager buttons; tap the track or drag the thumb to
+  move). There is no page label — the ▲/▼ pager and the scroll bar
+  are the navigation.
   History auto-prunes to the last 100 entries — oldest drops automatically,
   so there is no wipe control. (The calculator's Clear All, Conv+×, is
   separate: it resets stored riser/tread/o.c./wt-vol defaults.)
@@ -60,7 +64,7 @@ and any Android phone.
 
 ## APK
 
-Current release: **ConCalc 1.8** — version 1.8, versionCode 9, package
+Current release: **ConCalc 1.19** — version 1.19, versionCode 20, package
 `com.mmrice.concalc`, minSdk 21, targetSdk 33, self-signed.
 
 This is a new, personal app — a fresh package and a fresh signing key.
@@ -68,7 +72,7 @@ It will NOT update over the old builds (v0.1–v0.3):
 uninstall the old app first, then install this one fresh.
 
 The APK binary is not in this repo — GitHub's text push can't carry binaries.
-Download `ConCalcV1.8.apk` from the chat / release and sideload it, or build
+Download `ConCalcV1.19.apk` from the chat / release and sideload it, or build
 it yourself below. Keep the keystore at
 `~/workspace/apk-build/concalc-personal.keystore` — updates must use the
 same key.
@@ -137,11 +141,40 @@ Build with aapt2 → javac → d8 → aapt2 link → zipalign → apksigner,
 signing with the personal keystore
 (`~/workspace/apk-build/concalc-personal.keystore`, alias
 `concale-personal`). No Google services, no internet
-permission, no other permissions.
+permission. The one permission is VIBRATE (v1.18): the short
+haptic pulse on key presses needs it declared, or the WebView
+vibration call does nothing. It is a normal permission, granted
+automatically at install.
 
 ## Status
 
 Untested on real Kompakt hardware as of v1.3.
+v1.19 is UI only, no math changes: the "Page X of Y" label at the bottom of the History tab is gone entirely — the ▲/▼ pager and the scroll bar are the navigation now, and the layout closes up cleanly with no blank gap left behind.
+v1.18 is UI only, no math changes: pressing a key now shows it — the key inverts (solid black with white text) while held, and keys that are already solid at rest (Conv when off, backspace, =) invert the other way, white with black text, so a press is always visible; the same inversion applies to the History/Guide tabs, the ▲/▼ pager triangles and History rows. A press also gives one short haptic pulse (navigator.vibrate, 10 ms, feature-detected so nothing breaks where vibration is unavailable) — the app now declares the VIBRATE permission, which the WebView vibration call needs; it is a normal permission, granted automatically at install. Pressed state never sticks (cleared on release, leave or cancel) and never shifts the layout.
+v1.17 is UI only, no math changes: an invalid selection never shows an error message — pressing a solver key with nothing to solve shows its name as a label prompt instead (Pitch, Rise, Run, Diag, Hip/V, Jack, R/Wall, Stair, Circle, Arc, Weight, Cost, ...), and typing clears the label and the entry continues. Keys with no prompt to show (memory recall with an empty memory, Conv conversions of a plain number) stay fully silent: no message, no display change. Confirmations of something done successfully (Memory · cleared, Cleared) are kept. The guide's Roof section now shows the Pitch prompt.
+v1.16 is UI only, no math changes: the label on the left of the display stays blank during normal entry — no more "Ready" / "Entering" / "Entered" and no arithmetic echoes — it only shows when something is worth naming (a solved value's name, like Diagonal or Run, or a message like "Store a Rise and a Run first"). The CONV / RCL / MEM indicators no longer push the UI down: they always take their space in the sub row (invisible until armed) and the sub row has a fixed minimum height, so the display and keypad stay exactly where they are whether the indicators are showing or not.
+v1.15 fixes the triangle solver so it works in any order: store any two of Pitch, Rise and Run, then press the third key to solve for it — Pitch (6 in) + Rise (12 ft) then Run gives 24 ft, Run (12 ft) + Rise (12 ft) then Pitch gives 12 in. Entering a Rise no longer wipes the stored pitch, and entering a leg with a pitch stored solves the missing leg. The guide's Roof section now says any two, with the Pitch+Rise then Run example worked through. Also the History scroll bar now matches the stock bar: the black thumb is the same width as the track (it no longer sticks out wider), the ▲/▼ are plain small solid triangles with no button box, and an arrow shows as a dot-matrix dither at the end it cannot go past (▲ on the first page, ▼ on the last) and returns to solid black when you can move again — black dots on white, no grey pixels, since the display is black and white only.
+v1.14 is UI only, no math changes: History and Guide are now two tabs at the top of the sheet (History / Guide, active tab solid black) — the ⚙ Guide pill and the Guide's "← History" button are gone; tap the display to open the sheet (History tab first), tap it again to close it from either tab. The header count ("1–8 of 12") is gone — the page info stays at the bottom in the pager. The History list has a vertical scroll bar down its right edge (thin light track, thick black thumb, ▲ at the top end and ▼ at the bottom end — those triangles are the pager buttons) — tap the track or drag the thumb to move through History. The bar is hidden entirely when there is nothing to scroll (empty, or everything fits on one page); the thumb is sized by the visible fraction (8 entries shown out of the total), so more entries means a smaller thumb.
+v1.13 is UI only, no math changes: the History header is a 3-column grid so the title sits truly centred and the pills sit centred in the 44px header; the History list never scrolls — a page is exactly the 8 rows that fit, and the ▲/▼ pager buttons are the only way to move between pages; the "← Calc" back button is gone — tap the display to open History, tap it again to close it. The Guide's own "← History" button stays.
+v1.12 is UI only, no math changes: 3px outlines on ALL keys — plain keys, operators and the guide key icons alike (Mitch, after seeing the stock calculator's thick operator outlines). Solid keys stay solid with no outline ring: Conv when off, backspace / C, and =. Still monochrome, no fill, no colour.
+v1.11 is UI only, no math changes: the Conv key goes back to its v1.9 look — solid black when off, plain when armed (v1.10 had flipped it and Mitch asked for the old way back); the backspace / C key gets the same treatment, solid black as its resting style; and the key outlines are a little bolder than v1.10 — plain keys 1.5px, operators 2px, still thin monochrome black with no fill. = stays solid black as before.
+v1.10 is UI + guide, no math changes: the unit cap under the display now
+names only the units actually on screen (18' - 7 1/2" shows "FEET - INCH",
+7" shows "INCH", 18' shows "FEET", a plain number shows nothing); the Conv
+key's lit state is fixed (plain until armed, solid black when armed — =
+stays solid black as before); every key now has a thin black outline, no
+fill. The in-app user guide is rewritten as a thorough second-person
+step-by-step guide: 15 short sections, "Press: … / You see: …" one action
+per line, with the key presses shown as little key icons, and every worked
+example checked against the calculator itself. Conversion is documented as
+Conv first, then the unit.
+v1.9 fixes one thing Mitch found while testing v1.8: pressing a different
+unit key after a value is already tagged now converts it — 18 + Inch, then
+Feet, shows 1′ - 6″, and 6 + Feet, then Inch, shows 72″. Pressing the same
+unit key again still raises the dimension instead (Inch, Inch = square
+inches, again = cubic inches), and entering a value still keeps the unit
+entered (12 + Inch stays 12″). The in-app user guide is unchanged in v1.9 —
+a thorough step-by-step rewrite is coming in a later release.
 v1.8 fixes four things Mitch found while testing v1.7: only the display
 value is copyable — long-press copy and text selection are locked down
 everywhere else; entering a value keeps the unit entered (12 + Inch

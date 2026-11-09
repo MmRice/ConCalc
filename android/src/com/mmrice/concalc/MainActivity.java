@@ -7,7 +7,7 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
-/** ConCalc 1.8 - construction calculator, offline WebView wrapper.
+/** ConCalc 1.19 - construction calculator, offline WebView wrapper.
  *  No network, no Google services, no ads, no tracking. */
 public class MainActivity extends Activity {
     private WebView webView;

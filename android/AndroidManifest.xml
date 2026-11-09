@@ -1,10 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.mmrice.concalc"
-    android:versionCode="9"
-    android:versionName="1.8">
+    android:versionCode="20"
+    android:versionName="1.19">
 
-    <!-- No permissions: fully offline, no internet, no Google services. -->
+    <!-- v1.18: the VIBRATE permission is the one permission this app
+       asks for. The WebView vibration API (navigator.vibrate, used
+       for the short haptic pulse on key presses) is gated on it —
+       without the declaration the call is a silent no-op. It is a
+       normal permission, granted automatically at install, no
+       runtime prompt. Still fully offline: no internet, no Google
+       services, no other permissions. -->
+    <uses-permission android:name="android.permission.VIBRATE" />
 
     <uses-sdk android:minSdkVersion="21" android:targetSdkVersion="33" />
 
