@@ -105,7 +105,13 @@
      as the track, as before), and bigger plain solid triangle
      arrows. Same dithered end arrows, same black-and-white only. */
   .hist-main{flex:1 1 auto; min-height:0; display:flex; gap:8px;}
-  .hist-listcol{flex:1 1 auto; min-width:0; display:flex; flex-direction:column;}
+  /* v1.21: touch-action:none on the History list — without it the
+     WebView takes over a touch drag for native scrolling and fires
+     pointercancel (never pointerup), so the v1.20 swipe handler
+     never ran and the drag ended as a click on the row under the
+     finger. The Guide body already had this; History did not. */
+  .hist-listcol{flex:1 1 auto; min-width:0; display:flex; flex-direction:column; touch-action:none;}
+  .hist-list{touch-action:none;}
   .hist-vscroll{flex:0 0 32px; display:flex; flex-direction:column; gap:6px; padding:2px 0;}
   /* v1.15: the ▲/▼ are plain small solid triangles, like the stock
      bar — no button box, no border. v1.20: bigger, so they read on
@@ -900,6 +906,12 @@ function renderHistory(){
     var rs = document.createElement("span"); rs.className = "hist-res"; rs.textContent = e.result;
     row.appendChild(ex); row.appendChild(rs);
     row.addEventListener("click", function(){
+      /* v1.21: second line of defence against a swipe loading a row
+         — if the swipe handler flagged this gesture as a scroll,
+         the row must not load, even if the capture-phase click
+         suppression was bypassed. A clean tap has the flag clear
+         and loads as before. */
+      if(suppressHistClick) return;
       closeHistory();
       acc = null; pendingOp = null; clearBuilder(); justEvaluated = true;
       setDisplay(e.val, e.dim, e.expr + " =");
@@ -2590,6 +2602,10 @@ $("guideNext").addEventListener("click", function(){ guidePageStep(1); });
   });
 })();
 /* ---------- v1.20: swipe to move through History and Guide ----------
+   v1.21: the History half of this never worked on the Kompakt —
+   see the note inside the History swipe block below (no
+   touch-action, no pointer capture, pointercancel swallowed the
+   swipe). The Guide half already had all three and is unchanged.
    An extra way to move, on top of the ▲/▼ buttons — buttons still
    work exactly as before. A swipe is a scroll, a tap is a tap:
    - History: a mostly-vertical drag of 28px or more pages once —
@@ -2606,21 +2622,56 @@ $("guideNext").addEventListener("click", function(){ guidePageStep(1); });
 var suppressHistClick = false;
 (function(){
   var col = document.querySelector("#histPane .hist-listcol"); if(!col) return;
-  var startY = 0, startX = 0, swiping = false;
-  col.addEventListener("pointerdown", function(ev){
-    startY = ev.clientY; startX = ev.clientX; swiping = true;
-    suppressHistClick = false;
-  });
-  col.addEventListener("pointerup", function(ev){
-    if(!swiping) return; swiping = false;
-    var dy = ev.clientY - startY, dx = ev.clientX - startX;
+  var startY = 0, startX = 0, swiping = false, paged = false;
+  /* v1.21: the v1.20 swipe never ran on the Kompakt. Root cause,
+     found in the code: the History list had no touch-action:none
+     (the Guide body already had it) and the swipe handler took no
+     pointer capture — so once a touch drag started, the WebView
+     took the gesture over for native scrolling and fired
+     pointercancel, never pointerup. The v1.20 handler only paged
+     on pointerup, and its pointercancel arm just cleared the
+     flag — no page, no click suppression — and the WebView then
+     still synthesised a click on the row under the finger, loading
+     that calculation. That is exactly what Mitch reported:
+     "swiping just tries to select a past calculation, like it
+     can't sense you're trying to scroll." Fix, three parts:
+     (a) touch-action:none on the list (see CSS) so the browser
+     never takes the drag; (b) setPointerCapture on pointerdown,
+     like the Guide swipe, so the gesture's events keep flowing
+     to the list; (c) page live on pointermove once the 28px
+     mostly-vertical threshold is crossed, and treat pointercancel
+     exactly like pointerup — a swipe that ends by cancel still
+     pages and still suppresses the click. The row's own click
+     handler also checks suppressHistClick now, so a swipe can
+     never load a row even if the capture suppression is bypassed.
+     A clean tap (under 28px, or sideways) still loads its row. */
+  function markSwiped(){
+    suppressHistClick = true;
+    setTimeout(function(){ suppressHistClick = false; }, 350);
+  }
+  function tryPage(dy, dx){
+    if(paged) return;
     if(Math.abs(dy) >= 28 && Math.abs(dy) > Math.abs(dx)){
+      paged = true;
       if(dy < 0) histPageStep(1); else histPageStep(-1);
-      suppressHistClick = true;
-      setTimeout(function(){ suppressHistClick = false; }, 350);
+      markSwiped();
     }
+  }
+  function endSwipe(ev){
+    if(!swiping) return; swiping = false;
+    tryPage(ev.clientY - startY, ev.clientX - startX);
+  }
+  col.addEventListener("pointerdown", function(ev){
+    startY = ev.clientY; startX = ev.clientX; swiping = true; paged = false;
+    suppressHistClick = false;
+    try{ col.setPointerCapture(ev.pointerId); }catch(e){}
   });
-  col.addEventListener("pointercancel", function(){ swiping = false; });
+  col.addEventListener("pointermove", function(ev){
+    if(!swiping || paged) return;
+    tryPage(ev.clientY - startY, ev.clientX - startX);
+  });
+  col.addEventListener("pointerup", endSwipe);
+  col.addEventListener("pointercancel", endSwipe);
   col.addEventListener("click", function(ev){
     if(suppressHistClick){ suppressHistClick = false; ev.stopPropagation(); ev.preventDefault(); }
   }, true);
