@@ -1,40 +1,14 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" fill="#F4F1EA"/>
-  <!-- v8 icon (v1.21): a house roof with a chimney, and a speed
-       square tucked into the bottom-left corner. Bold black on
-       paper #F4F1EA, stroke 28 with round joins and caps. Nothing
-       else — no ticks, no pivot hole, no fence lip, no inner
-       detail, no text.
-       Geometry (512 viewBox):
-       - Speed square: right triangle, right angle at the
-         bottom-left corner (40,472); legs 267 — top (40,205),
-         base (307,472); hypotenuse (40,205)-(307,472):
-         dx +267, dy +267, i.e. 45° to horizontal.
-       - Roof: peak at top centre (256,40), eaves at the bottom
-         corners (40,472) and (472,472), symmetrical. Slopes are
-         steep (dx 216, dy 432) so the peak reaches the top centre.
-       - Chimney on the right slope: 56 wide, x 344-400, top at
-         y 96; its base is cut by the roof slope — left edge meets
-         the slope at (344,216), right edge at (400,328) — so the
-         closing edge of the chimney path runs along the slope.
-         Cap: a slab at y 82, x 330-414, stroke 26, round caps.
-       Launcher standard followed: standard Android legacy launcher
-       icon, 48 dp baseline (mdpi 48, hdpi 72, xhdpi 96, xxhdpi 144,
-       xxxhdpi 192 px), plain mipmap PNGs, no adaptive icon.
-       A launcher mask (circle/squircle) would clip the design's
-       left/right tips, and the Kompakt launcher uses plain PNGs. -->
-  <g fill="none" stroke="#111111" stroke-width="28" stroke-linejoin="round" stroke-linecap="round">
-    <!-- Speed square: vertical leg (40,205)-(40,472), base
-         (40,472)-(307,472), hypotenuse (40,205)-(307,472) -->
-    <path d="M 40 205 L 40 472 L 307 472 Z"/>
-    <!-- Gable roof: peak (256,40), left slope to bottom-left
-         corner (40,472), right slope to (472,472). No base line. -->
-    <path d="M 40 472 L 256 40 L 472 472"/>
-    <!-- Chimney: left edge (344,216)-(344,96), top (344,96)-(400,96),
-         right edge (400,96)-(400,328), base cut by the roof slope
-         back to (344,216). -->
-    <path d="M 344 216 L 344 96 L 400 96 L 400 328 Z"/>
+  <rect width="512" height="512" fill="#FFFFFF"/>
+  <!-- Mudita stock-tile frame: rect 496x496 rx112, stroke 16. -->
+  <rect x="8" y="8" width="496" height="496" rx="112" fill="none" stroke="#000000" stroke-width="16"/>
+  <!-- C3: top tread lands flat at the peak (last segment is
+       horizontal into 256,140). Three near-square steps
+       (37-38 units). Tail tips level and equidistant from
+       centre: left (144,252), right (368,252), 112 each side. -->
+  <g fill="none" stroke="#000000" stroke-width="16" stroke-linejoin="miter" stroke-linecap="round">
+    <path d="M 144 252 L 144 215 L 181 215 L 181 177 L 219 177 L 219 140 L 256 140 L 368 252"/>
+    <line x1="256" y1="290" x2="256" y2="362"/>
+    <line x1="220" y1="326" x2="292" y2="326"/>
   </g>
-  <!-- Chimney cap slab -->
-  <line x1="330" y1="82" x2="414" y2="82" stroke="#111111" stroke-width="26" stroke-linecap="round"/>
 </svg>

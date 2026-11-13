@@ -49,21 +49,20 @@ and any Android phone.
   - `src/com/mmrice/concalc/MainActivity.java` — single Activity, full-screen
     WebView loading `android/assets/index.html`, JavaScript on, VIBRATE permission only (for the haptic pulse)
   - `assets/index.html` — same file as `index.html` at the repo root
-- `icon.svg` — launcher icon (v8, v1.21): a house roof with a chimney,
-  and a speed square tucked into the bottom-left corner — the
-  square's right angle sits on the bottom-left corner, the roof
-  peak is at the top centre, symmetrical. Monochrome black on paper
-  #F4F1EA, no text. The APK build uses PNGs rendered from this at mdpi 48, hdpi 72,
-  xhdpi 96, xxhdpi 144, xxxhdpi 192 px (standard 48 dp legacy
-  launcher icon; no adaptive icon — a launcher mask would clip
-  the wide design's tips, and the Kompakt uses plain PNGs).
+- `icon.svg` — launcher icon (v1.22): in the stock-tile style — a
+  rounded-square tile border (81 px tile, 40 px symbol, 19 px radius
+  border at mdpi scale), pure black on white, no text. Inside the
+  tile: a roof chevron whose left slope is stepped like a stair
+  stringer, the top tread landing flat at the peak, the right slope
+  straight, and a plus sign below. The APK build uses PNGs rendered
+  from this at mdpi 48, hdpi 72, xhdpi 96, xxhdpi 144, xxxhdpi 192 px
+  (standard 48 dp legacy launcher icon; no adaptive icon — the
+  Kompakt uses plain PNGs).
   (PNGs are not in this repo — this push is text files only.)
-  A Mudita stock-tile variant (81 px tile, 40 px symbol, 19 px
-  radius border) is saved as an option in the workspace, not used.
 
 ## APK
 
-Current release: **ConCalc 1.21** — version 1.21, versionCode 22, package
+Current release: **ConCalc 1.22** — version 1.22, versionCode 23, package
 `com.mmrice.concalc`, minSdk 21, targetSdk 33, self-signed.
 
 This is a new, personal app — a fresh package and a fresh signing key.
@@ -71,7 +70,7 @@ It will NOT update over the old builds (v0.1–v0.3):
 uninstall the old app first, then install this one fresh.
 
 The APK binary is not in this repo — GitHub's text push can't carry binaries.
-Download `ConCalcV1.21.apk` from the chat / release and sideload it, or build
+Download `ConCalcV1.22.apk` from the chat / release and sideload it, or build
 it yourself below. Keep the keystore at
 `~/workspace/apk-build/concalc-personal.keystore` — updates must use the
 same key.
@@ -148,6 +147,7 @@ automatically at install.
 ## Status
 
 Untested on real Kompakt hardware as of v1.3.
+v1.22 is icon only, no code changes: new launcher icon in the stock-tile style — a rounded-square tile border, pure black on white, with a roof chevron inside whose left slope is stepped like a stair stringer with the top tread landing flat at the peak, the right slope straight, and a plus sign below — replacing the v8 roof-and-chimney icon, with fresh launcher PNGs at all five densities. The calculator code is byte-identical to v1.21.
 v1.21 is UI only, no math changes: new launcher icon (v8) — a house roof with a chimney and a speed square tucked into the bottom-left corner, roof peak at the top centre, symmetrical — replacing the old overlapping-triangles icon, with fresh launcher PNGs at all five densities. And the History swipe actually works on the Kompakt now: the v1.20 swipe never ran on-device because the History list had no touch-action:none and the swipe handler took no pointer capture, so the WebView took the drag over, fired pointercancel instead of pointerup, and the drag ended as a click loading the row under the finger. The list now has touch-action:none, the swipe takes pointer capture, pages live once the drag passes 28px, treats pointercancel like pointerup, and the row's click handler itself ignores clicks flagged as a swipe — a clean tap still loads its row, and the Guide swipe (which already had all three) is unchanged.
 v1.20 is UI only, no math changes: haptics now fire on a regular quick tap, not only on a hold. The v1.18 pulse was 10 ms on pointerdown only — too short for the Kompakt's motor to actually move (it needs roughly 30 ms to spin up), and the buzz felt on a hold was almost certainly the OS long-press feedback, not ours. The pulse is now 30 ms, and a click-time fallback buzzes when a press did not already buzz on pointerdown, so a quick tap buzzes exactly once and a hold buzzes once at press start. The display and the scroll track buzz too. Also: Conv-swapped labels now fit inside their keys — long second-function labels (Riser Ht, Tread W, Drywall, Clear All, …) get a smaller font and may wrap to two lines while Conv is armed, so nothing spills past the border. The History scroll bar is thicker (16px track with a solid border, 16px thumb, bigger ▲/▼ arrows) so it reads on E Ink, and the Guide tab has the same bar with the same paging. And both lists are swipeable: swipe up/down on the History list to move a page at a time, swipe and drag on the Guide to move a page at a time — a swipe never taps a History row, and the ▲/▼ buttons work as before.
 v1.19 is UI only, no math changes: the "Page X of Y" label at the bottom of the History tab is gone entirely — the ▲/▼ pager and the scroll bar are the navigation now, and the layout closes up cleanly with no blank gap left behind.
