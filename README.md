@@ -62,7 +62,7 @@ and any Android phone.
 
 ## APK
 
-Current release: **ConCalc 1.22** — version 1.22, versionCode 23, package
+Current release: **ConCalc 2.0** — version 2.0, versionCode 24, package
 `com.mmrice.concalc`, minSdk 21, targetSdk 33, self-signed.
 
 This is a new, personal app — a fresh package and a fresh signing key.
@@ -70,7 +70,7 @@ It will NOT update over the old builds (v0.1–v0.3):
 uninstall the old app first, then install this one fresh.
 
 The APK binary is not in this repo — GitHub's text push can't carry binaries.
-Download `ConCalcV1.22.apk` from the chat / release and sideload it, or build
+Download `ConCalcV2.0.apk` from the chat / release and sideload it, or build
 it yourself below. Keep the keystore at
 `~/workspace/apk-build/concalc-personal.keystore` — updates must use the
 same key.
@@ -114,9 +114,8 @@ big ones:
 - Repeated presses cycle only where the reference says so (above). Diag,
   Hip/V and the rest stay one-value-at-a-time: press again, same answer.
 
-Still open / judgement calls: the irregular-jack lengths in the reference
-worked example don't match the plane-B common-difference formula this
-build uses (see the code comments) — flag if it matters on a real roof.
+Still open / judgement calls: the irregular-jack lengths now match the
+reference worked example exactly (v2.0 derives them from the hip geometry).
 Flooring has no key in the reference, so the old Flooring solver was removed;
 flooring is area × (1 + waste%) with the % key. The "Fractional Mode:
 COnSt" preference is stored but the reference doesn't define its effect in
@@ -147,6 +146,7 @@ automatically at install.
 ## Status
 
 Untested on real Kompakt hardware as of v1.3.
+v2.0 is the big fix update. First, the batch that was waiting since v1.22: decimals now convert (a plain 10.75 plus Conv Inch tags it as inches, and bare unit keys convert the displayed value instead of wiping it to zero); fractions enter numerator, slash, denominator, with the slash visible while typing and never reduced mid-entry; the active operator or solver key stays lit until its action completes; pressing = again repeats the last step (43 + 16 = = = gives 59, 75, 91); any two of Pitch, Rise, Run and Diagonal solve the triangle, in any order; inch math stays in inches through a whole sum until Conv changes the unit; and fractional-inch results use the ″ mark instead of the word INCH. Second, an overnight audit — 99 practice problems plus 450 interface probes, then a second round of 68 new problems, a 600-cell conversion matrix, ~680 solver cross-interactions, 864 entry-state permutations and 1,500 fuzz sequences — found and fixed 65 wrong answers and crashes: memory totals ignored by later math; Feet squaring entries inside session prompts (the concrete example came out 177.78 yd³ instead of 1.23); board-foot cost 1000× too high one way round; square-metre conversions wrong both ways; leaving Prefs putting the resolution number on screen as a live value; stair incline using total rise/run instead of the displayed step; Rcl + triangle arithmetic collapsing to the last recalled value; the rake-wall base and irregular-jack mode surviving Clear All; and irregular-jack lengths, which now match the reference worked example exactly. Solver prompts no longer blank the display to zero when a typed entry is still held — the entry stays on screen under the solver label. Crash-class guards: no more Infinity/NaN from zero runs or zero treads, no wedged sessions from a lone decimal point, Conv disarms through hold-exits. The in-app Guide was rewritten from the calculator's actual behavior and all 260 of its worked claims verified. Zero regressions across every suite.
 v1.22 is icon only, no code changes: new launcher icon in the stock-tile style — a rounded-square tile border, pure black on white, with a roof chevron inside whose left slope is stepped like a stair stringer with the top tread landing flat at the peak, the right slope straight, and a plus sign below — replacing the v8 roof-and-chimney icon, with fresh launcher PNGs at all five densities. The calculator code is byte-identical to v1.21.
 v1.21 is UI only, no math changes: new launcher icon (v8) — a house roof with a chimney and a speed square tucked into the bottom-left corner, roof peak at the top centre, symmetrical — replacing the old overlapping-triangles icon, with fresh launcher PNGs at all five densities. And the History swipe actually works on the Kompakt now: the v1.20 swipe never ran on-device because the History list had no touch-action:none and the swipe handler took no pointer capture, so the WebView took the drag over, fired pointercancel instead of pointerup, and the drag ended as a click loading the row under the finger. The list now has touch-action:none, the swipe takes pointer capture, pages live once the drag passes 28px, treats pointercancel like pointerup, and the row's click handler itself ignores clicks flagged as a swipe — a clean tap still loads its row, and the Guide swipe (which already had all three) is unchanged.
 v1.20 is UI only, no math changes: haptics now fire on a regular quick tap, not only on a hold. The v1.18 pulse was 10 ms on pointerdown only — too short for the Kompakt's motor to actually move (it needs roughly 30 ms to spin up), and the buzz felt on a hold was almost certainly the OS long-press feedback, not ours. The pulse is now 30 ms, and a click-time fallback buzzes when a press did not already buzz on pointerdown, so a quick tap buzzes exactly once and a hold buzzes once at press start. The display and the scroll track buzz too. Also: Conv-swapped labels now fit inside their keys — long second-function labels (Riser Ht, Tread W, Drywall, Clear All, …) get a smaller font and may wrap to two lines while Conv is armed, so nothing spills past the border. The History scroll bar is thicker (16px track with a solid border, 16px thumb, bigger ▲/▼ arrows) so it reads on E Ink, and the Guide tab has the same bar with the same paging. And both lists are swipeable: swipe up/down on the History list to move a page at a time, swipe and drag on the Guide to move a page at a time — a swipe never taps a History row, and the ▲/▼ buttons work as before.

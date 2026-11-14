@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.mmrice.concalc"
-    android:versionCode="23"
-    android:versionName="1.22">
+    android:versionCode="24"
+    android:versionName="2.0">
 
     <!-- v1.18: the VIBRATE permission is the one permission this app
        asks for. The WebView vibration API (navigator.vibrate, used

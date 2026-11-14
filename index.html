@@ -265,12 +265,12 @@
      any plain key. Only colours change: border width never does,
      so pressing a key can never shift the layout. The dot on a
      second-function key flips colour with its key. */
-  button.key:active, button.key.pressed{background:var(--solid); color:var(--on-solid); border-color:transparent;}
+  button.key:active, button.key.pressed, button.key.lit{background:var(--solid); color:var(--on-solid); border-color:transparent;}
   button.key[data-k="eq"]:active, button.key[data-k="eq"].pressed,
   button.key.conv:active, button.key.conv.pressed,
   button.key.back:active, button.key.back.pressed{background:var(--bg); color:var(--ink); border-color:var(--ink);}
   button.key.conv.armed:active, button.key.conv.armed.pressed{background:var(--solid); color:var(--on-solid); border-color:transparent;}
-  button.key.has-shift:active::after, button.key.has-shift.pressed::after{color:var(--on-solid);}
+  button.key.has-shift:active::after, button.key.has-shift.pressed::after, button.key.has-shift.lit::after{color:var(--on-solid);}
   button.key.conv.has-shift:active::after, button.key.conv.has-shift.pressed::after,
   button.key.back.has-shift:active::after, button.key.back.has-shift.pressed::after{color:var(--ink);}
   button.key:focus-visible{outline:2px solid var(--focus); outline-offset:2px;}
@@ -388,10 +388,20 @@
       <p class="gstep">You see: 6&prime;</p>
       <p class="gstep">Press: <span class="gkey">1</span><span class="gkey">2</span> <span class="gkey">Feet</span> <span class="gkey">7</span> <span class="gkey">Inch</span> <span class="gkey">7</span> <span class="gkey">/</span> <span class="gkey">8</span></p>
       <p class="gstep">You see: 12&prime; - 7 7/8&Prime;</p>
+      <p class="gstep">Press: <span class="gkey">1</span> <span class="gkey">Inch</span> <span class="gkey">1</span> <span class="gkey">/</span> <span class="gkey">2</span></p>
+      <p class="gstep">You see: 1 1/2&Prime; &mdash; a mixed number is the whole part, the unit, then the fraction.</p>
+      <p class="gstep">Press: <span class="gkey">7</span> <span class="gkey">Inch</span> <span class="gkey">7</span> <span class="gkey">/</span> <span class="gkey">8</span></p>
+      <p class="gstep">You see: 7 7/8&Prime; &mdash; inches first, then the numerator, the slash, and the denominator.</p>
       <p class="gstep">Press: <span class="gkey">7</span> <span class="gkey">/</span> <span class="gkey">8</span> <span class="gkey">Inch</span></p>
       <p class="gstep">You see: 7/8&Prime;</p>
+      <p class="gstep">Press: <span class="gkey">/</span> <span class="gkey">2</span> <span class="gkey">Inch</span></p>
+      <p class="gstep">You see: 1/8&Prime; &mdash; Inch finishes a fraction typed with no whole part.</p>
+      <p class="gstep">Press: <span class="gkey">1</span> <span class="gkey">/</span> <span class="gkey">0</span> <span class="gkey solid">=</span></p>
+      <p class="gstep">You see: 1/0&Prime; &mdash; a zero denominator is refused, and the entry stays so you can fix it. Delete the 0, type 8, and press <span class="gkey solid">=</span> for 1/8&Prime;.</p>
       <p class="gstep">Press: <span class="gkey">1</span><span class="gkey">2</span> <span class="gkey">Inch</span></p>
       <p class="gstep">You see: 12&Prime; &mdash; it stays 12&Prime;, it does not turn into 1&prime;.</p>
+      <p class="gstep">Press: <span class="gkey">1</span><span class="gkey">8</span> <span class="gkey">Inch</span> <span class="gkey">+</span> <span class="gkey">6</span> <span class="gkey">Inch</span> <span class="gkey solid">=</span></p>
+      <p class="gstep">You see: 24&Prime; &mdash; inch math stays in inches through the whole sum. Only Conv changes the unit.</p>
       <p class="gstep">Press: <span class="gkey">5</span></p>
       <p class="gstep">You see: 5 &mdash; a number with no unit is a plain count.</p>
       <h3>Square and cubic values</h3>
@@ -412,13 +422,19 @@
       <p class="gstep">Press: <span class="gkey solid">Conv</span> <span class="gkey">Inch</span></p>
       <p class="gstep">You see: 18 in</p>
       <p class="gstep">Press: <span class="gkey solid">Conv</span> <span class="gkey">Inch</span></p>
-      <p class="gstep">You see: 18 INCH</p>
+      <p class="gstep">You see: 18&Prime;</p>
       <p class="gstep">Press: <span class="gkey solid">Conv</span> <span class="gkey">Yds</span></p>
       <p class="gstep">You see: 0.5 yd</p>
       <p class="gstep">Press: <span class="gkey solid">Conv</span> <span class="gkey">m</span></p>
       <p class="gstep">You see: 0.4572 m</p>
+      <p class="gstep">Press: <span class="gkey">1</span><span class="gkey">0</span> <span class="gkey">&middot;</span> <span class="gkey">7</span><span class="gkey">5</span> <span class="gkey solid">Conv</span> <span class="gkey">Inch</span></p>
+      <p class="gstep">You see: 10.75 in &mdash; a plain decimal converts too, Conv + unit reads it as being in that unit.</p>
+      <p class="gstep">Press: <span class="gkey solid">Conv</span> <span class="gkey">Inch</span></p>
+      <p class="gstep">You see: 10 3/4&Prime;</p>
+      <p class="gstep">A unit key pressed with a result on the display tags that value instead of clearing it.</p>
       <p class="gstep">Conv + Feet switches between decimal feet and feet-inches.</p>
       <p class="gstep">Conv + Inch switches between decimal and fractional inches.</p>
+      <p class="gstep">From yards or metric, the first Conv + Feet shows feet-and-inches and the second shows decimal feet. The first Conv + Inch shows fractional inches and the second shows decimal inches.</p>
       <p class="gstep lead">Conv is also the second-function key.</p>
       <p class="gstep">Press <span class="gkey solid">Conv</span> and the keys swap their labels to their second functions.</p>
       <p class="gstep">A small dot marks the keys that have one.</p>
@@ -434,6 +450,17 @@
       <p class="gstep">You see: 12&prime;</p>
       <p class="gstep">Press: <span class="gkey">5</span> <span class="gkey">+</span> <span class="gkey">3</span> <span class="gkey solid">=</span></p>
       <p class="gstep">You see: 8</p>
+      <p class="gstep">Press: <span class="gkey">4</span><span class="gkey">3</span> <span class="gkey">+</span> <span class="gkey">1</span><span class="gkey">6</span> <span class="gkey solid">=</span> <span class="gkey solid">=</span> <span class="gkey solid">=</span></p>
+      <p class="gstep">You see: 59, then 75, then 91 &mdash; pressing <span class="gkey solid">=</span> again repeats the last step, which is how you walk out even spacings. Typing a number or pressing another key stops the repeat &mdash; except M+ and Rcl, which leave it armed. Clearing stops it too.</p>
+      <p class="gstep">+ and &minus; need the same kind of value on both sides. Adding a length to an area does nothing &mdash; the display keeps the second number, and the first number and the + stay waiting.</p>
+      <h3>Keys that stay lit</h3>
+      <p class="gstep lead">The key you pressed stays black until the job is done.</p>
+      <p class="gstep">Press: <span class="gkey">7</span> <span class="gkey">&times;</span></p>
+      <p class="gstep">You see: &times; stays black while you enter the second number, until you press <span class="gkey solid">=</span>.</p>
+      <p class="gstep">Press: <span class="gkey">Diag</span> with Rise and Run stored</p>
+      <p class="gstep">You see: Diag stays black while its answer is on the display. Typing a new number, or pressing another key, clears it &mdash; except inside a solver, where the solver key stays black while it asks for numbers or steps through answers.</p>
+      <p class="gstep">A store press lights its number key the same way: Conv + 7 lights 7 until another key clears it.</p>
+      <p class="gstep">While an operation waits for its second number, the operator key is the one that stays black.</p>
       <h3>Percent</h3>
       <p class="gstep lead">% works with the operation you already have going.</p>
       <p class="gstep">Press: <span class="gkey">2</span><span class="gkey">0</span><span class="gkey">0</span> <span class="gkey">+</span> <span class="gkey">1</span><span class="gkey">0</span> <span class="gkey">%</span></p>
@@ -442,6 +469,16 @@
       <p class="gstep">You see: 5</p>
       <p class="gstep">Press: <span class="gkey">1</span><span class="gkey">0</span> <span class="gkey">%</span></p>
       <p class="gstep">You see: 0.1</p>
+      <h3>Reciprocal, pi, square, and sign</h3>
+      <p class="gstep lead">Conv turns four keys into one-press functions.</p>
+      <p class="gstep">Press: <span class="gkey">4</span> <span class="gkey solid">Conv</span> <span class="gkey">&divide;</span></p>
+      <p class="gstep">You see: 0.25 &mdash; the reciprocal of 4.</p>
+      <p class="gstep">Press: <span class="gkey solid">Conv</span> <span class="gkey">+</span></p>
+      <p class="gstep">You see: 3.141593 &mdash; &pi;</p>
+      <p class="gstep">Press: <span class="gkey">5</span> <span class="gkey solid">Conv</span> <span class="gkey">&radic;x</span></p>
+      <p class="gstep">You see: 25 &mdash; 5 squared.</p>
+      <p class="gstep">Press: <span class="gkey">9</span> <span class="gkey solid">Conv</span> <span class="gkey">&minus;</span></p>
+      <p class="gstep">You see: &minus;9 &mdash; Conv + &minus; changes the sign.</p>
       <h3>Area and volume</h3>
       <p class="gstep lead">Multiply two lengths for area. For volume, use the Concrete solver.</p>
       <p class="gstep">Press: <span class="gkey solid">Conv</span> <span class="gkey">Bd Ft</span></p>
@@ -482,8 +519,19 @@
       <p class="gstep">Press: <span class="gkey solid">Conv</span> <span class="gkey">0</span></p>
       <p class="gstep">You see: 1.5 Ton Per CU YD STORED</p>
       <p class="gstep">Type a new number, press <span class="gkey solid">Conv</span> <span class="gkey">0</span> again, and it stores that instead.</p>
+      <p class="gstep">Press: <span class="gkey">2</span> <span class="gkey solid">Conv</span> <span class="gkey">0</span></p>
+      <p class="gstep">You see: 2 Ton Per CU YD STORED</p>
+      <p class="gstep">Press: <span class="gkey">0</span></p>
+      <p class="gstep">You see: 2 LB Per CU YD STORED &mdash; after a store, 0 steps the unit through Ton Per CU YD, LB Per CU YD, LB Per CU FEET, MET Ton Per CU M, and kG Per CU M, then back to the start. The stored number stays the same. Any other key ends the stepping, and 0 types normally again.</p>
+      <p class="gstep">Press: <span class="gkey">Rcl</span> <span class="gkey">0</span></p>
+      <p class="gstep">You see: 2 LB Per CU YD &mdash; Rcl + 0 brings the stored weight-per-volume back, in the unit you stepped to, with no STORED after it. With nothing stored, Rcl + 0 shows 1.5 Ton Per CU YD.</p>
       <h3>Board feet and cost</h3>
-      <p class="gstep lead">Board feet has its own solver. Cost prices a quantity you already have.</p>
+      <p class="gstep lead">Cost prices a quantity you already have. Board feet has its own solver.</p>
+      <p class="gstep">Press: <span class="gkey">1</span><span class="gkey">0</span> <span class="gkey">Feet</span> <span class="gkey solid">Conv</span> <span class="gkey">&middot;</span></p>
+      <p class="gstep">You see: Cost &middot; unit price $</p>
+      <p class="gstep">Press: <span class="gkey">2</span> <span class="gkey">&middot;</span> <span class="gkey">5</span> <span class="gkey">0</span> <span class="gkey solid">=</span></p>
+      <p class="gstep">You see: $25.00 &mdash; Total Cost</p>
+      <p class="gstep">Pressing <span class="gkey solid">=</span> with no price typed leaves the prompt up &mdash; type the price and press <span class="gkey solid">=</span> to total.</p>
       <p class="gstep">Press: <span class="gkey">Bd Ft</span></p>
       <p class="gstep">You see: Board feet &middot; Thickness (in), 1 of 5</p>
       <p class="gstep">Press: <span class="gkey">Bd Ft</span> five more times to take the shown values.</p>
@@ -492,24 +540,41 @@
       <p class="gstep">You see: 4 BF &mdash; Per piece, 2 of 3</p>
       <p class="gstep">Press: <span class="gkey">Bd Ft</span></p>
       <p class="gstep">You see: 44 BF &mdash; With 10% waste, 3 of 3</p>
+      <p class="gstep">If you type a length first, Bd Ft keeps it: press <span class="gkey">1</span><span class="gkey">0</span> <span class="gkey">Feet</span> <span class="gkey">Bd Ft</span>, step through Thickness and Width, and Length shows 10&prime;.</p>
       <p class="gstep">Press: <span class="gkey">2</span> <span class="gkey">&times;</span> <span class="gkey">4</span> <span class="gkey">&times;</span> <span class="gkey">1</span><span class="gkey">6</span> <span class="gkey">Bd Ft</span></p>
       <p class="gstep">You see: 10.66667 BF</p>
-      <p class="gstep">Press: <span class="gkey">1</span><span class="gkey">0</span> <span class="gkey">Feet</span> <span class="gkey solid">Conv</span> <span class="gkey">&middot;</span></p>
-      <p class="gstep">You see: Cost &middot; unit price $</p>
-      <p class="gstep">Press: <span class="gkey">2</span> <span class="gkey">&middot;</span> <span class="gkey">5</span> <span class="gkey">0</span> <span class="gkey solid">=</span></p>
-      <p class="gstep">You see: $25.00 &mdash; Total Cost</p>
       <p class="gstep">Press: <span class="gkey">2</span> <span class="gkey">&times;</span> <span class="gkey">4</span> <span class="gkey">&times;</span> <span class="gkey">1</span><span class="gkey">6</span> <span class="gkey">Bd Ft</span> <span class="gkey solid">Conv</span> <span class="gkey">&middot;</span></p>
       <p class="gstep">You see: Cost &middot; unit price $</p>
       <p class="gstep">Press: <span class="gkey">5</span><span class="gkey">0</span><span class="gkey">0</span> <span class="gkey solid">=</span></p>
       <p class="gstep">You see: $5.33 &mdash; Total Cost, at $500 per thousand board feet.</p>
+      <p class="gstep">Press: <span class="gkey">2</span> <span class="gkey">&times;</span> <span class="gkey">3</span> <span class="gkey solid">Conv</span> <span class="gkey">&middot;</span></p>
+      <p class="gstep">You see: $6.00 &mdash; Total Cost. Conv + &middot; in the middle of a multiplication totals it at once, with the second number as the price.</p>
+      <h3>Drywall and roofing</h3>
+      <p class="gstep lead">Two more solvers hide behind Conv. They ask for their numbers the same way Concrete does.</p>
+      <p class="gstep">Press: <span class="gkey solid">Conv</span> <span class="gkey">R/Wall</span></p>
+      <p class="gstep">You see: Drywall &middot; Room length, 1 of 3</p>
+      <p class="gstep">Press: <span class="gkey">1</span><span class="gkey">2</span> <span class="gkey">Feet</span> <span class="gkey">R/Wall</span> <span class="gkey">1</span><span class="gkey">0</span> <span class="gkey">Feet</span> <span class="gkey">R/Wall</span> <span class="gkey">8</span> <span class="gkey">Feet</span> <span class="gkey">R/Wall</span></p>
+      <p class="gstep">You see: 17 &mdash; Sheets 4&times;8 w/ waste, 1 of 6</p>
+      <p class="gstep">Press: <span class="gkey">R/Wall</span></p>
+      <p class="gstep">You see: 472 ft&sup2; &mdash; Total area, 2 of 6</p>
+      <p class="gstep">Keep pressing R/Wall for wall area, ceiling area, joint compound, and screws.</p>
+      <p class="gstep">Press: <span class="gkey solid">Conv</span> <span class="gkey">Diag</span></p>
+      <p class="gstep">You see: Roofing &middot; Roof length (eave), 1 of 2</p>
+      <p class="gstep">Press: <span class="gkey">4</span><span class="gkey">0</span> <span class="gkey">Feet</span> <span class="gkey">Diag</span> <span class="gkey">1</span><span class="gkey">6</span> <span class="gkey">Feet</span> <span class="gkey">Diag</span></p>
+      <p class="gstep">You see: 43 &mdash; Bundles (3/square), 1 of 5</p>
+      <p class="gstep">Press: <span class="gkey">Diag</span></p>
+      <p class="gstep">You see: 14.08 &mdash; Squares, 2 of 5</p>
+      <p class="gstep">Keep pressing Diag for area with waste, total area, and underlayment rolls.</p>
       <h3>Circle and arc</h3>
       <p class="gstep lead">Circ works from a diameter. Conv + Circ is Arc.</p>
       <p class="gstep">Press: <span class="gkey">2</span><span class="gkey">5</span> <span class="gkey">Inch</span> <span class="gkey">Circ</span></p>
-      <p class="gstep">You see: 25 INCH &mdash; Diameter</p>
+      <p class="gstep">You see: 25&Prime; &mdash; Diameter</p>
       <p class="gstep">Press: <span class="gkey">Circ</span></p>
       <p class="gstep">You see: 490.8739 SQ IN &mdash; Circle &middot; Area</p>
       <p class="gstep">Press: <span class="gkey">Circ</span></p>
-      <p class="gstep">You see: 78-9/16 INCH &mdash; Circle &middot; Circumference</p>
+      <p class="gstep">You see: 78 9/16&Prime; &mdash; Circle &middot; Circumference</p>
+      <p class="gstep">Press: <span class="gkey">5</span> <span class="gkey">Feet</span> <span class="gkey">Circ</span> <span class="gkey">Circ</span></p>
+      <p class="gstep">You see: 19.635 ft&sup2; &mdash; Circle &middot; Area. Area follows the diameter's unit: feet gives square feet, inches gives SQ IN, metric gives square metres. Circumference follows the diameter the same way.</p>
       <p class="gstep">Press: <span class="gkey">5</span> <span class="gkey">Feet</span> <span class="gkey">Circ</span></p>
       <p class="gstep">You see: 5&prime; &mdash; Diameter</p>
       <p class="gstep">Press: <span class="gkey">3</span> <span class="gkey">Feet</span> <span class="gkey">3</span> <span class="gkey">Inch</span> <span class="gkey solid">Conv</span> <span class="gkey">Circ</span></p>
@@ -517,9 +582,10 @@
       <p class="gstep">Press: <span class="gkey">9</span><span class="gkey">0</span> <span class="gkey solid">Conv</span> <span class="gkey">Circ</span></p>
       <p class="gstep">You see: 3&prime; - 11 1/8&Prime; &mdash; Arc &middot; Length, from 90 degrees</p>
       <h3>Roof framing</h3>
-      <p class="gstep lead">Store any two of Pitch, Rise and Run, then press the third key to solve for it.</p>
+      <p class="gstep lead">Store any two of Pitch, Rise, Run and Diagonal, in any order &mdash; the rest of the triangle follows.</p>
       <p class="gstep">Press: <span class="gkey">Pitch</span></p>
       <p class="gstep">You see: Pitch</p>
+      <p class="gstep">A solver key with nothing stored shows its name over 0&Prime; &mdash; type the number, then press the key again to store it.</p>
       <p class="gstep">Press: <span class="gkey">6</span> <span class="gkey">Inch</span> <span class="gkey">Pitch</span></p>
       <p class="gstep">You see: 6&Prime; &mdash; Pitch, stored</p>
       <p class="gstep">Press: <span class="gkey">1</span><span class="gkey">2</span> <span class="gkey">Feet</span> <span class="gkey">Rise</span></p>
@@ -546,24 +612,37 @@
       <p class="gstep">You see: 0.5 &mdash; Pitch &middot; Slope</p>
       <p class="gstep">Press: <span class="gkey">Pitch</span></p>
       <p class="gstep">You see: 6&Prime; &mdash; Pitch, back to inches</p>
+      <p class="gstep">Press: <span class="gkey">&middot;</span> <span class="gkey">5</span> <span class="gkey solid">Conv</span> <span class="gkey">Pitch</span></p>
+      <p class="gstep">You see: 0.5 &mdash; Pitch &middot; Slope. Conv + Pitch stores a pitch typed as a ratio: 0.5 is the same pitch as 6&Prime;.</p>
       <p class="gstep">Press: <span class="gkey">8</span> <span class="gkey">Inch</span> <span class="gkey solid">Conv</span> <span class="gkey">Hip/V</span></p>
       <p class="gstep">You see: 8&Prime; STORED &mdash; Irregular Pitch</p>
       <p class="gstep">Press: <span class="gkey">Hip/V</span></p>
       <p class="gstep">You see: 16&prime; - 1 7/8&Prime; &mdash; Irregular Hip/V, with a 6&Prime; pitch and a 12 ft run</p>
+      <p class="gstep">Press: <span class="gkey solid">Conv</span> <span class="gkey">&times;</span></p>
+      <p class="gstep">You see: Clear All</p>
+      <p class="gstep">Press: <span class="gkey">5</span> <span class="gkey">Feet</span> <span class="gkey">Diag</span></p>
+      <p class="gstep">You see: 5&prime; &mdash; Diagonal, stored</p>
+      <p class="gstep">Press: <span class="gkey">9</span> <span class="gkey">Inch</span> <span class="gkey">Pitch</span></p>
+      <p class="gstep">You see: 9&Prime; &mdash; Pitch, stored</p>
+      <p class="gstep">Press: <span class="gkey">Rise</span></p>
+      <p class="gstep">You see: 3&prime; &mdash; Rise, from the diagonal and the pitch</p>
+      <p class="gstep">Press: <span class="gkey">Run</span></p>
+      <p class="gstep">You see: 4&prime; &mdash; Run, from the diagonal and the pitch</p>
       <h3>Jack rafters and rake-wall</h3>
       <p class="gstep lead">Jack and Rake-Wall step down from the stored on-centre spacing, 16&Prime; unless you change it.</p>
       <p class="gstep">Press: <span class="gkey">6</span> <span class="gkey">Feet</span> <span class="gkey">Rise</span> <span class="gkey">1</span><span class="gkey">2</span> <span class="gkey">Feet</span> <span class="gkey">Run</span></p>
       <p class="gstep">You see: 12&prime; &mdash; Run, stored</p>
       <p class="gstep">Press: <span class="gkey">Jack</span></p>
-      <p class="gstep">You see: 16 INCH STORED &mdash; Jack &middot; o.c.</p>
+      <p class="gstep">You see: 16&Prime; STORED &mdash; Jack &middot; o.c.</p>
       <p class="gstep">Press: <span class="gkey">Jack</span></p>
       <p class="gstep">You see: 11&prime; - 11 1/8&Prime; &mdash; Jack 1</p>
       <p class="gstep">Press: <span class="gkey">Jack</span></p>
       <p class="gstep">You see: 10&prime; - 5 1/4&Prime; &mdash; Jack 2</p>
       <p class="gstep">Press: <span class="gkey">Jack</span></p>
       <p class="gstep">You see: 8&prime; - 11 5/16&Prime; &mdash; Jack 3</p>
+      <p class="gstep">Keep pressing Jack past the last jack and you see 0&Prime; once, then the o.c. display again, and stepping starts over at Jack 1.</p>
       <p class="gstep">Press: <span class="gkey">R/Wall</span></p>
-      <p class="gstep">You see: 16 INCH STORED &mdash; Rake-Wall &middot; o.c.</p>
+      <p class="gstep">You see: 16&Prime; STORED &mdash; Rake-Wall &middot; o.c.</p>
       <p class="gstep">Press: <span class="gkey">R/Wall</span></p>
       <p class="gstep">You see: 5&prime; - 4&Prime; &mdash; Rake-Wall Stud 1</p>
       <p class="gstep">Press: <span class="gkey">R/Wall</span></p>
@@ -571,49 +650,65 @@
       <p class="gstep">Press: <span class="gkey">R/Wall</span></p>
       <p class="gstep">You see: 4&prime; &mdash; Rake-Wall Stud 3</p>
       <p class="gstep">Press: <span class="gkey">2</span><span class="gkey">4</span> <span class="gkey">Inch</span> <span class="gkey solid">Conv</span> <span class="gkey">5</span></p>
-      <p class="gstep">You see: 24 INCH STORED &mdash; On-Centre, now 24&Prime;</p>
+      <p class="gstep">You see: 24&Prime; STORED &mdash; On-Centre, now 24&Prime;</p>
+      <p class="gstep">Press: <span class="gkey">Rcl</span> <span class="gkey">5</span></p>
+      <p class="gstep">You see: 24&Prime; &mdash; On-Centre, the stored spacing, with no STORED after it.</p>
+      <p class="gstep">Press: <span class="gkey">8</span> <span class="gkey">Inch</span> <span class="gkey solid">Conv</span> <span class="gkey">Hip/V</span></p>
+      <p class="gstep">You see: 8&Prime; STORED &mdash; Irregular Pitch</p>
       <p class="gstep">Press: <span class="gkey solid">Conv</span> <span class="gkey">Jack</span></p>
-      <p class="gstep">You see: Irregular Jack &middot; o.c. &mdash; press Jack again for Irregular Jack 1, and keep pressing to step down.</p>
+      <p class="gstep">You see: Irregular Jack &middot; o.c.</p>
+      <p class="gstep">Press: <span class="gkey">Jack</span></p>
+      <p class="gstep">You see: 108 3/16&Prime; &mdash; Irregular Jack 1. Keep pressing to step down.</p>
       <h3>Stairs</h3>
       <p class="gstep lead">Store a Rise, then press Stair to step through the answers, one at a time.</p>
+      <p class="gstep">The sub row counts the steps, from 1 of 12 to 12 of 12.</p>
       <p class="gstep">Press: <span class="gkey">9</span> <span class="gkey">Feet</span> <span class="gkey">Rise</span></p>
       <p class="gstep">You see: 9&prime; &mdash; Rise, stored</p>
       <p class="gstep">Press: <span class="gkey">Stair</span></p>
-      <p class="gstep">You see: 7 11/16&Prime; &mdash; Riser Height</p>
+      <p class="gstep">You see: 7 11/16&Prime; &mdash; Riser Height, 1 of 12</p>
       <p class="gstep">Press: <span class="gkey">Stair</span></p>
-      <p class="gstep">You see: 14 &mdash; Risers</p>
+      <p class="gstep">You see: 14 &mdash; Risers, 2 of 12</p>
       <p class="gstep">Press: <span class="gkey">Stair</span></p>
-      <p class="gstep">You see: &minus;3/8&Prime; &mdash; Riser Overage</p>
+      <p class="gstep">You see: &minus;3/8&Prime; &mdash; Riser Overage, 3 of 12</p>
       <p class="gstep">Press: <span class="gkey">Stair</span></p>
-      <p class="gstep">You see: 10&Prime; &mdash; Tread Width</p>
+      <p class="gstep">You see: 10&Prime; &mdash; Tread Width, 4 of 12</p>
       <p class="gstep">Press: <span class="gkey">Stair</span></p>
-      <p class="gstep">You see: 13 &mdash; Treads</p>
+      <p class="gstep">You see: 13 &mdash; Treads, 5 of 12</p>
       <p class="gstep">Press: <span class="gkey">Stair</span></p>
-      <p class="gstep">You see: 0&Prime; &mdash; Tread Overage</p>
+      <p class="gstep">You see: 0&Prime; &mdash; Tread Overage, 6 of 12</p>
       <p class="gstep">Press: <span class="gkey">Stair</span></p>
-      <p class="gstep">You see: 13&prime; - 8&Prime; &mdash; Stringer Length</p>
+      <p class="gstep">You see: 13&prime; - 8&Prime; &mdash; Stringer Length, 7 of 12</p>
       <p class="gstep">Press: <span class="gkey">Stair</span></p>
-      <p class="gstep">You see: 39.72&deg; &mdash; Incline Angle</p>
+      <p class="gstep">You see: 37.55&deg; &mdash; Incline Angle, 8 of 12</p>
       <p class="gstep">Press: <span class="gkey">Stair</span></p>
-      <p class="gstep">You see: 10&prime; - 10&Prime; &mdash; Stored Run</p>
+      <p class="gstep">You see: 10&prime; - 10&Prime; &mdash; Stored Run, 9 of 12</p>
       <p class="gstep">Press: <span class="gkey">Stair</span></p>
-      <p class="gstep">You see: 9&prime; &mdash; Stored Rise</p>
+      <p class="gstep">You see: 9&prime; &mdash; Stored Rise, 10 of 12</p>
       <p class="gstep">Press: <span class="gkey">Stair</span></p>
-      <p class="gstep">You see: 7 1/2&Prime; STORED &mdash; Stored Riser Ht</p>
+      <p class="gstep">You see: 7 1/2&Prime; STORED &mdash; Stored Riser Ht, 11 of 12</p>
       <p class="gstep">Press: <span class="gkey">Stair</span></p>
-      <p class="gstep">You see: 10&Prime; STORED &mdash; Stored Tread W</p>
+      <p class="gstep">You see: 10&Prime; STORED &mdash; Stored Tread W, 12 of 12</p>
+      <p class="gstep">Press: <span class="gkey">3</span><span class="gkey">1</span><span class="gkey">0</span><span class="gkey">0</span> <span class="gkey">mm</span> <span class="gkey">Rise</span> <span class="gkey">Stair</span></p>
+      <p class="gstep">You see: 194 mm &mdash; Riser Height, 1 of 12. A rise typed in millimetres gives steps in whole millimetres.</p>
       <p class="gstep">Press: <span class="gkey">8</span> <span class="gkey">Inch</span> <span class="gkey solid">Conv</span> <span class="gkey">7</span></p>
       <p class="gstep">You see: 8&Prime; STORED &mdash; Riser Ht, your own riser height</p>
       <p class="gstep">Press: <span class="gkey">1</span><span class="gkey">2</span> <span class="gkey">Inch</span> <span class="gkey solid">Conv</span> <span class="gkey">9</span></p>
-      <p class="gstep">You see: 1&prime; STORED &mdash; Tread W, your own tread width</p>
+      <p class="gstep">You see: 12&Prime; STORED &mdash; Tread W, your own tread width</p>
+      <p class="gstep">Press: <span class="gkey">Rcl</span> <span class="gkey">7</span></p>
+      <p class="gstep">You see: 8&Prime; &mdash; Riser Ht, the stored riser height, with no STORED after it.</p>
+      <p class="gstep">Press: <span class="gkey">Rcl</span> <span class="gkey">9</span></p>
+      <p class="gstep">You see: 12&Prime; &mdash; Tread W, the stored tread width.</p>
+      <p class="gstep">Press: <span class="gkey">Rcl</span> <span class="gkey">Stair</span></p>
+      <p class="gstep">You see: 8&Prime; &mdash; Riser Ht again: Rcl + Stair recalls the riser height too.</p>
+      <p class="gstep">With nothing stored, Rcl + 7 shows 7 1/2&Prime;, Rcl + 9 shows 10&Prime;, and Rcl + 5 shows 16&Prime; &mdash; the defaults.</p>
       <p class="gstep">Press: <span class="gkey solid">Conv</span> <span class="gkey">Stair</span></p>
       <p class="gstep">You see: Baluster &middot; Rail length, post to post, 1 of 3 &mdash; the baluster solver.</p>
       <h3>Memory</h3>
       <p class="gstep lead">M+ adds the value on screen to memory. Rcl brings it back.</p>
       <p class="gstep">Press: <span class="gkey">1</span><span class="gkey">0</span> <span class="gkey">M+</span></p>
-      <p class="gstep">You see: 10 &mdash; Memory +</p>
+      <p class="gstep">You see: 10 &mdash; the label stays blank, and the MEM indicator lights up in the sub row.</p>
       <p class="gstep">Press: <span class="gkey">5</span> <span class="gkey">M+</span></p>
-      <p class="gstep">You see: 15 &mdash; Memory +</p>
+      <p class="gstep">You see: 15 &mdash; the label stays blank, and MEM stays lit.</p>
       <p class="gstep">Press: <span class="gkey">Rcl</span> <span class="gkey">M+</span></p>
       <p class="gstep">You see: 15 &mdash; Memory</p>
       <p class="gstep">Press: <span class="gkey">M+</span></p>
@@ -642,11 +737,13 @@
       <p class="gstep">You see: Std. &mdash; Prefs &middot; Fractional Mode</p>
       <p class="gstep">Press: <span class="gkey">%</span></p>
       <p class="gstep">You see: 1/16 &mdash; Prefs &middot; Fractional Resolution, back at the start</p>
+      <p class="gstep">On Fractional Resolution, + steps 1/16, 1/32, 1/64, 1/2, 1/4, 1/8, then back to 1/16. &minus; steps the other way.</p>
       <p class="gstep">Hold <span class="gkey">&#9003; / C</span> to leave Prefs.</p>
-      <p class="gstep">Press: <span class="gkey solid">Conv</span> <span class="gkey">1</span></p>
-      <p class="gstep">You see: 1/16 &mdash; Temp Resolution, just for the next value</p>
+      <p class="gstep">Press: <span class="gkey">7</span> <span class="gkey">Inch</span> <span class="gkey">&divide;</span> <span class="gkey">1</span><span class="gkey">0</span> <span class="gkey solid">=</span></p>
+      <p class="gstep">You see: 11/16&Prime;</p>
       <p class="gstep">Press: <span class="gkey solid">Conv</span> <span class="gkey">8</span></p>
-      <p class="gstep">You see: 1/8 &mdash; Temp Resolution</p>
+      <p class="gstep">You see: 3/4&Prime; &mdash; Conv + a digit shows the value on screen once at a finer or coarser resolution, and that is all: the next value uses the usual resolution again.</p>
+      <p class="gstep">Conv + 1 is 1/16, 2 is 1/2, 3 is 1/32, 4 is 1/4, 6 is 1/64, and 8 is 1/8.</p>
       <h3>History and clear</h3>
       <p class="gstep lead">Tap the display to open History.</p>
       <p class="gstep">Tap the display again to close History.</p>
@@ -658,11 +755,13 @@
       <p class="gstep">The last 100 entries are kept. The oldest drops off on its own.</p>
       <p class="gstep">Tap the Guide tab at the top to open this guide.</p>
       <p class="gstep">Tap the History tab to go back to History.</p>
-      <p class="gstep">Tap <span class="gkey">&#9003; / C</span> to delete one character.</p>
-      <p class="gstep">Hold <span class="gkey">&#9003; / C</span> about half a second to clear the display.</p>
-      <p class="gstep">Hold it again to clear the stored values too.</p>
+      <p class="gstep">Tap <span class="gkey">&#9003; / C</span> to delete one character. On a result with nothing to delete, a tap does nothing.</p>
+      <p class="gstep">Hold <span class="gkey">&#9003; / C</span> about half a second to clear the display. The first hold clears what you typed, any operation waiting, the lit key, and the repeat &mdash; and puts the display back to feet-and-inches. It keeps the stored triangle, the stored settings, memory, Prefs, and History, and solver stepping carries on where it left off.</p>
+      <p class="gstep">Hold it again to clear Rise, Run, Diagonal, and the irregular pitch too, and to restart solver stepping. Pitch stays, and the stored settings, memory, Prefs, and History stay too.</p>
       <p class="gstep">Press: <span class="gkey solid">Conv</span> <span class="gkey">&times;</span></p>
-      <p class="gstep">You see: Clear All &mdash; riser, tread, on-centre spacing and weight-per-volume go back to their defaults.</p>
+      <p class="gstep">You see: Clear All &mdash; everything above goes, plus Pitch, memory, and the stored settings: riser, tread, on-centre spacing, and weight-per-volume go back to their defaults. Prefs and History survive. Conv + &times; works from Prefs too.</p>
+      <p class="gstep">Holding <span class="gkey">&#9003; / C</span> while Prefs is open leaves Prefs and brings back the value you had. Holding it in a solver or a cost prompt leaves that prompt and shows 0&Prime;.</p>
+      <p class="gstep">Holding it while Conv or Rcl is armed only disarms it &mdash; the display stays as it was.</p>
       </div>
       <div class="hist-vscroll" id="guideVScroll">
         <button class="hist-vscroll-btn" id="guidePrev" type="button" aria-label="Previous page">&#9650;</button>
@@ -772,9 +871,9 @@
    ===================================================================== */
 function $(id){return document.getElementById(id);}
 function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){var t=a%b;a=b;b=t;}return a||1;}
-function fmtNum(x,d){ if(!isFinite(x)) return "—"; var s=Number(x).toFixed(d===undefined?2:d); if(s.indexOf(".")>=0){ s = s.replace(/0+$/,"").replace(/\.$/,""); } return s === "" || s === "-" ? "0" : s; }
-function fmtInt(x){ return Math.round(x).toLocaleString("en-US"); }
-function money(x){ return "$" + Number(x).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,","); }
+function fmtNum(x,d){ if(!isFinite(x)) return "—"; var s=Number(x).toFixed(d===undefined?2:d); if(s.indexOf(".")>=0){ s = s.replace(/0+$/,"").replace(/\.$/,""); } if(s === "" || s === "-") return "0"; return s.charAt(0) === "-" ? "−" + s.slice(1) : s; }   /* Batch E2 I21: one minus glyph (U+2212) in all generated display text */
+function fmtInt(x){ return Math.round(x).toLocaleString("en-US").replace(/^-/, "−"); }   /* Batch E2 I21: one minus glyph */
+function money(x){ return "$" + Number(x).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,",").replace(/^-/, "−"); }   /* Batch E2 I21: one minus glyph */
 function roundRes(x, res){ return Math.round(x*res)/res; }
 
 /* ---------- preferences (reference: Prefs = Conv + %, see prefs mode) ---------- */
@@ -813,6 +912,8 @@ function fmtFI(totalIn, r){
   out += (feet ? " - " : "") + parts + "″";
   return out.trim();
 }
+/* v1.23: fractional inches read like the rest of the display — 24 1/4″,
+   not 24-1/4 INCH. Same ″ style as entries, feet-and-inches, and pitch. */
 function fmtFracInch(totalIn){
   if(!isFinite(totalIn)) return "—";
   var r = res();
@@ -821,35 +922,30 @@ function fmtFracInch(totalIn){
   var whole = Math.floor(rounded + 1e-9);
   var num = Math.round((rounded - whole) * r), den = r;
   if(num === r){ whole += 1; num = 0; }
-  if(num){ var g = gcd(num, den); num/=g; den/=g; return sign + (whole ? whole + "-" + num + "/" + den : num + "/" + den) + " INCH"; }
-  return sign + whole + " INCH";
-}
-/* v1.15: pitch in inches is stated as inches, never rolled up into
-   feet — a 12″ pitch must read "12″", not "1′". */
-function fmtPitchIn(p){
-  if(!isFinite(p)) return "—";
-  var r = res();
-  var sign = p < 0 ? "−" : "";
-  var rounded = Math.round(Math.abs(p) * r) / r;
-  var whole = Math.floor(rounded + 1e-9);
-  var num = Math.round((rounded - whole) * r), den = r;
-  if(num === r){ whole += 1; num = 0; }
-  if(num){ var g = gcd(num, den); num/=g; den/=g; return sign + whole + " " + num + "/" + den + "″"; }
+  if(num){ var g = gcd(num, den); num/=g; den/=g; return sign + (whole ? whole + " " + num + "/" + den : num + "/" + den) + "″"; }
   return sign + whole + "″";
 }
+/* v1.15: pitch in inches is stated as inches, never rolled up into
+   feet — a 12″ pitch must read "12″", not "1′".
+   Batch D fix 6e (I21-E): pitch shares the one fraction formatter with
+   fractional inches, so a pitch below 1″ reads "1/2″", not "0 1/2″". */
+function fmtPitchIn(p){
+  return fmtFracInch(p);
+}
 var dispMode = "ftin";   /* ftin | decft | decin | fracin | yd | m | cm | mm */
+var prevDispMode = "ftin";   /* v1.23: the display unit before the current entry's unit key — a pitch entry puts it back, since a pitch is not a length */
 function fmtByPref(val, dim){
   if(dim===2){
     if(prefArea==="sqyd") return fmtNum(val/1296,4) + " yd²";
-    if(prefArea==="sqm") return fmtNum(val/929.0304,4) + " m²";
+    if(prefArea==="sqm") return fmtNum(val/1550.0031,4) + " m²";
     return fmtNum(val/144,4) + " ft²";
   }
   if(dim===3){
-    if(prefVol==="cuft") return fmtNum(val/1728,2) + " ft³";
-    if(prefVol==="cum") return fmtNum(val*0.0000163871,4) + " m³";
+    if(prefVol==="cuft") return fmtNum(val/1728,3) + " ft³";   /* Batch D fix 6a: cubic-feet preference shows 3 decimals (217.542, was 217.54) */
+    if(prefVol==="cum") return fmtNum(val*0.000016387064,4) + " m³";   /* Batch H fix 6 (M-4): exact 0.0254³ — the rounded 0.0000163871 was +2 ppm, visible on Conv round-trips */
     return fmtNum(val/46656,6) + " yd³";
   }
-  if(dim===0) return fmtNum(val,4);
+  if(dim===0) return fmtNum(val,6);   /* Batch D fix 6a: dimensionless results show up to 6 decimals, trimmed (7.142857, was 7.1429). Area (4dp) and yd³ (6dp) formatters are untouched. */
   if(dispMode==="decft") return fmtNum(val/12,4) + " ft";
   if(dispMode==="decin") return fmtNum(val,3) + " in";
   if(dispMode==="fracin") return fmtFracInch(val);
@@ -913,7 +1009,15 @@ function renderHistory(){
          and loads as before. */
       if(suppressHistClick) return;
       closeHistory();
-      acc = null; pendingOp = null; clearBuilder(); justEvaluated = true;
+      /* Batch E1 I10: loading a History answer returns to plain
+         calculation — cancel any active session, cost prompt, or Prefs
+         mode first, so none of them keeps running underneath. The
+         snapshot is discarded, not restored: the tapped value replaces
+         the display. */
+      if(session) sessionCancel();
+      costPrompt = null;
+      prefsMode = false; prefsSnapshot = null;
+      acc = null; pendingOp = null; clearBuilder(); justEvaluated = true; litSolver = null; lastRepeat = null; costPerMbm = false;   /* Batch F: a reused History value carries no board-feet provenance */
       setDisplay(e.val, e.dim, e.expr + " =");
     });
     list.appendChild(row);
@@ -1042,14 +1146,46 @@ loadHistory();
 /* ---------- state ---------- */
 var shiftArmed = false, rclArmed = false;
 var acc = null, pendingOp = null, lastPct = null;
+var eqFresh = false;   /* Batch B fix 7 (4.2): true only while the display holds a fresh = result. Cleared by every setDisplay/showMain call except the ones in pressEquals that set it — so only a solver key pressed right after = can store the displayed result, never a solver-store display, a conversion, or a stale value. */
+var convFresh = false;   /* Batch E1 I2: true only while the display holds a fresh Conv+unit conversion of a length. Cleared by setDisplay/showMain like eqFresh; only Pitch/Circ read it (Rise/Run/Diag keep their =-only gate). */
+var recallOperand = false;   /* Batch B fix 1: a solver-key recall shown while an operation is pending feeds that operation like a typed operand (pressOp/pressEquals read the display). Set by triangle recalls during a pending op and, since Batch H fix 5 (M-3), by a Conv conversion that commits a typed operand mid-operation; cleared by digits, backspace, prompts, clears, and any op/= that consumes it. */
+var accMode = "ftin";   /* v1.23: the running total keeps the first value's display unit — an inch total stays inches through the whole sum */
+var litSolver = null;   /* v1.23: data-k of the last solver key pressed — it
+   stays lit while its result is on the display. Cleared by digits (a new
+   entry), operators, =, Clear, and any action that replaces the display
+   with something else. A pending operator lights instead (see litKeyId). */
+var SOLVER_KEYS = {pitch:1, rise:1, run:1, diag:1, hip:1, jack:1, rwall:1, stair:1, circ:1, bdft:1, weight:1, sqrt:1};
+var lastRepeat = null;   /* v1.23: the last completed operation {op, val, dim} —
+   pressing = again repeats it (43 + 16 = 59, = 75, = 91), which is how even
+   spacings are walked out. Cleared by typing, solver keys, %, Clear, and
+   anything else that starts a new job, so a repeat only ever follows the
+   operation it repeats. */
+function litKeyId(){
+  if(pendingOp) return "op:" + pendingOp;   /* 7 × keeps × lit until = completes it */
+  return litSolver;
+}
+function renderLit(){
+  var id = litKeyId();
+  document.querySelectorAll("button.key").forEach(function(b){
+    b.classList.toggle("lit", b.getAttribute("data-k") === id);
+  });
+}
 var memory = null;                 /* {val, dim, count} */
 var memRecallMode = false;         /* after Rcl+M+, M+ shows AVG then CNT */
 var memCycle = 0;                  /* 0 = TTL shown, 1 = AVG, 2 = CNT */
-var tri = {rise:null, run:null, pitch:null, irPitch:null};
+var tri = {rise:null, run:null, pitch:null, irPitch:null, diag:null};
 var riserStore = null, treadStore = null, ocStore = 16;
 var wtvol = {val:1.5, unit:0};     /* default 1.5 Ton per CU YD (reference p.39) */
 var wtvolStoreMode = false;
 var costPerMbm = false;            /* displayed qty is board feet: price is per Mbm */
+/* Batch F: the per-Mbm flag belongs to the board-feet value showing, or
+   held as the accumulator by a pending operation. A key that replaces the
+   working value with a different quantity clears it — unless a pending
+   operation still holds the board-feet value as its accumulator, in which
+   case the keystroke is the OTHER operand and the flag belongs to the
+   accumulator, not the keystroke. Wholesale resets (Clear All, hold-clears,
+   session starts, History reuse) clear it unconditionally at their sites. */
+function clearMbmUnlessPending(){ if(!(acc !== null && pendingOp)) costPerMbm = false; }
 var costPrompt = null;             /* {qty, perMbm} — waiting for a unit price */
 var justEvaluated = false;
 var dispVal = 0, dispDim = 1;
@@ -1070,6 +1206,15 @@ var lastConv = null;               /* {key, val} for conversion toggling */
 var bMode = "num", single = "", bDim = 1, bDimUnit = 12;
 var fields = {feet:"", inch:"", num:"", den:""};
 var activeField = "feet";
+var entryComplete = false;   /* v1.23: set when a unit key converts or tags
+   the displayed value (no entry was in progress). The next digit starts
+   a fresh entry instead of appending to the converted value — without
+   this, 18″ -> Feet -> 3 gave 1′ - 63″. Cleared by clearBuilder. */
+var fracStarted = false;     /* v1.23: set by the / key. While a fraction is
+   being entered and no numerator digits are in yet, the entry display
+   keeps the whole part up with the slash after it (7/), so a fraction
+   can be entered next. Cleared by clearBuilder and by the conversion
+   entry builders, which construct complete values. */
 var UNIT_TO_IN = {decin:1, decft:12, yd:36, m:39.3700787402, cm:0.3937007874, mm:0.03937007874, num:1};
 var UNIT_LBL = {decin:"in", decft:"ft", yd:"yd", m:"m", cm:"cm", mm:"mm", num:"№"};
 
@@ -1077,6 +1222,36 @@ function builderHasInput(){
   if(bMode === "num") return single !== "";
   if(bMode === "ftin") return fields.feet!=="" || fields.inch!=="" || fields.num!=="" || fields.den!=="";
   return single !== "";
+}
+function fractionDenZero(){
+  /* Batch C fix 4 (W12): a fraction whose denominator was EXPLICITLY typed
+     as 0 (fields.den is "0", not omitted). Omitted denominators (den "")
+     still use the resolution setting — see builderValue. */
+  return bMode === "ftin" && fields.num !== "" && fields.den !== "" && parseFloat(fields.den) === 0;
+}
+/* Batch H fix 3 (F-2): a computed number written into the entry buffer
+   must never carry float noise past the 10-digit append cap — a raw
+   conversion like 7″ → m wrote "0.17779999999980797" (17 chars), so
+   after one backspace every digit was refused and the entry looked
+   frozen. Rounding to the entry system's own precision ceiling keeps
+   every displayed value identical at job sizes: 10 significant digits
+   for values >= 1, and fewer below 1, because the append cap counts
+   the leading zero (and any zeros after the point) as digits — 10
+   significant digits below 1 would still take two backspaces to edit.
+   One backspace now always frees a slot (for values the entry system
+   can represent at all). Non-finite values pass through unchanged;
+   -0 normalizes to "0". */
+function entryNumString(x){
+  if(!isFinite(x)) return String(x);
+  if(x === 0) return "0";
+  var prec = 10;
+  var ax = Math.abs(x);
+  if(ax < 1){
+    var zeros = 0, t = ax;
+    while(t < 0.1 && zeros < 8){ t *= 10; zeros++; }
+    prec = Math.max(1, 9 - zeros);
+  }
+  return String(parseFloat(x.toPrecision(prec)));
 }
 function builderValue(){
   if(bMode === "num"){
@@ -1088,7 +1263,9 @@ function builderValue(){
     var nn = parseFloat(fields.num)||0, dd = parseFloat(fields.den)||0;
     var frac = 0;
     if(nn && dd) frac = nn/dd;
-    else if(nn && !dd) frac = nn / res();   /* reference: no denominator -> resolution setting */
+    else if(nn && !dd && fields.den === "") frac = nn / res();   /* reference: no denominator -> resolution setting */
+    /* Batch C fix 4 (W12): an explicit zero denominator contributes
+       nothing — never the resolution fallback above. */
     var neg = (String(fields.feet).indexOf("-")===0 || String(fields.inch).indexOf("-")===0);
     var lin = Math.abs(f)*12 + Math.abs(i) + frac;
     var val = (bDim === 1) ? lin : lin * Math.pow(bDimUnit, bDim-1);
@@ -1102,6 +1279,7 @@ function builderValue(){
 function clearBuilder(){
   bMode = "num"; single = ""; bDim = 1; bDimUnit = 12;
   fields = {feet:"", inch:"", num:"", den:""}; activeField = "feet";
+  entryComplete = false; fracStarted = false;
 }
 function rawParts(){
   if(bMode === "num") return single;
@@ -1134,19 +1312,43 @@ function bareNumber(){
    shared formatter, so a total of 12 inches still reads as 1′. */
 function entryFtInText(){
   var f=fields.feet, i=fields.inch, n=fields.num, d=fields.den;
-  var frac="";
+  /* Batch E2 I21: fields keep ASCII "-" internally (parseFloat); the entry
+     preview renders U+2212. The " - " feet-inch separator is unchanged. */
+  f = f.replace(/^-/, "−"); i = i.replace(/^-/, "−"); n = n.replace(/^-/, "−"); d = d.replace(/^-/, "−");
+  var frac="", pendingFrac=false;
   if(n!==""){
-    if(d!==""){ var nn=parseInt(n,10), dd=parseInt(d,10);
-      if(dd){ var g=gcd(nn,dd); frac=(nn/g)+"/"+(dd/g); } else frac=n+"/"+d;
-    } else frac=n;
+    if(d!==""){
+      /* v1.23: show the fraction exactly as typed (7/7), never reduced
+         during entry — the / key enters a fraction, it does not simplify
+         one. Results still show reduced fractions. */
+      frac = n + "/" + d;
+    } else {
+      /* v1.23: a fraction still being entered shows its slash (7/),
+         with no inch mark until the denominator is in — the entry
+         reads as a fraction in progress, not a finished value. The
+         committed value still uses the resolution when = is pressed
+         with no denominator given. */
+      frac = n + "/"; pendingFrac = true;
+    }
   }
   var parts=[];
   if(f!=="") parts.push(f+"′");
   var inchPart="";
   if(i!=="") inchPart=i;
   if(frac) inchPart = inchPart ? inchPart+" "+frac : frac;
-  if(inchPart) parts.push(inchPart+"″");
-  if(!parts.length) return null;
+  else if(fracStarted && (activeField === "num" || activeField === "den")){
+    /* v1.23: / pressed and no numerator digits in yet — the whole part
+       stays up with the slash after it (7/), so a fraction can be
+       entered next. */
+    inchPart = inchPart ? inchPart+"/" : "/";
+    pendingFrac = true;
+  }
+  if(inchPart) parts.push(pendingFrac ? inchPart : inchPart+"″");
+  if(!parts.length){
+    /* v1.23: pressing / with nothing entered yet still shows the slash. */
+    if(activeField === "num" || activeField === "den") return "/";
+    return null;
+  }
   return parts.join(" - ");
 }
 
@@ -1166,7 +1368,25 @@ function updateIndicators(){
      total is more than a foot, and a circle area reads "SQ IN".) */
   var txt = $("dispMain").textContent || "";
   var cap = "";
-  if(/′/.test(txt) && /″/.test(txt)) cap = "FEET - INCH";
+  /* Batch E3 K2: while a feet-and-inches entry is still in progress, the
+     caption comes from the ENTRY STATE, not the displayed text — a
+     pending fraction (12′ - 7 7/) has no inch mark yet, so text-reading
+     would say FEET for a feet-and-inches entry. Only a plain entry
+     preview qualifies: no label on screen (a labeled display is a
+     prompt, a Prefs screen, or a result — never the entry itself), and
+     never inside a cost prompt, Prefs, or a session prompt, where the
+     typed digits are a price, an option, or a prompt value in the
+     prompt's own unit. Everything else keeps text-reading, as before. */
+  var entryCap = null;
+  if(!costPrompt && !prefsMode && !(session && session.phase === "prompt") && $("dispLabel").textContent === "" && builderHasInput() && bMode === "ftin" && bDim === 1){
+    var hasF = fields.feet !== "";
+    var hasI = fields.inch !== "" || fields.num !== "" || fields.den !== "" || (fracStarted && (activeField === "num" || activeField === "den"));
+    if(hasF && hasI) entryCap = "FEET - INCH";
+    else if(hasF) entryCap = "FEET";
+    else if(hasI) entryCap = "INCH";
+  }
+  if(entryCap !== null) cap = entryCap;
+  else if(/′/.test(txt) && /″/.test(txt)) cap = "FEET - INCH";
   else if(/′/.test(txt)) cap = "FEET";
   else if(/″/.test(txt) || /INCH/.test(txt)) cap = "INCH";
   else if(/yd²/.test(txt)) cap = "SQ YD";
@@ -1193,10 +1413,11 @@ function updateIndicators(){
   else if(dispDim===1 && dispMode==="mm") cap = "MILLIMETRES";
   else cap = "";
   $("dispUnits").textContent = cap;
+  renderLit();   /* v1.23: every display update re-syncs the lit key */
 }
 /* ---------- v1.16: the label on the left of the display stays
    blank unless something is worth naming. Routine states (Ready,
-   Entering, Entered, Cleared, Clear All, Negated), bare key echoes
+   Entering, Entered, Cleared, Negated), bare key echoes
    with no result (Diag, Hip/V), and arithmetic echoes (a label that
    ends in an operator or "=") show nothing — the display is just
    the value. Named solver results (Diagonal, Hip / valley, Run,
@@ -1207,11 +1428,12 @@ function updateIndicators(){
    with nothing to solve shows its name as a label prompt instead
    (Pitch, Rise, Run, ...); typing clears the label and the entry
    continues. Keys with no prompt to show (memory recall with an
-   empty memory, Conv conversions of a plain number) stay fully
-   silent. Confirmations of something done successfully (Memory ·
+   empty memory) stay fully silent. Confirmations of something done successfully (Memory ·
    cleared, Cleared) are kept. */
 var ROUTINE_LABELS = {"Ready":1,"Entering":1,"Entered":1,"Cleared":1,
-  "Clear All":1,"Negated":1};
+  "Negated":1};   /* Batch E3 G1: "Clear All" is NOT routine — the Clear All
+   confirmation shows its label, like other confirmations. It clears on
+   the next key, when the next display sets its own label. */
 function displayLabel(label){
   if(label === undefined || label === null) return "";
   var t = String(label).trim();
@@ -1226,10 +1448,29 @@ function displayLabel(label){
    the label clears when you type (typing goes through liveEntryPreview,
    which blanks the label). Only the label changes: the value, sub row
    and History are untouched. Keys with no prompt to show (memory recall
-   with an empty memory, Conv conversions of a plain number) stay fully
-   silent. */
-function promptLabel(name){ $("dispLabel").textContent = displayLabel(name); updateIndicators(); }
+   with an empty memory) stay fully silent. */
+/* Batch B fix 4 (W7): a solver prompt never presents a stale value under
+   the solver's label — the display resets to the neutral 0" with the
+   prompt label, so a prompt is never mistaken for an answer. The label
+   itself, the silent-invalid behavior, and the diag<=leg guard are
+   unchanged; only the value shown with the prompt is neutral now. */
+function promptLabel(name){
+  /* Fix 2026-11-14 (Mitch's solver report): a prompt must never blank an
+     entry the user just typed. The W7 0" reset was for TRUE prompts — no
+     entry, stale solver result on screen. But rejected entries are kept
+     in the builder for continued typing (I1), so blanking their display
+     to 0" lied about the state: typing 12 then Run showed 0" while the
+     12 was still in the builder. With an entry present, set the label
+     only (the pre-W7 behavior) and leave the entry preview showing;
+     with no entry, the 0" neutral display stands. The fresh-= and
+     fresh-conversion flags clear in both branches, exactly as the
+     setDisplay path did. */
+  recallOperand = false; eqFresh = false; convFresh = false;
+  if(builderHasInput()){ $("dispLabel").textContent = displayLabel(name); updateIndicators(); return; }
+  setDisplay(0, 1, name);
+}
 function setDisplay(val, dim, label, subOverride){
+  eqFresh = false; convFresh = false;
   dispVal = val; dispDim = dim;
   $("dispMain").textContent = fmtByPref(val, dim);
   if(label !== undefined) $("dispLabel").textContent = displayLabel(label);
@@ -1247,6 +1488,7 @@ function subIndicator(text){
   return m ? m[1] + " of " + m[2] : "";
 }
 function showMain(label, mainText, subText, val, dim){
+  eqFresh = false; convFresh = false;
   if(val !== undefined){ dispVal = val; dispDim = dim; }
   $("dispLabel").textContent = displayLabel(label);
   $("dispMain").textContent = mainText;
@@ -1258,7 +1500,7 @@ function liveEntryPreview(){
   if(!v) return;
   dispMode = (bMode === "decft") ? "decft" : (bMode === "decin") ? "decin"
     : (bMode === "yd") ? "yd" : (bMode === "m" || bMode === "cm" || bMode === "mm") ? bMode
-    : (bMode === "ftin") ? "ftin" : dispMode;
+    : dispMode;   /* v1.23: a feet-and-inches entry no longer forces the feet display here — the unit keys declare the unit, and arithmetic keeps the running total's unit */
   if(session && session.phase === "prompt"){
     var pr = session.def.prompts[session.idx];
     setDisplay(v.val, v.dim, session.def.title + " · " + pr.label,
@@ -1275,16 +1517,28 @@ function liveEntryPreview(){
 }
 
 /* ---------- arithmetic ---------- */
+/* Batch B fix 2 (W9): + and - refuse mixed dimensions. Adding raw internal
+   numbers across dimensions (5 ft2 + 6 ft) is meaningless and was
+   order-dependent, so applyOp returns null and every caller treats that as
+   a silent no-op (acc, pending op and display untouched). One exception:
+   a bare-zero dimensionless operand adopts the other operand's dimension
+   (0 - 5" -> -5"), so a leading zero never drops a unit. x and / keep
+   scaling dimensions exactly as before. */
+function addSub(a, op, b){
+  if(a.dim !== b.dim){
+    var aZero = (a.dim === 0 && a.val === 0), bZero = (b.dim === 0 && b.val === 0);
+    if(!aZero && !bZero) return null;
+    var dim = aZero ? b.dim : a.dim;
+    return {val: op === "+" ? a.val + b.val : a.val - b.val, dim: dim};
+  }
+  return {val: op === "+" ? a.val + b.val : a.val - b.val, dim: a.dim};
+}
 function applyOp(a, op, b){
-  if(op==="+") return {val:a.val + convDim(b,a.dim), dim:a.dim};
-  if(op==="-") return {val:a.val - convDim(b,a.dim), dim:a.dim};
+  if(op==="+") return addSub(a, "+", b);
+  if(op==="-") return addSub(a, "-", b);
   if(op==="*") return {val:a.val * b.val, dim:Math.min(3, a.dim + b.dim)};
   if(op==="/") return {val: b.val===0 ? NaN : a.val / b.val, dim:Math.max(0, a.dim - b.dim)};
   return b;
-}
-function convDim(b, targetDim){
-  if(b.dim === targetDim) return b.val;
-  return b.val;   /* plain numbers (dim 0) are used as-is */
 }
 function opSymbol(op){ return {"+":"+","-":"−","*":"×","/":"÷"}[op] || op; }
 function commitEntry(){
@@ -1292,35 +1546,74 @@ function commitEntry(){
   var v = builderValue(); clearBuilder(); return v;
 }
 function pressOp(op){
+  if(fractionDenZero()) return;   /* Batch C fix 4 (W12): an explicit 0 denominator refuses silently — entry stays pending, acc/pending op/display untouched */
   var entry = commitEntry();
+  if(!entry && recallOperand && acc !== null && pendingOp){ entry = {val:dispVal, dim:dispDim}; }
+  recallOperand = false;
+  var freshEntry = !!entry && (acc === null || !pendingOp);
   if(acc === null){
     if(entry) acc = entry;
     else acc = {val:dispVal, dim:dispDim};
+    accMode = dispMode;   /* v1.23: the running total takes the first value's display unit */
   } else if(entry){
-    if(pendingOp){ acc = applyOp(acc, pendingOp, entry); }
-    else acc = entry;
+    if(pendingOp){ var chained = applyOp(acc, pendingOp, entry); if(chained === null) return; acc = chained; }
+    else { acc = entry; accMode = dispMode; }
   }
-  pendingOp = op; lastPct = null; costPerMbm = false;
+  pendingOp = op; lastPct = null; litSolver = null;
+  /* The per-Mbm flag survives operating on the displayed board-feet total
+     (or chaining onto it), so Rcl Rcl × price Conv+· prices per Mbm. Only
+     a freshly typed quantity replacing the accumulator clears it. */
+  if(freshEntry) costPerMbm = false;
   justEvaluated = false;
+  if(acc.dim === 1) dispMode = accMode;   /* v1.23: the running total echoes in its own unit — pressing + no longer flips inches to feet */
   setDisplay(acc.val, acc.dim, fmtByPref(acc.val, acc.dim) + " " + opSymbol(op));
 }
 function pressEquals(){
+  if(fractionDenZero()) return;   /* Batch C fix 4 (W12): an explicit 0 denominator refuses silently — entry stays pending, nothing commits */
+  litSolver = null;   /* v1.23: = completes the action, so nothing stays lit */
   /* v1.8: capture the entered-unit text before commitEntry clears it,
      so an entered value keeps the unit it was entered in (12 Inch
-     stays 12″) at this point too. */
-  var etxt = (bMode === "ftin" && bDim === 1) ? entryFtInText() : null;
+     stays 12″) at this point too. v1.23: a fraction with no denominator
+     yet shows the committed value instead of the pending slash. */
+  var etxt = (bMode === "ftin" && bDim === 1 && !(fields.num !== "" && fields.den === "")) ? entryFtInText() : null;
+  /* Batch D fix 6d: a COMMITTED = result renders the reduced fraction
+     (7/7″ -> 1″). The flag is captured before commitEntry clears the
+     fields; during-entry display stays verbatim (entryFtInText). Only
+     an unreduced or improper fraction skips the as-entered override —
+     already-reduced entries render identically either way. */
+  var fracUnreduced = (fields.num !== "" && fields.den !== "") && (function(){ var n = Math.abs(parseFloat(fields.num)||0), d = Math.abs(parseFloat(fields.den)||0); return d > 0 && (n >= d || gcd(n, d) > 1); })();
   var entry = commitEntry();
+  if(!entry && recallOperand && acc !== null && pendingOp){ entry = {val:dispVal, dim:dispDim}; }
+  recallOperand = false;
   if(acc !== null && pendingOp && entry){
+    if(acc.dim === 1) dispMode = accMode;   /* v1.23: the result keeps the running total's unit */
     var expr = fmtByPref(acc.val, acc.dim) + " " + opSymbol(pendingOp) + " " + fmtByPref(entry.val, entry.dim);
     var res = applyOp(acc, pendingOp, entry);
+    if(res === null) return;   /* W9 refusal: acc, pending op and display stay as they were */
     addHistory(expr, fmtByPref(res.val, res.dim), res.val, res.dim);
+    lastRepeat = {op: pendingOp, val: entry.val, dim: entry.dim};   /* v1.23: = repeats this step */
     acc = null; pendingOp = null; justEvaluated = true;
     setDisplay(res.val, res.dim, expr + " =");
+    eqFresh = true;
   } else if(entry){
     addHistory("Entered", etxt || fmtByPref(entry.val, entry.dim), entry.val, entry.dim);
     justEvaluated = true;
     setDisplay(entry.val, entry.dim, "Entered");
-    if(etxt){ $("dispMain").textContent = etxt; updateIndicators(); }
+    eqFresh = true;
+    if(etxt && !fracUnreduced){ $("dispMain").textContent = etxt; updateIndicators(); }
+  } else if(lastRepeat && justEvaluated){
+    /* v1.23: = with nothing new entered repeats the last step on the
+       value showing — 43 + 16 = 59, = 75, = 91. Each repeat is logged,
+       so the whole run of spacings is in History. */
+    var cur = {val: dispVal, dim: dispDim};
+    var rexpr = fmtByPref(cur.val, cur.dim) + " " + opSymbol(lastRepeat.op) + " " + fmtByPref(lastRepeat.val, lastRepeat.dim);
+    var rres = applyOp(cur, lastRepeat.op, {val: lastRepeat.val, dim: lastRepeat.dim});
+    if(rres !== null){
+      addHistory(rexpr, fmtByPref(rres.val, rres.dim), rres.val, rres.dim);
+      justEvaluated = true;
+      setDisplay(rres.val, rres.dim, rexpr + " =");
+      eqFresh = true;
+    }
   }
   lastPct = null;
 }
@@ -1332,8 +1625,13 @@ function currentOperand(){
 
 /* ---------- entry keys ---------- */
 function pressDigit(d){
+  clearMbmUnlessPending();   /* Batch F: a fresh typed entry replaces the working value */
+  recallOperand = false;
   if(session && session.prefilled){ clearBuilder(); session.prefilled = false; }
   if(wtvolStoreMode && d === "0"){ cycleWtvolUnit(); return; }
+  if(!session) litSolver = null;   /* v1.23: typing a new entry ends the lit solver's turn (session digits belong to that solver, so they keep it lit) */
+  lastRepeat = null;   /* v1.23: typing starts a new job — = no longer repeats the old step */
+  if(entryComplete){ clearBuilder(); }   /* v1.23: a converted/tagged value is complete — typing starts fresh */
   if(justEvaluated && !builderHasInput()){ justEvaluated = false; }
   if(bMode === "num"){
     if(single.replace("-","").replace(".","").length >= 10) return;
@@ -1350,16 +1648,46 @@ function pressDigit(d){
   liveEntryPreview();
 }
 function pressBack(){
+  recallOperand = false;
+  lastRepeat = null;   /* Batch E1 I4: backspace breaks repeat-= (the display value changed) */
+  if(!session) litSolver = null;   /* Batch E2 I13: backspace is "another key" — it clears a lit key (session backspaces keep the session key lit) */
+  /* Batch E2 I14a: with no entry to delete, backspace leaves the display alone
+     (a result stays up; hold-clear is the clearing gesture) — repeat-= is
+     already broken above. One exception: a bare pending slash (fracStarted
+     with no digits) is itself deleted, so the press has a visible effect. */
+  if(!builderHasInput()){
+    if(fracStarted && !session && !costPrompt){
+      fracStarted = false; activeField = "feet";
+      setDisplay(0, 1, "Ready");
+    }
+    return;
+  }
+  entryComplete = false;   /* v1.23: backspace edits the converted value instead of starting fresh */
   if(bMode === "num"){ if(single.length) single = single.slice(0,-1); }
   else if(bMode === "ftin"){
-    var f = fields[activeField];
-    if(f.length){ fields[activeField] = f.slice(0,-1); }
-    else {
-      var order = ["feet","inch","num","den"]; var i = order.indexOf(activeField);
-      if(i > 0) activeField = order[i-1];
-    }
+    /* Batch E2 I14b: no dead presses at field boundaries — an empty active
+       field falls back to the nearest non-empty earlier field and deletes
+       its last character, so every press changes something visible. */
+    var order = ["feet","inch","num","den"]; var i = order.indexOf(activeField);
+    while(i >= 0 && fields[order[i]] === "") i--;
+    if(i >= 0){ activeField = order[i]; fields[activeField] = fields[activeField].slice(0,-1); }
   } else if(single.length){ single = single.slice(0,-1); }
-  if(builderHasInput()) liveEntryPreview(); else setDisplay(acc ? acc.val : 0, acc ? acc.dim : dispDim, "Ready");
+  if(builderHasInput()) liveEntryPreview();
+  else if(costPrompt) setDisplay(0, 0, "Cost · unit price $");   /* Batch E1 I9: backspace-to-empty re-renders the live cost prompt label instead of blanking it */
+  else if(session && session.phase === "prompt"){
+    /* Batch E2 I14c: backspace-to-empty in a session prompt re-renders the
+       prompt label (the prompt stays live) — never re-prefills the default. */
+    /* Batch H fix 9 (P-4): the display shows the PENDING value, not 0.
+       With no entry, accepting the prompt stores its default, so the
+       display shows that default (the builder stays empty — typing
+       still starts fresh and `=` still stores the default). Prompts
+       with no default keep the neutral 0 display, as before. */
+    var pr = session.def.prompts[session.idx];
+    var pendVal = (session.curDef !== null && session.curDef !== undefined) ? session.curDef : 0;
+    setDisplay(pendVal, pr.unit === "num" ? 0 : 1, session.def.title + " · " + pr.label,
+      (session.idx+1) + " of " + session.def.prompts.length);
+  }
+  else setDisplay(acc ? acc.val : 0, acc ? acc.dim : dispDim, "Ready");
 }
 /* ---------- v1.9: convert between Feet and Inch on entry ----------
    Pressing a *different* unit key after a value is already tagged
@@ -1384,7 +1712,7 @@ function splitTotalIn(totalIn){
 }
 function setFtInEntry(totalIn){
   var p = splitTotalIn(totalIn);
-  bMode = "ftin"; bDim = 1; bDimUnit = 12; dispMode = "ftin";
+  bMode = "ftin"; bDim = 1; bDimUnit = 12; dispMode = "ftin"; fracStarted = false;
   fields = {feet:"", inch:"", num:"", den:""}; single = "";
   if(p.feet) fields.feet = p.sign + p.feet;
   if(p.wholeIn || p.num) fields.inch = (p.feet ? "" : p.sign) + p.wholeIn;
@@ -1395,37 +1723,78 @@ function setFtInEntry(totalIn){
 function setInchOnlyEntry(totalIn){
   var p = splitTotalIn(totalIn);
   var totalWhole = p.feet*12 + p.wholeIn;
-  bMode = "ftin"; bDim = 1; bDimUnit = 1; dispMode = "ftin";
+  bMode = "ftin"; bDim = 1; bDimUnit = 1; dispMode = "fracin"; fracStarted = false;
   fields = {feet:"", inch:"", num:"", den:""}; single = "";
   fields.inch = p.sign + totalWhole;
   if(p.num){ fields.num = String(p.num); fields.den = String(p.den); }
   activeField = "num";
 }
 function pressFeetKey(){
+  clearMbmUnlessPending();   /* Batch F: a unit-tagged entry replaces the working value */
   wtvolStoreMode = false;
+  if(!session) litSolver = null;   /* Batch E2 I13: a unit key is "another key" — it clears a lit key (session entries keep the session key lit) */
   if(bMode === "num"){
-    if(single === ""){ bMode = "ftin"; activeField = "feet"; }
-    else if(single.indexOf(".") >= 0){ bMode = "decft"; dispMode = "decft"; }
+    prevDispMode = dispMode;   /* v1.23: remember the ambient unit — a pitch entry (not a length) puts it back */
+    if(single === ""){
+      /* v1.23: no entry in progress — use the displayed value instead of
+         switching to an empty entry (which wiped the display to 0″). A
+         plain number is tagged as feet; a length converts to feet-and-
+         inches; area/volume results are left alone. */
+      if(!isFinite(dispVal) || dispDim === 2 || dispDim === 3) return;
+      if(dispDim === 1){ setFtInEntry(dispVal); entryComplete = true; liveEntryPreview(); return; }
+      single = entryNumString(dispVal); entryComplete = true;
+    }
+    if(single.indexOf(".") >= 0){ bMode = "decft"; dispMode = "decft"; }
     else { bMode = "ftin"; fields.feet = single; single = ""; activeField = "inch"; dispMode = "ftin"; }
     liveEntryPreview(); return;
   }
   if(bMode !== "ftin"){
+    /* Batch H fix 1 (M-2): a repeat Feet on a decimal-feet entry raises
+       the dimension, exactly like the integer rule and like the metric
+       keys — it no longer converts to feet-and-inches. At dim 3 the
+       press is a no-op (the integer cap). Inside a session prompt the
+       convert behavior below is kept (dimension-raising is guarded
+       there, as for the feet-only branch). A cross-unit press (decimal
+       inches, yards, metric) still converts, as before. */
+    if(bMode === "decft" && single !== "" && !isNaN(parseFloat(single)) && !(session && session.phase === "prompt")){
+      if(bDim < 3) bDim++;
+      liveEntryPreview(); return;
+    }
     /* A decimal/metric value already tagged in another unit: convert
        its total to feet-and-inches instead of re-reading the number
        as feet (18.5 decimal inches + Feet is 1′ - 6 1/2″, not 18′). */
     var s = parseFloat(single);
-    if(single !== "" && !isNaN(s)){ setFtInEntry(s * (UNIT_TO_IN[bMode] || 1)); }
+    if(single !== "" && !isNaN(s)){
+      /* Batch G fix 6 (M-1): convert the TOTAL and keep the dimension —
+         a dimensioned entry (1 yd³) converts to the same volume in
+         feet-and-inches (27 ft³), never a bare length. The ft-in entry
+         holds the count in feet, so the linear total is divided by
+         12^(dim-1) before the fields are built (the builder multiplies
+         it back on commit); dim 1 is unchanged. */
+      var dimF = bDim, totalF = s * Math.pow(UNIT_TO_IN[bMode] || 1, dimF);
+      setFtInEntry(totalF / Math.pow(12, dimF - 1));
+      bDim = dimF; bDimUnit = 12;
+      entryComplete = true;
+    }
     else { bMode = "ftin"; fields = {feet:"", inch:"", num:"", den:""}; single = ""; bDim = 1; activeField = "feet"; dispMode = "ftin"; }
     liveEntryPreview(); return;
   }
   if(!builderHasInput()){ activeField = "feet"; return; }
   if(fields.feet === "" && fields.inch !== "" && bDim === 1){
     /* Inches-only value, Feet pressed: convert it (18″ -> 1′ - 6″). */
-    setFtInEntry(builderValue().val);
+    setFtInEntry(builderValue().val); entryComplete = true;
     liveEntryPreview(); return;
   }
-  if(fields.feet !== "" && fields.inch === "" && fields.num === "" && fields.den === "" && bDim < 3){
-    bDim++; bDimUnit = 12;   /* 130 f f = 130 sq ft; again = cu ft */
+  /* Batch H fix 8 (M-5): Feet squares a compound feet-and-inches value
+     exactly when Inch squares its inch-only form — but ONLY for a
+     converted/tagged value (entryComplete: the value came from the
+     display or another unit, never from typed digits, since typing
+     after a conversion starts a fresh entry and backspace clears the
+     flag). A TYPED compound entry (12 Feet, 7) still never squares on
+     Feet, matching Inch on a typed compound. Fraction parts still
+     block the raise, as in the Inch branch. */
+  if(fields.feet !== "" && (fields.inch === "" || entryComplete) && fields.num === "" && fields.den === "" && bDim < 3 && !fracStarted && !(session && session.phase === "prompt")){
+    bDim++; bDimUnit = 12;   /* 130 f f = 130 sq ft; again = cu ft (not while a fraction is being entered; never inside a session prompt, where the entry is already feet) */
     liveEntryPreview(); return;
   }
   if(activeField === "feet"){ if(fields.feet !== "") activeField = "inch"; }
@@ -1435,32 +1804,92 @@ function pressFeetKey(){
   liveEntryPreview();
 }
 function pressInchKey(){
+  clearMbmUnlessPending();   /* Batch F: a unit-tagged entry replaces the working value */
   wtvolStoreMode = false;
+  if(!session) litSolver = null;   /* Batch E2 I13: a unit key is "another key" — it clears a lit key (session entries keep the session key lit) */
   if(bMode === "num"){
-    if(single === ""){ bMode = "ftin"; activeField = "inch"; }
-    else if(single.indexOf(".") >= 0){ bMode = "decin"; dispMode = "decin"; }
-    else { bMode = "ftin"; fields.inch = single; single = ""; activeField = "num"; dispMode = "ftin"; }
+    prevDispMode = dispMode;   /* v1.23: remember the ambient unit — a pitch entry (not a length) puts it back */
+    if(single === ""){
+      /* v1.23: no entry in progress — use the displayed value instead of
+         switching to an empty entry (which wiped the display to 0″). A
+         plain number is tagged as inches; a length converts to inches;
+         area/volume results are left alone. */
+      if(!isFinite(dispVal) || dispDim === 2 || dispDim === 3) return;
+      if(dispDim === 1){ setInchOnlyEntry(dispVal); entryComplete = true; liveEntryPreview(); return; }
+      single = entryNumString(dispVal); entryComplete = true;
+    }
+    if(single.indexOf(".") >= 0){ bMode = "decin"; dispMode = "decin"; }
+    else { bMode = "ftin"; fields.inch = single; single = ""; activeField = "num"; dispMode = "fracin"; }   /* v1.23: an Inch tag declares inches — the value stays inches until converted */
     liveEntryPreview(); return;
   }
   if(bMode !== "ftin"){
+    /* Batch H fix 1 (M-2): a repeat Inch on a decimal-inch entry raises
+       the dimension, exactly like the integer rule and like the metric
+       keys — it no longer converts to fractional inches. At dim 3 the
+       press is a no-op (the integer cap). Inside a session prompt the
+       convert behavior below is kept. A cross-unit press (decimal
+       feet, yards, metric) still converts, as before. */
+    if(bMode === "decin" && single !== "" && !isNaN(parseFloat(single)) && !(session && session.phase === "prompt")){
+      if(bDim < 3) bDim++;
+      liveEntryPreview(); return;
+    }
     /* A value already tagged in another unit: convert its total to
        inches instead of re-reading the number as inches (1.5 decimal
        feet + Inch is 18″, not 1 1/2″). */
     var s = parseFloat(single);
-    if(single !== "" && !isNaN(s)){ setInchOnlyEntry(s * (UNIT_TO_IN[bMode] || 1)); }
+    if(single !== "" && !isNaN(s)){
+      /* Batch G fix 6 (M-1): convert the TOTAL and keep the dimension
+         (see pressFeetKey). An inch entry holds the total directly —
+         the builder multiplies by 1^(dim-1) — so no division is
+         needed; only the dimension is restored after the fields are
+         built. Dim 1 is unchanged. */
+      var dimI = bDim, totalI = s * Math.pow(UNIT_TO_IN[bMode] || 1, dimI);
+      setInchOnlyEntry(totalI);
+      bDim = dimI; bDimUnit = 1;
+      entryComplete = true;
+    }
     else { bMode = "ftin"; fields = {feet:"", inch:"", num:"", den:""}; single = ""; bDim = 1; activeField = "inch"; dispMode = "ftin"; }
     liveEntryPreview(); return;
   }
   if(!builderHasInput()){ activeField = "inch"; return; }
+  /* Batch E2 I22c: a fraction-only entry (a leading slash, or numerator /
+     denominator with no whole part) is finalized on Inch: a missing
+     denominator is filled from the resolution setting, and the fraction is
+     reduced exactly (integer gcd — no resolution rounding, so sub-resolution
+     values like 1/64 survive verbatim). The entry STAYS in the builder, so a
+     pending operation, a solver store, or `=` still consumes it exactly as
+     before; only its displayed form is finalized. An explicit zero
+     denominator is left alone (the W12 refusal state is preserved).
+     Whole+fraction entries are untouched. */
+  if(fields.feet === "" && fields.inch === "" && fields.num !== "" && !fractionDenZero()){
+    var fv = builderValue();
+    var neg = fv.val < 0;
+    var nn = Math.abs(parseFloat(fields.num)), dd;
+    if(fields.den !== ""){ dd = Math.abs(parseFloat(fields.den)); }
+    else { dd = res(); }
+    var gg = gcd(nn, dd); nn /= gg; dd /= gg;
+    var whole = Math.floor(nn / dd), rem = nn - whole * dd;
+    fracStarted = false;
+    if(rem === 0){
+      fields.inch = (neg ? "-" : "") + String(whole); fields.num = ""; fields.den = "";
+      activeField = "num";
+    } else if(whole > 0){
+      fields.inch = (neg ? "-" : "") + String(whole); fields.num = String(rem); fields.den = String(dd);
+      activeField = "den";
+    } else {
+      fields.num = (neg ? "-" : "") + String(nn); fields.den = String(dd);
+    }
+    liveEntryPreview(); return;
+  }
   if(fields.inch === "" && fields.feet !== "" && fields.num === "" && fields.den === "" && bDim === 1){
     /* Feet-only value, Inch pressed: convert it (6′ -> 72″). Only
        when no inch digits have been typed yet — 12 Feet, 7, Inch
        still moves on to the fraction, it does not convert. */
-    setInchOnlyEntry(builderValue().val);
+    setInchOnlyEntry(builderValue().val); entryComplete = true;
     liveEntryPreview(); return;
   }
-  if(fields.inch !== "" && fields.feet === "" && fields.num === "" && fields.den === "" && bDim < 3){
-    bDim++; bDimUnit = 1; liveEntryPreview(); return;
+  if(fields.inch !== "" && fields.feet === "" && fields.num === "" && fields.den === "" && bDim < 3 && !fracStarted && !(session && session.phase === "prompt")){
+    bDim++; bDimUnit = 1; liveEntryPreview(); return;   /* inch, inch = sq in (not while a fraction is being entered; never inside a session prompt) */
   }
   if(activeField === "inch"){ if(fields.inch !== "") activeField = "num"; }
   else if(activeField === "feet"){
@@ -1471,10 +1900,30 @@ function pressInchKey(){
   liveEntryPreview();
 }
 function pressFracKey(){
-  wtvolStoreMode = false;
+  clearMbmUnlessPending();   /* Batch F: a fraction entry replaces the working value */
+  wtvolStoreMode = false; fracStarted = true;
+  /* Batch H fix 10 (P-5): / starts a fraction ON the value showing, so
+     the next digit must continue the fraction — never start a fresh
+     entry. A converted/tagged value (Feet on a display) sets
+     entryComplete, and pressDigit clears the builder when it is set,
+     so Feet, /, 2 used to discard the pending 0/ and type a plain 2.
+     Clearing the flag here keeps the fraction context the slash
+     promises, in every branch (typed entries never have the flag set,
+     and session prompts clear the prefill on typing regardless). */
+  entryComplete = false;
+  if(!session) litSolver = null;   /* Batch E2 I13: a fraction entry is a new entry — it clears a lit key, like digits do (session entries keep the session key lit) */
   if(bMode === "num"){
+    /* v1.23: / with nothing typed starts a fresh fraction entry (a
+       leading slash: / 7 / 8 is 7/8″). It never resurrects the
+       displayed value — after an operator, / starts the next operand,
+       so seeding the display here corrupted it (3/4 + / 1 / 2 gave
+       1.49 instead of 1 1/4). */
     if(single === ""){ bMode = "ftin"; activeField = "num"; }
-    else { bMode = "ftin"; fields.num = single; single = ""; activeField = "den"; dispMode = "ftin"; }
+    /* v1.23: / with a typed number makes it the numerator and waits for
+       the denominator — the reference order is numerator, slash,
+       denominator (7 / 8 is 7/8″; 7 Inch 7 / 8 is 7 7/8″). The slash
+       stays visible on screen while the denominator is entered. */
+    else { bMode = "ftin"; fields.num = single; single = ""; activeField = "den"; }   /* v1.23: the slash does not declare a unit — the display unit stays as it was */
     liveEntryPreview(); return;
   }
   if(bMode !== "ftin"){
@@ -1482,9 +1931,9 @@ function pressFracKey(){
     bMode = "ftin"; fields = {feet:"", inch:"", num:"", den:""}; single = ""; bDim = 1;
     if(s !== ""){ fields.num = s; activeField = "den"; }
     else activeField = "num";
-    dispMode = "ftin"; liveEntryPreview(); return;
+    liveEntryPreview(); return;
   }
-  if(!builderHasInput()){ activeField = "num"; return; }
+  if(!builderHasInput()){ activeField = "num"; liveEntryPreview(); return; }
   if(activeField === "num"){ if(fields.num !== "") activeField = "den"; }
   else if(activeField === "inch"){ activeField = "num"; }
   else if(activeField === "feet"){
@@ -1495,53 +1944,131 @@ function pressFracKey(){
   liveEntryPreview();
 }
 function pressUnitKey(u){   /* Yds / m / cm / mm tag the typed number as that unit */
+  clearMbmUnlessPending();   /* Batch F: a unit-tagged entry replaces the working value */
   wtvolStoreMode = false;
+  if(!session) litSolver = null;   /* Batch E2 I13: a unit key is "another key" — it clears a lit key (session entries keep the session key lit) */
   if(bMode === "num"){
+    if(single === ""){
+      /* v1.23: no entry in progress — tag the displayed value instead of
+         switching to an empty entry. A plain number keeps its number, a
+         length converts into the new unit; area/volume results are
+         left alone. */
+      if(!isFinite(dispVal) || dispDim === 2 || dispDim === 3) return;
+      single = (dispDim === 1) ? entryNumString(dispVal / (UNIT_TO_IN[u] || 1)) : entryNumString(dispVal);
+      entryComplete = true;
+    }
     bMode = u; dispMode = u; liveEntryPreview(); return;
   }
-  if(bMode === u && single !== "" && bDim < 3){ bDim++; liveEntryPreview(); return; }  /* 5 y y y = 5 cu yd */
-  var bare = bareNumber();
-  if(bare === null && builderHasInput()) return;   /* compound ft-in entry: leave it */
+  if(bMode === u && single !== "" && bDim < 3){ if(!(session && session.phase === "prompt")) bDim++; liveEntryPreview(); return; }  /* 5 y y y = 5 cu yd; inside a session prompt the repeat press only re-tags, never raises dimension */
+  /* Batch E2 I22a: plain unit keys convert compound entries exactly like
+     Conv+unit does (the old silent no-op for compound ft-in entries is gone).
+     The conversion below preserves the value and the dimension. */
+  if(!builderHasInput()){
+    /* v1.23: unit mode with an empty entry — same display-value rule. */
+    if(!isFinite(dispVal) || dispDim === 2 || dispDim === 3) return;
+    bMode = u; dispMode = u;
+    fields = {feet:"", inch:"", num:"", den:""};
+    single = (dispDim === 1) ? entryNumString(dispVal / (UNIT_TO_IN[u] || 1)) : entryNumString(dispVal);
+    entryComplete = true; bDim = 1;
+    liveEntryPreview(); return;
+  }
+  /* v1.23: switching units converts the total (1.5 decimal feet + Yds
+     is 0.5 yd, not 1.5 yd) instead of re-reading the typed number, and
+     keeps the dimension (sq ft -> sq yd). */
+  var bv = builderValue();
+  if(!bv) return;   /* Batch E2 I22a: an unparseable entry (e.g. a lone "-") stays put */
+  var fac = UNIT_TO_IN[u] || 1;
   bMode = u; dispMode = u;
   fields = {feet:"", inch:"", num:"", den:""};
-  single = (bare === null) ? "" : String(bare);
-  bDim = 1;
+  single = entryNumString(bv.val / Math.pow(fac, bDim));
+  entryComplete = true;
   liveEntryPreview();
 }
 
 /* ---------- Conv conversions (reference: Ç + unit converts the value) ---------- */
 function convertDisplayTo(u){
+  lastRepeat = null;   /* Batch E1 I4: a conversion changes the displayed value — repeat-= must never fire from it */
+  if(session && session.phase === "prompt") return;   /* Batch C fix 3 (W11): a Conv+unit conversion during a session prompt is a safe no-op — same guard as the other second functions — so the typed entry, prompt label and display mode all survive */
+  clearMbmUnlessPending();   /* Batch F: a conversion replaces the working value with a converted quantity, never board feet */
+  litSolver = null;   /* Batch E2 I13: a conversion is "another key" — it clears a lit key */
   var v;
-  if(builderHasInput()){ v = commitEntry(); }
+  var hadEntry = builderHasInput();
+  if(hadEntry){ v = commitEntry(); }
   else v = {val:dispVal, dim:dispDim};
-  if(!v || v.dim === 0){ return; }  /* v1.17: invalid selection is silent */
+  if(!v){ return; }  /* v1.17: invalid selection is silent */
+  /* Batch H fix 5 (M-3): a conversion that commits a TYPED operand
+     mid-operation must not orphan it — the converted value stays the
+     pending operand, via the same recallOperand flag solver recalls
+     use, so `=` (or the next operator) consumes the converted display
+     value (10′ + 5′ Conv Feet = → 15′). With no typed entry the flag
+     is left exactly as it was: converting the accumulator's own
+     display must never turn it into an operand (10′ + Conv Feet = is
+     still a no-op until an operand is typed). Typing a fresh operand
+     clears the flag (pressDigit), so a fresh operand still wins. */
+  if(hadEntry && acc !== null && pendingOp) recallOperand = true;
+  if(v.dim === 0){
+    /* v1.23: a plain decimal converts too — Conv + unit reads the number
+       as being in that unit (10.75, Conv + Inch -> 10.75 in, and Conv +
+       Inch again -> 10 3/4″). Before this, Conv on a plain number
+       did nothing at all. */
+    var fac0 = {feet:12, inch:1, yds:36, m:39.3700787402, cm:0.3937007874, mm:0.03937007874}[u] || 1;
+    var inches0 = v.val * fac0;
+    if(u === "feet"){ dispMode = "decft"; showMain("Conv · FEET", fmtNum(v.val,4) + " ft","", inches0, 1); }
+    else if(u === "inch"){ dispMode = "decin"; showMain("Conv · INCHES", fmtNum(v.val,3) + " in","", inches0, 1); }
+    else {
+      var lbl0 = {yds:"YARDS", m:"METRES", cm:"CENTIMETRES", mm:"MILLIMETRES"}[u];
+      var txt0 = {yds:fmtNum(v.val,4)+" yd", m:fmtNum(v.val,4)+" m", cm:fmtNum(v.val,3)+" cm", mm:fmtNum(v.val,2)+" mm"}[u];
+      dispMode = (u === "yds") ? "yd" : u;
+      showMain("Conv · " + lbl0, txt0,"", inches0, 1);
+    }
+    convFresh = true;   /* Batch E1 I2: a converted length display is storable by Pitch/Circ */
+    return;
+  }
   var key = u;
   if(v.dim === 1){
     if(u === "feet"){
-      var target = (dispMode === "decft") ? "ftin" : "decft";
+      /* Batch D fix 3: the first Conv+Feet from a metric/yard mode shows
+         feet-and-inches (the fractional form), the second shows decimal
+         feet. From feet-and-inches / fractional / decimal-inch displays
+         the order is unchanged (decimal first, then feet-and-inches),
+         and from decimal feet it still returns to feet-and-inches. */
+      var target = (dispMode === "decft" || dispMode === "yd" || dispMode === "m" || dispMode === "cm" || dispMode === "mm") ? "ftin" : "decft";
       dispMode = target;
       showMain("Conv · " + (target === "decft" ? "FEET" : "FEET–INCH"),
         target === "decft" ? fmtNum(v.val/12,4) + " ft" : fmtFI(v.val),"", v.val, 1);
+      convFresh = true;   /* Batch E1 I2 */
       return;
     }
     if(u === "inch"){
-      var t2 = (dispMode === "decin") ? "fracin" : "decin";
+      /* Batch D fix 3: the first Conv+Inch from a metric/yard mode shows
+         fractional inches, the second shows decimal inches. From
+         feet-and-inches / fractional / decimal-feet displays the order
+         is unchanged (decimal first), and from decimal inches it still
+         returns to fractional inches. */
+      var t2 = (dispMode === "decin" || dispMode === "yd" || dispMode === "m" || dispMode === "cm" || dispMode === "mm") ? "fracin" : "decin";
       dispMode = t2;
       showMain("Conv · " + (t2 === "decin" ? "INCHES" : "INCHES (FRAC)"),
         t2 === "decin" ? fmtNum(v.val,3) + " in" : fmtFracInch(v.val),"", v.val, 1);
+      convFresh = true;   /* Batch E1 I2 */
       return;
     }
     var lbl = {yds:"YARDS", m:"METRES", cm:"CENTIMETRES", mm:"MILLIMETRES"}[u];
-    var txt = {yds:fmtNum(v.val/36,4)+" yd", m:fmtNum(v.val*0.0254,4)+" m",
+    /* Batch H fix 7 (T1-F2): Conv m honors the FLOAT metre preference
+       (6 decimals, like the entry display) instead of the hardcoded 4;
+       the 0.000 preference keeps 4 decimals, and the yd/cm/mm texts
+       are untouched. Only this dim-1 Conv m text changes. */
+    var mTxt = (prefMeter === "float") ? fmtNum(v.val*0.0254,6)+" m" : fmtNum(v.val*0.0254,4)+" m";
+    var txt = {yds:fmtNum(v.val/36,4)+" yd", m:mTxt,
       cm:fmtNum(v.val*2.54,3)+" cm", mm:fmtNum(v.val*25.4,2)+" mm"}[u];
     dispMode = (u === "yds") ? "yd" : u;
     showMain("Conv · " + lbl, txt,"", v.val, 1);
+    convFresh = true;   /* Batch E1 I2 */
     return;
   }
   /* area / volume conversions (reference p.15) */
   var per = {yds: v.dim===2 ? 1296 : 46656, feet: v.dim===2 ? 144 : 1728,
-    inch: 1, m: v.dim===2 ? 929.0304 : 0.0000163871, cm: v.dim===2 ? 6.4516 : 16.3871,
-    mm: v.dim===2 ? 645.16 : 16387.1};
+    inch: 1, m: v.dim===2 ? 0.00064516 : 0.000016387064, cm: v.dim===2 ? 6.4516 : 16.387064,
+    mm: v.dim===2 ? 645.16 : 16387.064};
   var unitName = {yds: v.dim===2 ? "SQ YD" : "CU YD", feet: v.dim===2 ? "SQ FT" : "CU FT",
     inch: v.dim===2 ? "SQ IN" : "CU IN", m: v.dim===2 ? "SQ M" : "CU M",
     cm: v.dim===2 ? "SQ CM" : "CU CM", mm: v.dim===2 ? "SQ MM" : "CU MM"}[u];
@@ -1561,10 +2088,24 @@ function pitchFromEntry(isRatio){
   if(raw !== null) return {pitch: Math.tan(raw*Math.PI/180)*12, form:"deg"};  /* 30 p = 30 deg */
   return null;
 }
+/* Batch G fix 1 (X-1): a pitch derived from the stored legs is only
+   storable when it is finite. A zero run would derive Infinity (or
+   NaN for 0/0), poisoning the triangle, later solves, and History —
+   and the poison survived the 2nd hold because pitch is kept by
+   design. Every derivation site uses this helper (or
+   storeDerivedPitch) and stores nothing when it returns null; the
+   leg stores themselves are unaffected, and a zero run still
+   stores as a leg. */
+function derivedPitch(){
+  if(tri.rise === null || tri.run === null || tri.run === 0) return null;
+  var p = tri.rise / tri.run * 12;
+  return isFinite(p) ? p : null;
+}
+function storeDerivedPitch(){ var p = derivedPitch(); if(p !== null) tri.pitch = p; }
 var PITCH_CYCLE = ["in","deg","grd","slp"];
 function pitchShow(form){
   var p = tri.pitch;
-  if(p === null && tri.rise !== null && tri.run !== null) p = tri.rise/tri.run*12;
+  if(p === null) p = derivedPitch();   /* Batch G fix 1 (X-1): never derive Infinity/NaN from a zero run */
   if(p === null) return;
   tri.pitch = p;
   var ang = Math.atan2(p,12)*180/Math.PI;
@@ -1578,24 +2119,63 @@ function pitchKey(isRatio){
     var pe = pitchFromEntry(isRatio);
     if(!pe){ promptLabel("Pitch"); return; }
     tri.pitch = pe.pitch;
+    /* v1.23: a pitch is not a length — a unit-tagged pitch entry puts the
+       ambient display unit back, so storing a pitch never flips the
+       triangle's results between feet and inches. */
+    if(bMode === "ftin" || bMode === "decft" || bMode === "decin") dispMode = prevDispMode;
     if(tri.run !== null) tri.rise = tri.run * pe.pitch / 12;
     else if(tri.rise !== null && pe.pitch !== 0) tri.run = tri.rise * 12 / pe.pitch;  /* v1.15: any order — Pitch + Rise solves Run */
+    else if(tri.diag !== null){   /* v1.23: Pitch + Diag solves both legs */
+      var diagK = pe.pitch / 12;
+      tri.run = tri.diag / Math.sqrt(1 + diagK*diagK);
+      tri.rise = tri.run * diagK;
+    }
     pitchCycleIdx = PITCH_CYCLE.indexOf(pe.form);
-    acc = null; pendingOp = null; justEvaluated = true; lastPct = null;
+    acc = null; pendingOp = null; recallOperand = false; justEvaluated = true; lastPct = null; costPerMbm = false;   /* Batch F: storing a pitch cancels the pending operation, so the flag cannot belong to an accumulator any more */
     clearBuilder();
     pitchShow(pe.form);
     return;
   }
   if(tri.rise === null || tri.run === null){
+    if(tri.pitch === null && tri.diag !== null){
+      /* v1.23: a stored diagonal + one leg gives the pitch (and the other leg) */
+      if(tri.rise !== null && tri.diag > tri.rise){ tri.run = Math.sqrt(tri.diag*tri.diag - tri.rise*tri.rise); storeDerivedPitch(); /* Batch G fix 1 (X-1): guarded derivation */ }
+      else if(tri.run !== null && tri.diag > tri.run){ tri.rise = Math.sqrt(tri.diag*tri.diag - tri.run*tri.run); storeDerivedPitch(); /* Batch G fix 1 (X-1): guarded derivation */ }
+    }
     if(tri.pitch !== null){
       pitchCycleIdx = (pitchCycleIdx+1) % 4;
+      if(acc !== null && pendingOp) recallOperand = true;
       pitchShow(PITCH_CYCLE[pitchCycleIdx]);
+    } else if(!isRatio && (eqFresh || convFresh) && dispDim === 1 && isFinite(dispVal)){
+      /* Batch E1 I2: a fresh = result or Conv conversion showing a length
+         stores as the pitch (inches form), solving the other leg exactly
+         like a typed pitch entry would. Stored-pitch cycling above wins;
+         solver-store and stale displays still prompt. No mode put-back:
+         the display already holds the ambient unit. */
+      tri.pitch = dispVal;
+      if(tri.run !== null) tri.rise = tri.run * tri.pitch / 12;
+      else if(tri.rise !== null && tri.pitch !== 0) tri.run = tri.rise * 12 / tri.pitch;
+      else if(tri.diag !== null){
+        var diagK4 = tri.pitch / 12;
+        tri.run = tri.diag / Math.sqrt(1 + diagK4*diagK4);
+        tri.rise = tri.run * diagK4;
+      }
+      pitchCycleIdx = PITCH_CYCLE.indexOf("in");
+      acc = null; pendingOp = null; recallOperand = false; justEvaluated = true; lastPct = null; costPerMbm = false;   /* Batch F: storing a pitch cancels the pending operation, so the flag cannot belong to an accumulator any more */
+      clearBuilder();
+      pitchShow("in");
     } else { promptLabel("Pitch"); }
     return;
   }
-  tri.pitch = tri.rise/tri.run*12;
+  /* Batch G fix 1 (X-1): both legs are known, but a zero run makes the
+     pitch undefined — show the silent prompt and store nothing, instead
+     of deriving Infinity/NaN. Finite triangles derive exactly as before. */
+  var dpPitch = derivedPitch();
+  if(dpPitch === null){ promptLabel("Pitch"); return; }
+  tri.pitch = dpPitch;
   pitchCycleIdx = (pitchCycleIdx+1) % 4;   /* reference: p cycles in -> deg -> %grd -> slope */
-  acc = null; pendingOp = null; justEvaluated = true;
+  if(acc !== null && pendingOp){ recallOperand = true; } else { acc = null; pendingOp = null; }
+  justEvaluated = true;
   pitchShow(PITCH_CYCLE[pitchCycleIdx]);
 }
 function triJump(name){
@@ -1606,10 +2186,16 @@ function triJump(name){
     addHistory("Diagonal of " + fmtFI(tri.rise) + " × " + fmtFI(tri.run), fmtFI(dg), dg, 1);
     setDisplay(dg, 1, "Diagonal");
   }
+  else if(name === "diag" && tri.diag !== null) setDisplay(tri.diag, 1, "Diagonal");   /* v1.23: a stored diagonal shows until both legs are known */
   else if(name === "hip") hipKey();
 }
 function hipKey(){
   if(tri.rise === null || tri.run === null){ promptLabel("Hip/V"); return; }
+  /* Batch D fix 0: a stored zero irregular pitch is degenerate — the
+     irregular branch would divide by it (Infinity). Show the silent
+     prompt instead, never Infinity/NaN, and add no History. An unset
+     irregular pitch still falls through to the regular hip below. */
+  if(tri.irPitch === 0){ promptLabel("Hip/V"); return; }
   if(tri.irPitch !== null && tri.pitch !== null){
     var rise = tri.run * tri.pitch / 12;
     var runB = rise * 12 / tri.irPitch;
@@ -1626,8 +2212,12 @@ function hipKey(){
 function irPitchKey(){
   if(builderHasInput()){
     var o = builderValue();
-    if(o.dim !== 1){ promptLabel("Irregular Pitch"); return; }
+    if(!o || o.dim !== 1){ promptLabel("Irregular Pitch"); return; }   /* Batch G fix 2 (F-1): a null entry (lone decimal + unit key) prompts like any invalid entry, never throws */
     tri.irPitch = o.val;
+    /* Batch E1 item 0 (coordinator adjudication): revert of Batch D fix 2 —
+       a pitch is not a length, so storing one never flips the unit: put
+       the ambient mode back exactly like pitchKey does, in both directions. */
+    if(bMode === "ftin" || bMode === "decft" || bMode === "decin") dispMode = prevDispMode;
     clearBuilder();
     showMain("Irregular Pitch", fmtFI(o.val) + "  STORED","", o.val, 1);
     return;
@@ -1641,26 +2231,57 @@ function irPitchKey(){
    Arc (Conv+Circ): enter Diameter, then an Arc Length -> degree;
    or enter Diameter, then degrees (plain number) -> arc length. */
 var circDiaMode = "ftin";
+/* Batch D fix 1 (I11): circle AREA/CIRC follow the diameter's entry
+   family. Inch diameters keep the documented outputs byte-identical
+   (SQ IN / fractional inches); metric diameters give m² / the entry
+   metric unit; feet/yard/decimal diameters use the preference-aware
+   area path (fmtByPref dim 2) and the mode-aware length path
+   (fmtByPref dim 1). The diameter display itself is unchanged. */
+function circAreaText(area){
+  if(circDiaMode === "in") return fmtNum(area,4) + " SQ IN";
+  if(circDiaMode === "m" || circDiaMode === "cm" || circDiaMode === "mm") return fmtNum(area*0.00064516,6) + " m²";
+  return fmtByPref(area, 2);
+}
+function circCircText(c){
+  if(circDiaMode === "in") return fmtFracInch(c);
+  if(circDiaMode === "mm") return fmtNum(c*25.4,3) + " mm";
+  if(circDiaMode === "cm") return fmtNum(c*2.54,3) + " cm";
+  if(circDiaMode === "m") return fmtNum(c*0.0254,6) + " m";
+  return fmtByPref(c, 1);
+}
 function circKey(){
   if(builderHasInput()){
     var o = builderValue();
-    if(o.dim !== 1){ promptLabel("Circle"); return; }
-    circDiaMode = (bMode === "decin" || (bMode === "ftin" && fields.feet === "")) ? "in" : "ftin";
+    if(!o || o.dim !== 1){ promptLabel("Circle"); return; }   /* Batch G fix 2 (F-1): a null entry (lone decimal + unit key) prompts like any invalid entry, never throws */
+    circDiaMode = (bMode === "decin" || (bMode === "ftin" && fields.feet === "")) ? "in" : (bMode === "m" || bMode === "cm" || bMode === "mm") ? bMode : (bMode === "decft") ? "decft" : (bMode === "yd") ? "yd" : "ftin";
     circDia = o.val; circIdx = 0;
     clearBuilder();
-    if(circDiaMode === "in") showMain("Diameter", fmtNum(circDia,3) + " INCH","", circDia, 1);
+    if(circDiaMode === "in") showMain("Diameter", fmtNum(circDia,3) + "″","", circDia, 1);
     else setDisplay(circDia, 1, "Diameter");
     return;
   }
-  if(circDia === null){ promptLabel("Circle"); return; }
+  if(circDia === null){
+    /* Batch E1 I2: a fresh = result or Conv conversion showing a length
+       stores as the diameter, like Rise/Run/Diag/Weight accept the display.
+       A stored diameter still cycles (below); solver-store and stale
+       displays still prompt. */
+    if((eqFresh || convFresh) && dispDim === 1 && isFinite(dispVal) && dispVal !== 0){
+      circDiaMode = (dispMode === "decin" || dispMode === "fracin") ? "in" : (dispMode === "m" || dispMode === "cm" || dispMode === "mm") ? dispMode : (dispMode === "decft") ? "decft" : (dispMode === "yd") ? "yd" : "ftin";
+      circDia = dispVal; circIdx = 0;
+      if(circDiaMode === "in") showMain("Diameter", fmtNum(circDia,3) + "″","", circDia, 1);
+      else setDisplay(circDia, 1, "Diameter");
+      return;
+    }
+    promptLabel("Circle"); return;
+  }
   circIdx = (circIdx+1) % 3;
   var r = circDia/2;
   if(circIdx === 0){
-    if(circDiaMode === "in") showMain("Diameter", fmtNum(circDia,3) + " INCH","", circDia, 1);
+    if(circDiaMode === "in") showMain("Diameter", fmtNum(circDia,3) + "″","", circDia, 1);
     else setDisplay(circDia, 1, "Diameter");
   }
-  else if(circIdx === 1){ addHistory("Circle · Area — dia " + fmtFI(circDia), fmtNum(Math.PI*r*r,4) + " SQ IN", Math.PI*r*r, 2); showMain("Circle · Area", fmtNum(Math.PI*r*r,4) + " SQ IN","", Math.PI*r*r, 2); }
-  else { addHistory("Circle · Circumference — dia " + fmtFI(circDia), fmtFracInch(2*Math.PI*r), 2*Math.PI*r, 1); showMain("Circle · Circumference", fmtFracInch(2*Math.PI*r),"", 2*Math.PI*r, 1); }
+  else if(circIdx === 1){ var area = Math.PI*r*r, at = circAreaText(area); addHistory("Circle · Area — dia " + fmtFI(circDia), at, area, 2); showMain("Circle · Area", at,"", area, 2); }
+  else { var cc = 2*Math.PI*r, ct = circCircText(cc); addHistory("Circle · Circumference — dia " + fmtFI(circDia), ct, cc, 1); showMain("Circle · Circumference", ct,"", cc, 1); }
 }
 function arcKey(){
   if(circDia === null){ promptLabel("Arc"); return; }
@@ -1668,7 +2289,7 @@ function arcKey(){
   if(builderHasInput()){
     var raw = bareNumber();
     var o = builderValue();
-    if(o.dim === 1){   /* arc length entered -> degree */
+    if(o && o.dim === 1){   /* arc length entered -> degree; Batch G fix 2 (F-1): a null entry falls through to the prompt below, never throws */
       var deg = (o.val / r) * 180/Math.PI;
       clearBuilder();
       showMain("Arc · Degrees", fmtAngle(deg),"", deg, 0);
@@ -1677,12 +2298,28 @@ function arcKey(){
     if(raw !== null){  /* degrees entered -> arc length */
       var len = r * raw * Math.PI/180;
       clearBuilder();
-      showMain("Arc · Length", fmtFI(len),"", len, 1);
+      /* Batch D fix 2 (I12): arc length follows the ambient display mode
+         (total inches in inch-sticky mode) instead of always rolling up
+         to feet-and-inches. Feet-and-inches mode is byte-identical. */
+      showMain("Arc · Length", fmtByPref(len,1),"", len, 1);
       return;
     }
   }
   promptLabel("Arc"); return;
 }
+
+/* Batch D fix 2/5: shared mode helpers. A metric display mode means the
+   ambient/entry unit is metric; stored-length confirmations then show the
+   bare millimetre number (the reference metric style, e.g. `400 STORED`),
+   while imperial confirmations show total inches, never a feet rollup. */
+function metricDispMode(){ return dispMode === "m" || dispMode === "cm" || dispMode === "mm"; }
+function fmtStoredInches(v){ return metricDispMode() ? fmtNum(v*25.4,2) + "  STORED" : fmtFracInch(v) + "  STORED"; }
+function fmtOCStored(v){ return metricDispMode() ? fmtNum(v*25.4,2) + "  STORED" : fmtNum(v,2) + "″  STORED"; }
+/* Batch E2 I15: recall formats — the same mode-aware path as the stores
+   (total inches, or a bare millimetre number in metric mode), but with no
+   "STORED" suffix: a recall must never claim a default was stored. */
+function fmtRecallInches(v){ return metricDispMode() ? fmtNum(v*25.4,2) : fmtFracInch(v); }
+function fmtRecallOC(v){ return metricDispMode() ? fmtNum(v*25.4,2) : fmtNum(v,2) + "″"; }
 
 /* ---------- Stair (reference p.7, p.35-37): 12 results, press Stair to step ---------- */
 function stairCompute(){
@@ -1693,25 +2330,38 @@ function stairCompute(){
   var actualR = total / risers;
   var treads = risers - 1;
   var run, treadW;
-  if(tri.run !== null){ run = tri.run; treadW = run / treads; }
+  if(tri.run !== null){ run = tri.run; treadW = treads > 0 ? run / treads : wantT; }   /* Batch C fix 6 (C1): zero treads (a single riser) falls back to the tread setting, never Infinity — the stored run is still reported as Stored Run */
   else { treadW = wantT; run = treads * treadW; }
-  var stringer = treads * Math.sqrt(Math.pow(roundRes(actualR, res()), 2) + Math.pow(roundRes(treadW, res()), 2));
-  var angle = Math.atan2(total, run) * 180/Math.PI;
-  var rOver = risers * roundRes(actualR, res()) - total;
-  var tOver = run - treads * roundRes(treadW, res());
+  /* Batch D fix 2 (6.8/I12): the rounding basis and the length format
+     follow the entry/display mode — metric modes round the displayed
+     step to whole millimetres and render `N mm`; other modes round at
+     the fractional resolution and render through the mode-aware length
+     path, so inch-sticky stairs show total inches (stringer included)
+     instead of a feet rollup. Counts and the angle rule are unchanged. */
+  var metricStair = metricDispMode();
+  function rndS(x){ return metricStair ? Math.round(x*25.4)/25.4 : roundRes(x, res()); }
+  function fmtS(x){
+    if(metricStair){ var mm = Math.round(Math.abs(x)*25.4); return (x < 0 ? "−" : "") + mm + " mm"; }
+    return fmtByPref(x, 1);
+  }
+  var rR = rndS(actualR), rT = rndS(treadW);
+  var stringer = treads * Math.sqrt(rR*rR + rT*rT);
+  var angle = Math.atan2(rR, rT) * 180/Math.PI;
+  var rOver = risers * rR - total;
+  var tOver = treads * rT - run;
   return [
-    {k:"Riser Height", v:fmtFI(actualR), val:actualR, dim:1},
+    {k:"Riser Height", v:fmtS(actualR), val:actualR, dim:1},
     {k:"Risers", v:String(risers), val:risers, dim:0},
-    {k:"Riser Overage", v:fmtFI(rOver), val:rOver, dim:1},
-    {k:"Tread Width", v:fmtFI(treadW), val:treadW, dim:1},
+    {k:"Riser Overage", v:fmtS(rOver), val:rOver, dim:1},
+    {k:"Tread Width", v:fmtS(treadW), val:treadW, dim:1},
     {k:"Treads", v:String(treads), val:treads, dim:0},
-    {k:"Tread Overage", v:fmtFI(tOver), val:tOver, dim:1},
-    {k:"Stringer Length", v:fmtFI(stringer), val:stringer, dim:1},
+    {k:"Tread Overage", v:fmtS(tOver), val:tOver, dim:1},
+    {k:"Stringer Length", v:fmtS(stringer), val:stringer, dim:1},
     {k:"Incline Angle", v:fmtAngle(angle), val:angle, dim:0},
-    {k:"Stored Run", v:fmtFI(run), val:run, dim:1},
-    {k:"Stored Rise", v:fmtFI(total), val:total, dim:1},
-    {k:"Stored Riser Ht", v:fmtFI(wantR) + "  STORED", val:wantR, dim:1},
-    {k:"Stored Tread W", v:fmtFI(wantT) + "  STORED", val:wantT, dim:1}
+    {k:"Stored Run", v:fmtS(run), val:run, dim:1},
+    {k:"Stored Rise", v:fmtS(total), val:total, dim:1},
+    {k:"Stored Riser Ht", v:fmtS(wantR) + "  STORED", val:wantR, dim:1},
+    {k:"Stored Tread W", v:fmtS(wantT) + "  STORED", val:wantT, dim:1}
   ];
 }
 function stairKey(){
@@ -1720,9 +2370,13 @@ function stairKey(){
   if(key !== stairSig){ stairSig = key; stairIdx = 0; }
   var items = stairCompute();
   var it = items[stairIdx % items.length];
+  /* Batch E3 G7: the Stair cycle shows its position in the sub row
+     ("N of 12"), like session items. The prompt (no Rise stored) shows
+     no sub; the CONV/RCL/MEM pills are separate indicators, untouched. */
+  var pos = (stairIdx % items.length) + 1;
   stairIdx++;
   addHistory("Stair · " + it.k, it.v, it.val, it.dim);
-  setDisplay(it.val, it.dim, it.k);
+  setDisplay(it.val, it.dim, it.k, pos + " of " + items.length);
   if(it.k === "Riser Height" || it.k === "Tread Width" || it.k === "Stringer Length" || it.k === "Stored Run" || it.k === "Stored Rise" || it.k === "Stored Riser Ht" || it.k === "Stored Tread W" || it.k === "Riser Overage" || it.k === "Tread Overage")
     $("dispMain").textContent = it.v;
   if(it.k === "Incline Angle") $("dispMain").textContent = it.v;
@@ -1733,17 +2387,20 @@ function stairKey(){
 function jackKey(){
   if(tri.rise === null || tri.run === null){ promptLabel("Jack"); return; }
   if(jackIdx === -1){
-    showMain(jackIr ? "Irregular Jack · o.c." : "Jack · o.c.", fmtNum(ocStore,2) + " INCH  STORED","", ocStore, 1);
+    showMain(jackIr ? "Irregular Jack · o.c." : "Jack · o.c.", fmtOCStored(ocStore),"", ocStore, 1);
     jackIdx = 0; return;
   }
   var common = Math.sqrt(tri.rise*tri.rise + tri.run*tri.run);
-  if(jackIr && tri.irPitch !== null && tri.pitch !== null){
-    var rise = tri.run * tri.pitch / 12;
-    var runB = rise * 12 / tri.irPitch;
-    var cB = Math.sqrt(runB*runB + rise*rise);
-    var diffB = ocStore * (cB / runB);
-    var L = cB - diffB * (jackIdx+1);
-    if(L <= 0){ showMain("Irregular Jack", "0′ 0″","", 0, 1); return; }
+  if(jackIr && tri.irPitch !== null && tri.irPitch !== 0 && tri.pitch !== null){
+    /* Batch C fix 5 (W6): verified irregular-jack formula —
+       IJ_k = (L − k·s) × (p/q) × √(1 + q²), L = stored run, s = o.c.,
+       p = main pitch ratio, q = irregular pitch ratio. Reproduces the
+       reference example exactly at 1/16″ rounding. q = 0 never divides
+       (gated above; falls through to regular jacks); p = 0 gives
+       zero-length jacks via the end-of-list branch below. */
+    var p = tri.pitch / 12, q = tri.irPitch / 12;
+    var L = (tri.run - ocStore * (jackIdx+1)) * (p / q) * Math.sqrt(1 + q*q);
+    if(!isFinite(L) || L <= 0){ jackIdx = -1; setDisplay(0, 1, "Irregular Jack"); return; }   /* Batch C fix 7 (C2/K1): the zero jack shows once, through the normal formatter (0″), and the next press wraps to the o.c. display; Batch G fix 1 (X-1): a non-finite length is end-of-list too, never displayed */
     jackIdx++;
     addHistory("Irregular Jack " + jackIdx, fmtFI(L), L, 1);
     setDisplay(L, 1, "Irregular Jack " + jackIdx);
@@ -1751,14 +2408,14 @@ function jackKey(){
   }
   var diff = ocStore * (common / tri.run);
   var Lj = common - diff * (jackIdx+1);
-  if(Lj <= 0){ showMain("Jack", "0′ 0″","", 0, 1); return; }
+  if(!isFinite(Lj) || Lj <= 0){ jackIdx = -1; setDisplay(0, 1, "Jack"); return; }   /* Batch C fix 7 (C2/K1): the zero jack shows once, through the normal formatter (0″), and the next press wraps to the o.c. display; Batch G fix 1 (X-1): a non-finite length is end-of-list too, never displayed */
   jackIdx++;
   addHistory("Jack " + jackIdx, fmtFI(Lj), Lj, 1);
   setDisplay(Lj, 1, "Jack " + jackIdx);
 }
 function irJackKey(){
-  jackIr = true; jackIdx = -1;
-  showMain("Irregular Jack · o.c.", fmtNum(ocStore,2) + " INCH  STORED","", ocStore, 1);
+  jackIr = true; jackIdx = 0;   /* Batch C fix 5 (I20/G6): Conv Jack already shows the o.c. display, so the next plain Jack shows Irregular Jack 1 instead of repeating o.c. */
+  showMain("Irregular Jack · o.c.", fmtOCStored(ocStore),"", ocStore, 1);
 }
 
 /* ---------- Rake-Wall (reference p.34): 1st press RWOC, then RW1, RW2..., BASE, angle ---------- */
@@ -1767,10 +2424,10 @@ function rwallKey(){
   if(rwallIdx === -1){
     if(builderHasInput()){
       var o = builderValue();
-      if(o.dim === 1) rwallBase = o.val;   /* reference: enter base height before ∑ */
+      if(o && o.dim === 1) rwallBase = o.val;   /* reference: enter base height before ∑; Batch G fix 2 (F-1): a null entry stores no base, never throws */
       clearBuilder();
     }
-    showMain("Rake-Wall · o.c.", fmtNum(ocStore,2) + " INCH  STORED","", ocStore, 1);
+    showMain("Rake-Wall · o.c.", fmtOCStored(ocStore),"", ocStore, 1);
     rwallIdx = 0; return;
   }
   if(rwallIdx === 999){
@@ -1787,15 +2444,19 @@ function rwallKey(){
     setDisplay(h, 1, "Rake-Wall Stud " + i);
     return;
   }
-  addHistory("Rake-Wall · Base", fmtFI(rwallBase), rwallBase, 1);
-  showMain("Rake-Wall · Base", fmtFI(rwallBase),"", rwallBase, 1);
+  /* Batch D fix 5 (5.8): BASE follows the ambient/entry mode — a bare
+     millimetre number in metric mode, feet-and-inches otherwise. Studs
+     already follow the mode via setDisplay and are untouched. */
+  var baseTxt = metricDispMode() ? fmtNum(rwallBase*25.4,2) : fmtFI(rwallBase);
+  addHistory("Rake-Wall · Base", baseTxt, rwallBase, 1);
+  showMain("Rake-Wall · Base", baseTxt,"", rwallBase, 1);
   rwallIdx = 999;
 }
 
 /* ---------- Weight / wt-vol (reference p.4, p.19-20, p.39) ---------- */
 var WT_UNITS = ["Ton","LB","MET Ton","kG"];
 function wtTons(volIn3, volUnit){
-  var volYd = volIn3/46656, volFt = volIn3/1728, volM = volIn3*0.0000163871;
+  var volYd = volIn3/46656, volFt = volIn3/1728, volM = volIn3*0.000016387064;   /* Batch H fix 6 (M-4): exact 0.0254³, same constant as the Conv/Prefs volume paths */
   switch(wtvol.unit){
     case 0: return volYd * wtvol.val;
     case 1: return volYd * wtvol.val / 2000;
@@ -1816,9 +2477,14 @@ function wtShow(lb, unitIdx){
 function weightKey(){
   if(builderHasInput()){
     var o = builderValue();
-    if(o.dim === 0){ clearBuilder(); weightState = {lb:o.val, unitIdx:1}; wtShow(o.val, 1); return; }
-    if(o.dim === 3){ clearBuilder(); var lb = wtTons(o.val) * 2000; weightState = {lb:lb, unitIdx:0}; wtShow(lb, 0); return; }
-    promptLabel("Weight"); return;
+    /* Batch G fix 2 (F-1): a null entry (lone decimal + unit key) is
+       treated like no entry — fall through to the display-based
+       handling below instead of throwing. */
+    if(o){
+      if(o.dim === 0){ clearBuilder(); weightState = {lb:o.val, unitIdx:1}; wtShow(o.val, 1); return; }
+      if(o.dim === 3){ clearBuilder(); var lb = wtTons(o.val) * 2000; weightState = {lb:lb, unitIdx:0}; wtShow(lb, 0); return; }
+      promptLabel("Weight"); return;
+    }
   }
   if(dispDim === 3){ var lb2 = wtTons(dispVal) * 2000; weightState = {lb:lb2, unitIdx:0}; wtShow(lb2, 0); return; }
   if(weightState){ weightState.unitIdx = (weightState.unitIdx+1) % 4; wtShow(weightState.lb, weightState.unitIdx); return; }
@@ -1830,13 +2496,23 @@ function wtvolShow(){
   showMain("Weight / Vol", fmtNum(wtvol.val,3) + " " + WTVOL_UNITS[wtvol.unit] + "  STORED","", wtvol.val, 0);
 }
 function wtvolStore(){
+  clearMbmUnlessPending();   /* Batch F: a wt/vol store replaces the working value */
+  litSolver = "d:0";   /* Batch E2 I13: a wt/vol store press lights its physical digit key, like a solver press lights its solver key — whether it stores or prompts */
   if(builderHasInput()){
     var o = builderValue();
-    if(o.dim !== 0){ promptLabel("Weight / Vol"); return; }
+    if(!o || o.dim !== 0){ promptLabel("Weight / Vol"); return; }   /* Batch G fix 2 (F-1): a null entry (lone decimal + unit key) prompts like any invalid entry, never throws */
     wtvol.val = o.val; wtvolStoreMode = true;
     clearBuilder();
     wtvolShow(); return;
   }
+  /* Batch E2 I16: the display-based store arms 0-key unit cycling exactly
+     like the entry-based store does. The value shown is unchanged (the
+     stored wt/vol value); only the cycling gesture is now available. */
+  /* Batch E3 0b: a bare zero display stores nothing — silent prompt,
+     no unit cycling armed. A nonzero display keeps the existing
+     behavior (re-show the stored value, arm cycling). */
+  if(dispVal === 0){ promptLabel("Weight / Vol"); return; }
+  wtvolStoreMode = true;
   wtvolShow();
 }
 function cycleWtvolUnit(){
@@ -1844,6 +2520,8 @@ function cycleWtvolUnit(){
   wtvolShow();
 }
 function wtvolRecall(){
+  clearMbmUnlessPending();   /* Batch F: a wt/vol recall replaces the working value */
+  litSolver = null;   /* v1.23: the recalled value replaces the display */
   showMain("Weight / Vol", fmtNum(wtvol.val,3) + " " + WTVOL_UNITS[wtvol.unit],"", wtvol.val, 0);
 }
 
@@ -1857,8 +2535,10 @@ function costQty(v, dim){
   return {qty: v, unit:""};
 }
 function costKey(){
+  litSolver = null;   /* v1.23: the cost prompt/total replaces the display */
   if(acc !== null && pendingOp === "*"){
     var entry = builderHasInput() ? commitEntry() : {val:dispVal, dim:0};
+    if(!entry) entry = {val:dispVal, dim:0};   /* Batch G fix 2 (F-1): a null entry (lone decimal + unit key) prices like no entry, never throws */
     var cq = costQty(acc.val, acc.dim);
     var total = cq.qty * entry.val / (costPerMbm ? 1000 : 1);
     addHistory("Cost — " + fmtNum(cq.qty,4) + " " + cq.unit + " × $" + fmtNum(entry.val,2) + (costPerMbm ? " per Mbm" : ""), money(total), total, 0);
@@ -1868,6 +2548,7 @@ function costKey(){
   }
   if(builderHasInput() || dispVal !== 0){
     var q = builderHasInput() ? commitEntry() : {val:dispVal, dim:dispDim};
+    if(!q) q = {val:dispVal, dim:dispDim};   /* Batch G fix 2 (F-1): a null entry (lone decimal + unit key) prices the display like no entry, never throws */
     var cq2 = costQty(q.val, q.dim);
     costPrompt = {qty:cq2.qty, unit:cq2.unit, perMbm:costPerMbm};
     clearBuilder();
@@ -1877,8 +2558,13 @@ function costKey(){
   promptLabel("Cost"); return;
 }
 function costFinish(){
+  litSolver = null;   /* v1.23: the cost total replaces the display */
   var entry = builderHasInput() ? commitEntry() : null;
-  if(!costPrompt || !entry){ costPrompt = null; return; }
+  if(!costPrompt) return;
+  /* Batch E1 I9: bare = with no price typed keeps the prompt live WITH its
+     label (a silent no-op — = is the prompt's enter key, and cancelling
+     would discard the quantity). Label present ⇔ prompt live, always. */
+  if(!entry){ setDisplay(0, 0, "Cost · unit price $"); return; }
   var total = costPrompt.qty * entry.val / (costPrompt.perMbm ? 1000 : 1);
   addHistory("Cost — " + fmtNum(costPrompt.qty,4) + " " + costPrompt.unit + " × $" + fmtNum(entry.val,2) + (costPrompt.perMbm ? " per Mbm" : ""), money(total), total, 0);
   costPrompt = null; justEvaluated = true; costPerMbm = false;
@@ -1887,9 +2573,11 @@ function costFinish(){
 
 /* ---------- Prefs (reference p.11-12, p.39): Conv+%, % steps settings, + steps options ---------- */
 var prefsMode = false, prefsIdx = 0;
+var prefsSnapshot = null;   /* value/dimension/mode on Prefs entry — restored on exit, so the Prefs display never becomes a live value */
 var PREFS = [
   {name:"Fractional Resolution", get:function(){ return "1/" + prefRes; },
-   options:[32,16,64,2,4,8], cur:function(){ return prefRes; },
+   /* Batch E2 I17 (corrected spec): the booklet order — 1/16 → 1/32 → 1/64 → 1/2 → 1/4 → 1/8 → repeat. 1/32 sits directly after 1/16 (it used to sit at the end). − steps reverse the cycle. */
+   options:[16,32,64,2,4,8], cur:function(){ return prefRes; },
    set:function(v){ prefRes = v; }},
   {name:"Area Displays", get:function(){ return {std:"Std.",sqft:"0. SQ FEET",sqyd:"0. SQ YD",sqm:"0. SQ M"}[prefArea]; },
    options:["std","sqft","sqyd","sqm"], cur:function(){ return prefArea; },
@@ -1909,9 +2597,9 @@ var PREFS = [
 ];
 function prefsShow(){
   var p = PREFS[prefsIdx];
-  showMain("Prefs · " + p.name, p.get(),"", prefRes, 0);
+  showMain("Prefs · " + p.name, p.get(),"");   /* no value passed: the Prefs display never writes through to the working value */
 }
-function prefsEnter(){ prefsMode = true; prefsIdx = 0; prefsShow(); }
+function prefsEnter(){ prefsSnapshot = {val: dispVal, dim: dispDim, mode: dispMode}; prefsMode = true; prefsIdx = 0; litSolver = null; prefsShow(); }
 function prefsStep(dir){
   var p = PREFS[prefsIdx];
   var i = p.options.indexOf(p.cur());
@@ -1921,12 +2609,27 @@ function prefsStep(dir){
 }
 var TEMP_RES = {1:16, 2:2, 3:32, 4:4, 6:64, 8:8};
 function tempResKey(d){
+  litSolver = null;   /* v1.23: a resolution change replaces the display */
   tempRes = TEMP_RES[d];
-  showMain("Temp Resolution", "1/" + tempRes,"", tempRes, 0);
+  /* Batch D fix 4 (I5/G5): Conv+digit RE-RENDERS the current value at
+     the new resolution instead of showing only a `1/N` confirmation
+     (which also clobbered the working value with the number N). The
+     re-rendered value is the "next value": the temporary resolution is
+     consumed immediately after it displays, so it never survives to a
+     later computation. An in-progress entry is preserved exactly (its
+     preview re-renders); a session prompt re-renders with its label;
+     session results show precomputed text and are left alone. A single
+     Clear also clears any armed temporary resolution (see handleOnC). */
+  if(session && session.phase === "results"){ /* nothing to re-render */ }
+  else if(session && session.phase === "prompt"){ liveEntryPreview(); }
+  else if(builderHasInput()){ liveEntryPreview(); }
+  else { setDisplay(dispVal, dispDim); }
+  tempRes = null;
 }
 
 /* ---------- Memory (reference p.21) ---------- */
 function memAdd(sign){
+  litSolver = null;   /* v1.23: a memory confirmation replaces the display */
   if(memRecallMode){
     memCycle = (memCycle+1) % 3;
     if(memCycle === 1) showMain("Memory · Average", fmtByPref(memory.val/memory.count, memory.dim),"", memory.val/memory.count, memory.dim);
@@ -1935,27 +2638,52 @@ function memAdd(sign){
     return;
   }
   var o = currentOperand();
+  /* Batch H fix 4 (T1-PROBEs): Memory adds follow the same rule as +/−
+     (Batch B W9) — mixed dimensions refuse SILENTLY. Adding raw
+     internal numbers across dimensions (100 + 5′ = 160) is meaningless
+     and order-dependent, so a nonzero dimension mismatch leaves the
+     memory total untouched and the display unchanged (no showMain, no
+     count increment — the operand stays on screen exactly as the W9
+     refusal leaves a typed operand). One exception, as in W9: a
+     bare-zero dimensionless value adopts the other's dimension, so a
+     leading 0 never drops a unit — a zero dim-0 total adopts the
+     operand's dim, and a zero dim-0 operand keeps the total's dim.
+     Same-dimension adds (including all dim-0 board-feet/memory flows)
+     are untouched. */
+  if(memory !== null && memory.dim !== o.dim){
+    var memZero = (memory.dim === 0 && memory.val === 0);
+    var opZero = (o.dim === 0 && o.val === 0);
+    if(!memZero && !opZero) return;
+    memory = {val: memory.val + sign*o.val, dim: memZero ? o.dim : memory.dim, count: memory.count+1};
+    showMain(sign > 0 ? "Memory +" : "Memory −", fmtByPref(memory.val, memory.dim),"", memory.val, memory.dim);
+    return;
+  }
   if(memory === null) memory = {val: sign*o.val, dim:o.dim, count:1};
   else memory = {val: memory.val + sign*o.val, dim:o.dim, count: memory.count+1};
-  showMain(sign > 0 ? "Memory +" : "Memory −", fmtByPref(memory.val, memory.dim),"", dispVal, dispDim);
+  showMain(sign > 0 ? "Memory +" : "Memory −", fmtByPref(memory.val, memory.dim),"", memory.val, memory.dim);
 }
 function memRecall(){
   if(memory === null){ return; }  /* v1.17: silent */
+  litSolver = null;   /* v1.23: the recalled value replaces the display */
   memRecallMode = true; memCycle = 0;
-  acc = null; pendingOp = null; clearBuilder();
+  acc = null; pendingOp = null; recallOperand = false; clearBuilder();
   setDisplay(memory.val, memory.dim, "Memory");
   justEvaluated = true;
 }
 function memRecallClear(){
   if(memory === null){ return; }  /* v1.17: silent */
+  litSolver = null;   /* v1.23: the recalled total replaces the display */
   var v = memory.val, d = memory.dim;
-  memory = null; memRecallMode = false;
+  memory = null; memRecallMode = false; recallOperand = false;
   setDisplay(v, d, "Memory · cleared");
   justEvaluated = true;
 }
 function memClear(){
-  memory = null; memRecallMode = false;
-  showMain("Memory", "Cleared","", dispVal, dispDim);
+  clearMbmUnlessPending();   /* Batch F: clearing memory zeroes the display */
+  litSolver = null;   /* v1.23: the cleared confirmation replaces the display */
+  memory = null; memRecallMode = false; recallOperand = false;
+  showMain("Memory", "Cleared","", 0, 0);
+  justEvaluated = true;
 }
 
 /* ---------- prompt sessions (extra solvers; one value at a time) ----------
@@ -1974,9 +2702,9 @@ function setBuilderFromValue(val, unit){
     fields.feet = ft ? sign + ft : ""; fields.inch = inch ? String(inch) : "";
     if(six){ fields.num = String(six); fields.den = "16"; }
     activeField = "feet";
-  } else if(unit === "decft"){ bMode = "decft"; single = fmtNum(val/12, 4); }
-  else if(unit === "decin"){ bMode = "decin"; single = fmtNum(val, 4); }
-  else { bMode = "num"; single = fmtNum(val, 4); }
+  } else if(unit === "decft"){ bMode = "decft"; single = fmtNum(val/12, 4).replace("−", "-"); }   /* Batch E2 I21: builder strings stay ASCII-parseable (fmtNum now renders U+2212 for display) */
+  else if(unit === "decin"){ bMode = "decin"; single = fmtNum(val, 4).replace("−", "-"); }
+  else { bMode = "num"; single = fmtNum(val, 4).replace("−", "-"); }
 }
 function showPrompt(){
   var pr = session.def.prompts[session.idx];
@@ -1984,6 +2712,12 @@ function showPrompt(){
   bMode = pr.unit;
   session.prefilled = false;
   var def = (typeof pr.def === "function") ? pr.def() : pr.def;
+  /* Batch E2 I19: a length entry typed before Bd Ft prefills the Length
+     prompt (consumed once — other prompts use their own defaults). */
+  if(session.name === "bdft" && pr.id === "l" && session.prefillLen !== null && session.prefillLen !== undefined){
+    def = session.prefillLen;
+    session.prefillLen = null;
+  }
   session.curDef = def;
   if(def !== null && def !== undefined){
     setBuilderFromValue(def, pr.unit);
@@ -2000,16 +2734,43 @@ function startSession(name){
   var def = SESSIONS[name];
   if(!def) return;
   if(def.guard && !def.guard()) return;
-  acc = null; pendingOp = null;
-  session = {name:name, def:def, idx:0, values:{}, phase:"prompt", itemIdx:0, items:null, prefilled:false, curDef:null};
+  /* Batch E2 I19: a typed length entry is preserved for the Board Feet
+     session's Length prompt. Other sessions and non-length entries are
+     unaffected — their entries are dropped exactly as before. */
+  var prefillLen = null;
+  if(name === "bdft" && builderHasInput()){
+    var bv = builderValue();
+    if(bv && bv.dim === 1) prefillLen = bv.val;
+  }
+  acc = null; pendingOp = null; costPerMbm = false;   /* Batch F: a session replaces the working value with prompts */
+  session = {name:name, def:def, idx:0, values:{}, phase:"prompt", itemIdx:0, items:null, prefilled:false, curDef:null, prefillLen:prefillLen};
   showPrompt();
 }
 function acceptPrompt(){
+  if(fractionDenZero()) return;   /* Batch C fix 4 (W12): an explicit 0 denominator refuses silently — the prompt stays and the entry is preserved */
   var pr = session.def.prompts[session.idx];
   var val;
   if(builderHasInput()){
     var bv = builderValue();
-    val = bv.val;
+    /* Batch G fix 2 (F-1): a null entry (lone decimal + unit key) takes
+       the prompt default instead of throwing; with no default the
+       prompt refuses silently and stays live. The session can never
+       wedge on a null entry. */
+    if(bv === null){
+      if(session.curDef === null || session.curDef === undefined) return;
+      val = session.curDef;
+    } else {
+      val = bv.val;
+      /* Batch G fix 4 (T1-F1): the Length prompt is labelled (ft) and
+         its compute divides by 12 as feet, but a bare typed number
+         arrives in num mode (typing clears the prefilled decft
+         builder), so it was stored as inches — 12x too few board
+         feet. A bare number here is feet, matching the sibling ftin
+         length prompts. Tagged entries (Feet/Inch/Yds/metric) and
+         defaults/prefills keep their own values: only the untagged
+         num-mode entry converts. */
+      if(session.name === "bdft" && pr.id === "l" && bMode === "num") val = bv.val * 12;
+    }
   } else val = session.curDef;
   session.values[pr.id] = val;
   session.idx++;
@@ -2029,11 +2790,17 @@ function finishSession(){
 }
 function showItem(){
   var it = session.items[session.itemIdx]; if(!it) return;
+  /* Batch F: a board-feet session's first three items (Total, Per piece,
+     With waste) ARE board-feet quantities, so costing them prices per Mbm
+     exactly like the inline path; its money items (Material cost, Cost per
+     piece) and every other session's items are not. Stepping re-derives the
+     flag from the item showing, so wrapping back to Total restores it. */
+  costPerMbm = (session.name === "bdft" && session.itemIdx < 3);
   var n = session.items.length;
   var sub = "";
   if(n > 1) sub = (session.itemIdx + 1) + " of " + n;
   if(it.val !== undefined && it.val !== null) setDisplay(it.val, (it.dim === undefined ? 0 : it.dim), it.k, sub);
-  else showMain(it.k, it.v, sub);
+  else showMain(it.k, it.v, sub, 0, 0);   /* Batch E2 I23: a valueless item sets the neutral working value (0, dim 0 — the same documented choice as memory-clear) so no stale value leaks into later arithmetic */
   if(it.val !== undefined && it.val !== null && it.v){ $("dispMain").textContent = it.v; updateIndicators(); }
 }
 function sessionAdvance(){
@@ -2043,7 +2810,7 @@ function sessionAdvance(){
   else { session.itemIdx = (session.itemIdx + 1) % session.items.length; showItem(); }
 }
 function sessionCancel(){
-  session = null; bMode = "num"; clearBuilder();
+  session = null; bMode = "num"; clearBuilder(); litSolver = null; lastRepeat = null;
 }
 
 var SESSIONS = {
@@ -2060,7 +2827,8 @@ var SESSIONS = {
         {k:"First centre", v:fmtFI(first) + " off post face", val:first, dim:1},
         {k:"Layout", v:"Start " + fmtFI(first) + ", then step " + fmtFI(oc)}
       ];
-    }
+    },
+    histFn:function(v, items){ return ["Baluster — " + fmtFI(v.len) + " rail, " + fmtNum(v.bw,1) + "″ balusters, " + fmtNum(v.gap,1) + "″ max gap", items[0].v, items[0].val, 0]; }   /* Batch E1 I8: Baluster sessions log one History row, like Board Feet / Concrete */
   },
   bdft: { title:"Board feet", keyLabel:"Bd Ft", key:"bdft",
     prompts:[ P("t","Thickness (in)","decin",1), P("w","Width (in)","decin",6), P("l","Length (ft)","decft",96),
@@ -2109,7 +2877,8 @@ var SESSIONS = {
         {k:"Joint compound", v:"≈ " + fmtNum(total/100*0.9,1) + " gal premix", val:total/100*0.9, dim:0},
         {k:"Screws", v:"≈ " + fmtInt(Math.ceil(total*1.4)), val:Math.ceil(total*1.4), dim:0}
       ];
-    }
+    },
+    histFn:function(v, items){ return ["Drywall " + fmtFI(v.l) + " × " + fmtFI(v.w) + " × " + fmtFI(v.h), items[0].v, items[0].val, 0]; }   /* Batch E1 I8: Drywall sessions log one History row, like Board Feet / Concrete */
   },
   roof: { title:"Roofing", keyLabel:"Diag", key:"diag",
     prompts:[ P("l","Roof length (eave)"), P("s","Slope length, one side") ],
@@ -2123,22 +2892,45 @@ var SESSIONS = {
         {k:"Total area", v:fmtNum(total,1) + " ft² (both sides)", val:total*144, dim:2},
         {k:"Underlayment", v:String(Math.ceil(totalW/400)) + " rolls (400 ft²)", val:Math.ceil(totalW/400), dim:0}
       ];
-    }
+    },
+    histFn:function(v, items){ return ["Roofing " + fmtFI(v.l) + " × " + fmtFI(v.s), items[0].v, items[0].val, 0]; }   /* Batch E1 I8: Roofing sessions log one History row, like Board Feet / Concrete */
   },
 };
 
 /* ---------- stored settings: riser / tread / o.c. (reference: value + Conv+key) ---------- */
 function storeSetting(which){
-  var o = builderHasInput() ? currentOperand() : {val:dispVal, dim:dispDim};
+  clearMbmUnlessPending();   /* Batch F: a store replaces the working value */
+  /* Batch E2 I13: a store press lights its physical digit key (Conv 7/9/5),
+     like a solver press lights its solver key — whether it stores or prompts. */
+  litSolver = (which === "riser") ? "d:7" : (which === "tread") ? "d:9" : "d:5";
+  var o;
+  if(builderHasInput()){
+    o = builderValue();
+    if(!o || o.dim !== 1){ promptLabel(which === "riser" ? "Riser Ht" : which === "tread" ? "Tread W" : "On-Centre"); return; }   /* Batch E1 I1: a rejected entry stays on screen, like Circ/Weight */
+    clearBuilder();
+  } else {
+    o = {val:dispVal, dim:dispDim};
+    /* Batch E3 0b: a setting store with no typed entry and a bare zero
+       display stores NOTHING — a 0 riser/tread/o.c. would break solver
+       math. Silent prompt, like a rejected entry; the stored value
+       survives. Nonzero display values still store, as before. */
+    if(o.val === 0){ promptLabel(which === "riser" ? "Riser Ht" : which === "tread" ? "Tread W" : "On-Centre"); return; }
+  }
   if(o.dim !== 1){ promptLabel(which === "riser" ? "Riser Ht" : which === "tread" ? "Tread W" : "On-Centre"); return; }
-  if(which === "riser"){ riserStore = o.val; showMain("Riser Ht", fmtFI(o.val) + "  STORED","", o.val, 1); }
-  else if(which === "tread"){ treadStore = o.val; showMain("Tread W", fmtFI(o.val) + "  STORED","", o.val, 1); }
-  else { ocStore = o.val; jackIdx = -1; rwallIdx = -1; showMain("On-Centre", fmtNum(o.val,2) + " INCH  STORED","", o.val, 1); }
+  /* Batch D fix 2 (I12): riser/tread stores format like the o.c. store —
+     total inches, no feet rollup (metric: bare millimetres). */
+  if(which === "riser"){ riserStore = o.val; showMain("Riser Ht", fmtStoredInches(o.val),"", o.val, 1); }
+  else if(which === "tread"){ treadStore = o.val; showMain("Tread W", fmtStoredInches(o.val),"", o.val, 1); }
+  else { ocStore = o.val; jackIdx = -1; rwallIdx = -1; showMain("On-Centre", fmtOCStored(o.val),"", o.val, 1); }
 }
 function recallStored(which){
-  if(which === "oc") showMain("On-Centre", fmtNum(ocStore,2) + " INCH","", ocStore, 1);
-  else if(which === "riser") showMain("Riser Ht", fmtFI(riserStore !== null ? riserStore : 7.5) + "  STORED","", riserStore !== null ? riserStore : 7.5, 1);
-  else if(which === "tread") showMain("Tread W", fmtFI(treadStore !== null ? treadStore : 10) + "  STORED","", treadStore !== null ? treadStore : 10, 1);
+  clearMbmUnlessPending();   /* Batch F: a recall replaces the working value */
+  litSolver = null;   /* v1.23: the recalled setting replaces the display */
+  /* Batch E2 I15: one recall format for all five recalls — value + setting
+     name as label, no "STORED" suffix. Stores keep STORED; recalls never do. */
+  if(which === "oc") showMain("On-Centre", fmtRecallOC(ocStore),"", ocStore, 1);
+  else if(which === "riser"){ var rv = riserStore !== null ? riserStore : 7.5; showMain("Riser Ht", fmtRecallInches(rv),"", rv, 1); }
+  else if(which === "tread"){ var tv = treadStore !== null ? treadStore : 10; showMain("Tread W", fmtRecallInches(tv),"", tv, 1); }
 }
 
 /* ---------- Shift (Conv) functions ---------- */
@@ -2168,12 +2960,13 @@ function handleShift(action){
     case "mrc": memClear(); break;
     case "mminus": memAdd(-1); break;
     case "clearall":
-      sessionCancel(); prefsMode = false; costPrompt = null;
-      acc = null; pendingOp = null; clearBuilder(); justEvaluated = false; tempRes = null;
-      tri = {rise:null, run:null, pitch:null, irPitch:null};
+      sessionCancel(); prefsMode = false; prefsSnapshot = null; costPrompt = null;   /* Batch E2 I18a: Clear All discards the Prefs-entry snapshot */
+      acc = null; pendingOp = null; recallOperand = false; clearBuilder(); justEvaluated = false; tempRes = null; litSolver = null; lastRepeat = null; dispMode = "ftin"; prevDispMode = "ftin"; costPerMbm = false;   /* Batch F: Clear All clears the flag */
+      tri = {rise:null, run:null, pitch:null, irPitch:null, diag:null};
       riserStore = null; treadStore = null; ocStore = 16;
       wtvol = {val:1.5, unit:0}; memory = null; memRecallMode = false;
-      stairIdx = 0; jackIdx = -1; rwallIdx = -1; circDia = null; weightState = null;
+      stairIdx = 0; jackIdx = -1; jackIr = false; rwallIdx = -1; rwallBase = 0; circDia = null; weightState = null;
+      pitchCycleIdx = -1;   /* Batch E1 I6: Clear All resets the pitch cycle — first Pitch press shows inches */
       setDisplay(0, 1, "Clear All"); break;
   }
 }
@@ -2190,6 +2983,7 @@ function primaryKey(k){
     } else if(single.indexOf(".") < 0) pressDigit(".");
     return;
   }
+  if(SOLVER_KEYS[k]){ litSolver = k; lastRepeat = null; clearMbmUnlessPending(); }   /* Batch F: a solver result replaces the working value (the inline Bd Ft case re-sets the flag below) */   /* v1.23: the solver key stays lit while its result shows; a solver starts a new job, so = stops repeating the old step */
   switch(k){
     case "back": pressBack(); break;
     case "feet": pressFeetKey(); break;
@@ -2208,9 +3002,16 @@ function primaryKey(k){
       /* reference flow: 2 x 4 x 16 Bd Ft -> board feet of the pending product */
       if(acc !== null && pendingOp === "*"){
         var e = builderHasInput() ? commitEntry() : {val:dispVal, dim:0};
-        var prod = acc.val * e.val;
+        if(!e) e = {val:dispVal, dim:0};   /* Batch G fix 2 (F-1): a null entry (lone decimal + unit key) counts like no entry, never throws */
+        /* Batch C fix 1: the last factor is the length, conventionally in
+           feet — a dimensioned length (16 Feet = 192 in internally) counts
+           as feet, not feet x 12. Earlier factors are already in inches
+           internally (T, W), so only the length converts (in -> ft). A
+           plain-number length is already feet and is untouched. */
+        var lenFt = (e.dim === 1) ? e.val / 12 : e.val;
+        var prod = acc.val * lenFt;
         var bf = prod / 12;
-        addHistory("Board feet — " + fmtNum(acc.val,2) + " × " + fmtNum(e.val,2) + " / 12", fmtNum(bf,5) + " BF", bf, 0);
+        addHistory("Board feet — " + fmtNum(acc.val,2) + " × " + fmtNum(lenFt,2) + " / 12", fmtNum(bf,5) + " BF", bf, 0);
         acc = null; pendingOp = null; justEvaluated = true; costPerMbm = true;
         showMain("Board Feet", fmtNum(bf,5) + " BF","", bf, 0);
         break;
@@ -2223,10 +3024,12 @@ function primaryKey(k){
     case "weight": weightKey(); break;
     case "pitch": pitchKey(false); break;
     case "pct": {
+      litSolver = null; lastRepeat = null;   /* v1.23: % replaces the display with its own result, and a % step is not repeated */
       var raw = builderHasInput() ? bareNumber() : null;
       var e = currentOperand();
       if(raw !== null) e = {val:raw, dim:0};
       if(acc && pendingOp){
+        if(acc.dim === 1) dispMode = accMode;   /* v1.23: a % step keeps the running total's unit */
         var res;
         if(pendingOp === "+" || pendingOp === "-"){
           var pv = {val: acc.val * e.val/100, dim: acc.dim};
@@ -2236,6 +3039,7 @@ function primaryKey(k){
         } else {
           res = {val: e.val === 0 ? NaN : acc.val / (e.val/100), dim: acc.dim};
         }
+        if(res === null) break;   /* W9 refusal (unreachable: % steps share acc.dim) */
         var expr = fmtByPref(acc.val, acc.dim) + " " + opSymbol(pendingOp) + " " + fmtNum(e.val,2) + "%";
         addHistory(expr, fmtByPref(res.val, res.dim), res.val, res.dim);
         acc = null; pendingOp = null; justEvaluated = true;
@@ -2247,64 +3051,140 @@ function primaryKey(k){
         setDisplay(pv2.val, pv2.dim, fmtNum(e.val,2) + "% =");
       }
       break; }
-    case "sqrt": { var o = currentOperand(); var v = Math.sqrt(Math.abs(o.val));
+    case "sqrt": { var peek = builderHasInput() ? builderValue() : {val:dispVal, dim:dispDim};
+      if(peek && peek.val < 0) break;   /* Batch C fix 2 (W10): sqrt of a negative refuses silently — display, entry and History untouched, never the root of the absolute value */
+      var o = currentOperand(); var v = Math.sqrt(Math.abs(o.val));
       var d3 = o.dim === 2 ? 1 : (o.dim === 0 ? 0 : 1);
       addHistory("√ " + fmtByPref(o.val, o.dim), fmtByPref(v, d3), v, d3);
+      litSolver = null;   /* Batch E2 I13: √ clears the lit key on completion, like recip/sign/pi/% */
       setDisplay(v, d3, "√ " + fmtByPref(o.val, o.dim) + " ="); justEvaluated = true; break; }
     case "sq": { var o2 = currentOperand(); var v2 = o2.val * o2.val;
       var d4 = o2.dim === 0 ? 0 : (o2.dim === 1 ? 2 : o2.dim);
       addHistory(fmtByPref(o2.val, o2.dim) + " ²", fmtByPref(v2, d4), v2, d4);
+      litSolver = null;   /* Batch E2 I13: square clears the lit key on completion, like recip/sign/pi/% */
       setDisplay(v2, d4, fmtByPref(o2.val, o2.dim) + " squared ="); justEvaluated = true; break; }
-    case "recip": { var o3 = currentOperand(); var v3 = o3.val === 0 ? NaN : 1/o3.val;
+    case "recip": { clearMbmUnlessPending(); var o3 = currentOperand();   /* Batch F: a reciprocal is not a board-feet quantity */ var v3 = o3.val === 0 ? NaN : 1/o3.val;
+      litSolver = null;   /* Batch E2 I13: a second function is "another key" — it clears a lit key */
       setDisplay(v3, 0, "1 ÷ " + fmtByPref(o3.val, o3.dim) + " ="); justEvaluated = true; break; }
     case "sign": {
+      litSolver = null;   /* Batch E2 I13: a second function is "another key" — it clears a lit key */
       if(builderHasInput()){
-        if(bMode === "ftin"){ fields.feet = fields.feet.indexOf("-") === 0 ? fields.feet.slice(1) : "-" + (fields.feet || "0"); }
+        if(bMode === "ftin"){
+          /* Batch E2 I21a: negate the field that holds the value — feet if
+             present, else inches, else the numerator — never fabricate a
+             "-0′" feet field for an inch-only entry. */
+          if(fields.feet !== "") fields.feet = fields.feet.indexOf("-") === 0 ? fields.feet.slice(1) : "-" + fields.feet;
+          else if(fields.inch !== "") fields.inch = fields.inch.indexOf("-") === 0 ? fields.inch.slice(1) : "-" + fields.inch;
+          else if(fields.num !== "") fields.num = fields.num.indexOf("-") === 0 ? fields.num.slice(1) : "-" + fields.num;
+        }
         else single = single.indexOf("-") === 0 ? single.slice(1) : "-" + single;
         liveEntryPreview();
       } else setDisplay(-dispVal, dispDim, "Negated");
       break; }
-    case "pi": setDisplay(Math.PI, 0, "π"); justEvaluated = true; break;
-    case "rcl": rclArmed = true; updateIndicators(); break;
+    case "pi": litSolver = null; clearMbmUnlessPending(); setDisplay(Math.PI, 0, "π");   /* Batch F: pi replaces the working value */ justEvaluated = true; break;   /* Batch E2 I13: a second function clears a lit key */
+    case "rcl": litSolver = null; rclArmed = true; updateIndicators(); break;   /* Batch E2 I13: Rcl clears a lit key, like M+ does */
     case "mplus": memAdd(1); break;
     case "rise": case "run": {
       if(builderHasInput()){
-        var o6 = currentOperand(); if(o6.dim !== 1){ promptLabel(k === "rise" ? "Rise" : "Run"); break; }
+        var o6 = builderValue(); if(!o6 || o6.dim !== 1){ promptLabel(k === "rise" ? "Rise" : "Run"); break; }   /* Batch E1 I1: check the dimension before committing — a rejected entry stays on screen, like Circ/Weight */
+        clearBuilder();
         tri[k] = o6.val;
         /* v1.15: any order — never wipe the stored pitch on a leg entry.
            If both legs are now known, derive the pitch from them;
            if only the other leg is missing and a pitch is stored, solve it. */
         if(k === "rise"){
-          if(tri.run !== null) tri.pitch = tri.rise / tri.run * 12;
+          if(tri.run !== null) storeDerivedPitch(); /* Batch G fix 1 (X-1): guarded derivation */
           else if(tri.pitch !== null && tri.pitch !== 0) tri.run = tri.rise * 12 / tri.pitch;
+          else if(tri.diag !== null && tri.diag > tri.rise){ tri.run = Math.sqrt(tri.diag*tri.diag - tri.rise*tri.rise); storeDerivedPitch(); /* Batch G fix 1 (X-1): guarded derivation */ }   /* v1.23: Diag + Rise solves Run */
         } else {
-          if(tri.rise !== null) tri.pitch = tri.rise / tri.run * 12;
+          if(tri.rise !== null) storeDerivedPitch(); /* Batch G fix 1 (X-1): guarded derivation */
           else if(tri.pitch !== null) tri.rise = o6.val * tri.pitch / 12;
+          else if(tri.diag !== null && tri.diag > tri.run){ tri.rise = Math.sqrt(tri.diag*tri.diag - tri.run*tri.run); storeDerivedPitch(); /* Batch G fix 1 (X-1): guarded derivation */ }   /* v1.23: Diag + Run solves Rise */
         }
-        acc = null; pendingOp = null; justEvaluated = true;
+        acc = null; pendingOp = null; recallOperand = false; justEvaluated = true; costPerMbm = false;   /* Batch F: storing a leg cancels the pending operation */
         triJump(k);
       } else {
         var storedLeg = tri[k];
+        var storedFromDisplay = false;
         if(storedLeg === null){
           /* v1.15: any order — solve the missing leg from Pitch + the other leg */
           if(k === "rise" && tri.run !== null && tri.pitch !== null){
             tri.rise = tri.run * tri.pitch / 12;
           } else if(k === "run" && tri.rise !== null && tri.pitch !== null && tri.pitch !== 0){
             tri.run = tri.rise * 12 / tri.pitch;
+          } else if(k === "rise" && tri.run !== null && tri.diag !== null && tri.diag > tri.run){
+            /* v1.23: Diag + Run solves Rise */
+            tri.rise = Math.sqrt(tri.diag*tri.diag - tri.run*tri.run);
+            storeDerivedPitch(); /* Batch G fix 1 (X-1): guarded derivation */
+          } else if(k === "run" && tri.rise !== null && tri.diag !== null && tri.diag > tri.rise){
+            /* v1.23: Diag + Rise solves Run */
+            tri.run = Math.sqrt(tri.diag*tri.diag - tri.rise*tri.rise);
+            storeDerivedPitch(); /* Batch G fix 1 (X-1): guarded derivation */
+          } else if(tri.diag !== null && tri.pitch !== null){
+            /* v1.23: Diag + Pitch solves both legs */
+            var diagK2 = tri.pitch / 12;
+            tri.run = tri.diag / Math.sqrt(1 + diagK2*diagK2);
+            tri.rise = tri.run * diagK2;
+          } else if(eqFresh && dispDim === 1 && isFinite(dispVal)){
+            /* Batch B fix 7 (4.2): nothing stored, nothing solvable, but
+               the display holds a fresh = result — store it as this leg,
+               then solve the other leg exactly like a typed entry would.
+               Stored legs and solvable triangles win over the display
+               (checked above); the gate is = only, so a solver-store
+               display (e.g. Diag then Rise) still prompts. */
+            tri[k] = dispVal;
+            if(k === "rise"){
+              if(tri.run !== null) storeDerivedPitch(); /* Batch G fix 1 (X-1): guarded derivation */
+              else if(tri.pitch !== null && tri.pitch !== 0) tri.run = tri.rise * 12 / tri.pitch;
+              else if(tri.diag !== null && tri.diag > tri.rise){ tri.run = Math.sqrt(tri.diag*tri.diag - tri.rise*tri.rise); storeDerivedPitch(); /* Batch G fix 1 (X-1): guarded derivation */ }
+            } else {
+              if(tri.rise !== null) storeDerivedPitch(); /* Batch G fix 1 (X-1): guarded derivation */
+              else if(tri.pitch !== null) tri.rise = dispVal * tri.pitch / 12;
+              else if(tri.diag !== null && tri.diag > tri.run){ tri.rise = Math.sqrt(tri.diag*tri.diag - tri.run*tri.run); storeDerivedPitch(); /* Batch G fix 1 (X-1): guarded derivation */ }
+            }
+            storedFromDisplay = true;
           } else { promptLabel(k === "rise" ? "Rise" : "Run"); break; }
           storedLeg = tri[k];
         }
-        acc = null; pendingOp = null; clearBuilder(); justEvaluated = true;
+        if(acc !== null && pendingOp && !storedFromDisplay){ recallOperand = true; } else { acc = null; pendingOp = null; recallOperand = false; }
+        clearBuilder(); justEvaluated = true;
         triJump(k);
       }
       break; }
     case "diag": {
-      if(tri.rise === null || tri.run === null){ promptLabel("Diag"); break; }
-      acc = null; pendingOp = null; clearBuilder(); justEvaluated = true;
-      triJump("diag"); break; }
+      if(builderHasInput()){
+        var od = builderValue(); if(!od || od.dim !== 1){ promptLabel("Diag"); break; }   /* Batch E1 I1: check the dimension before committing — a rejected entry stays on screen, like Circ/Weight */
+        clearBuilder();
+        tri.diag = od.val;
+        /* v1.23: a diagonal can be entered like any other leg — with a
+           second value stored, the rest of the triangle follows. */
+        if(tri.rise !== null && tri.run !== null){ /* legs already known; the entered diagonal is echoed below */ }
+        else if(tri.rise !== null && tri.diag > tri.rise){ tri.run = Math.sqrt(tri.diag*tri.diag - tri.rise*tri.rise); storeDerivedPitch(); /* Batch G fix 1 (X-1): guarded derivation */ }
+        else if(tri.run !== null && tri.diag > tri.run){ tri.rise = Math.sqrt(tri.diag*tri.diag - tri.run*tri.run); storeDerivedPitch(); /* Batch G fix 1 (X-1): guarded derivation */ }
+        else if(tri.pitch !== null){ var diagK3 = tri.pitch/12; tri.run = tri.diag/Math.sqrt(1+diagK3*diagK3); tri.rise = tri.run*diagK3; }
+        acc = null; pendingOp = null; recallOperand = false; justEvaluated = true; costPerMbm = false;   /* Batch F: storing a leg cancels the pending operation */
+        setDisplay(tri.diag, 1, "Diagonal");
+      } else if((tri.rise !== null && tri.run !== null) || tri.diag !== null){
+        if(acc !== null && pendingOp){ recallOperand = true; } else { acc = null; pendingOp = null; }
+        clearBuilder(); justEvaluated = true;
+        triJump("diag");
+      } else if(eqFresh && dispDim === 1 && isFinite(dispVal)){
+        /* Batch B fix 7 (4.2): store the fresh = result as the diagonal,
+           then solve the legs like a typed diagonal entry would. */
+        tri.diag = dispVal;
+        if(tri.rise !== null && tri.diag > tri.rise){ tri.run = Math.sqrt(tri.diag*tri.diag - tri.rise*tri.rise); storeDerivedPitch(); /* Batch G fix 1 (X-1): guarded derivation */ }
+        else if(tri.run !== null && tri.diag > tri.run){ tri.rise = Math.sqrt(tri.diag*tri.diag - tri.run*tri.run); storeDerivedPitch(); /* Batch G fix 1 (X-1): guarded derivation */ }
+        else if(tri.pitch !== null){ var diagK4 = tri.pitch/12; tri.run = tri.diag/Math.sqrt(1+diagK4*diagK4); tri.rise = tri.run*diagK4; }
+        acc = null; pendingOp = null; recallOperand = false; justEvaluated = true; costPerMbm = false;   /* Batch F: storing a leg cancels the pending operation */
+        setDisplay(tri.diag, 1, "Diagonal");
+      } else { promptLabel("Diag"); }
+      break; }
     case "hip": {
       if(tri.rise === null || tri.run === null){ promptLabel("Hip/V"); break; }
-      acc = null; pendingOp = null; clearBuilder(); justEvaluated = true;
+      if(acc !== null && pendingOp){ recallOperand = true; } else { acc = null; pendingOp = null; }
+      /* Batch E1 I3: Hip/V never consumes a typed entry (it has no entry
+         form of its own) — no clearBuilder here, in either case. */
+      justEvaluated = true;
       hipKey(); break; }
   }
 }
@@ -2358,6 +3238,9 @@ function applyShiftLabels(on){
 }
 function setShift(on){
   shiftArmed = on;
+  if(on) lastRepeat = null;   /* Batch E1 I4: arming Conv starts a new job — bare Conv alone breaks repeat-=, and so does any conversion that follows */
+  /* Batch E2 I13: arming Conv is "another key" — it clears a lit key, except inside a session prompt, where the session key stays lit through the session. */
+  if(on && !(session && session.phase === "prompt")) litSolver = null;
   document.querySelectorAll("button.key.conv").forEach(function(b){ b.classList.toggle("armed", on); });
   applyShiftLabels(on);
   updateIndicators();
@@ -2367,23 +3250,25 @@ function clearTransientModes(){
   if(memRecallMode){ memRecallMode = false; memCycle = 0; }
 }
 function handleOnC(){
-  if(historyOpen){ closeHistory(); return; }
-  if(prefsMode){ prefsMode = false; setDisplay(dispVal, dispDim, "Ready"); return; }
-  if(session){ sessionCancel(); setDisplay(0, 1, "Ready"); return; }
-  if(costPrompt){ costPrompt = null; clearBuilder(); setDisplay(dispVal, dispDim, "Ready"); return; }
+  memRecallMode = false; memCycle = 0;   /* Batch E1 I7: a hold-clear exits memory-recall mode (set directly — clearTransientModes would also reset the hold counter) */
+  if(historyOpen){ if(shiftArmed) setShift(false); closeHistory(); return; }   /* Batch G fix 3 (P-1): a hold-exit disarms Conv, like a hold outside a mode does — the next key must never execute a Conv function */
+  if(prefsMode){ if(shiftArmed) setShift(false); prefsMode = false; if(prefsSnapshot){ dispMode = prefsSnapshot.mode; setDisplay(prefsSnapshot.val, prefsSnapshot.dim, "Ready"); prefsSnapshot = null; } else setDisplay(dispVal, dispDim, "Ready"); return; }
+  if(session){ if(shiftArmed) setShift(false); sessionCancel(); costPerMbm = false; setDisplay(0, 1, "Ready"); return; }   /* Batch F: a hold-clear from a session zeroes the display */
+  if(costPrompt){ if(shiftArmed) setShift(false); costPrompt = null; costPerMbm = false; clearBuilder(); setDisplay(0, 1, "Ready"); return; }   /* Batch E2 I18b: one hold-clear behavior for prompts — exit + zero, like session prompts (was: the typed price survived on screen) */
   if(rclArmed){ rclArmed = false; updateIndicators(); return; }
   if(shiftArmed){ setShift(false); return; }
   oncCount++;
   if(oncCount === 1){
     /* reference: 1st press clears the display (entry + pending op) */
-    acc = null; pendingOp = null; clearBuilder(); justEvaluated = false; lastPct = null;
+    acc = null; pendingOp = null; recallOperand = false; clearBuilder(); justEvaluated = false; lastPct = null; litSolver = null; lastRepeat = null; tempRes = null; dispMode = "ftin"; prevDispMode = "ftin"; costPerMbm = false;   /* Batch F: 1st hold-clear clears the flag */   /* v1.23: a clear resets the display unit too; Batch D fix 4: a single Clear also restores the permanent resolution */
     setDisplay(0, 1, "Ready");
   } else {
     /* reference: 2nd press clears all temporary values (not Pitch, not Prefs) */
     oncCount = 0;
-    acc = null; pendingOp = null; clearBuilder(); justEvaluated = false; tempRes = null;
-    tri.rise = null; tri.run = null; tri.irPitch = null;
-    stairIdx = 0; jackIdx = -1; rwallIdx = -1; circDia = null; weightState = null;
+    acc = null; pendingOp = null; recallOperand = false; clearBuilder(); justEvaluated = false; tempRes = null; litSolver = null; lastRepeat = null; dispMode = "ftin"; prevDispMode = "ftin"; costPerMbm = false;   /* Batch F: 2nd hold-clear clears the flag */
+    tri.rise = null; tri.run = null; tri.irPitch = null; tri.diag = null;
+    stairIdx = 0; jackIdx = -1; jackIr = false; rwallIdx = -1; rwallBase = 0; circDia = null; weightState = null;
+    pitchCycleIdx = -1;   /* Batch E1 I6: 2nd hold resets the pitch cycle too */
     setDisplay(0, 1, "Cleared");
   }
 }
@@ -2392,6 +3277,7 @@ function handleKey(k){
   if(k === "onc"){ handleOnC(); return; }
   if(k !== "conv") oncCount = 0;
   if(prefsMode){
+    if(shiftArmed && k === "op:*"){ setShift(false); handleShift("clearall"); return; }   /* Batch E2 I18a: Clear All works from Prefs mode — exits Prefs + full clear (the W2 snapshot is discarded: Clear All means clear) */
     if(k === "pct"){ prefsIdx = (prefsIdx+1) % PREFS.length; prefsShow(); return; }
     if(k === "op:+"){ prefsStep(1); return; }
     if(k === "op:-"){ prefsStep(-1); return; }
@@ -2400,10 +3286,20 @@ function handleKey(k){
   }
   if(historyOpen){ return; }  /* keypad is hidden while History is open */
   if(costPrompt){
-    if(isEntryKey(k)){ primaryKey(k); return; }
+    /* Batch B fix 3 (W4): a dollar price is a plain number — unit keys
+       while the cost-price prompt is open are ignored, never convert it. */
+    /* Batch H fix 2 (P-3): Conv must not survive a key typed inside the
+       cost prompt — an entry key (digit/dot/back/frac) or an ignored
+       unit key disarms it, so the NEXT solver key runs its plain
+       function instead of its Conv function. The accepted Conv+· quirk
+       is untouched (the dot still types a point); only the leftover
+       armed state clears. A solver key pressed with Conv armed still
+       falls through below and runs its Conv function, as before. */
+    if(k === "feet" || k === "inch" || k === "yds" || k === "m" || k === "cm" || k === "mm"){ if(shiftArmed) setShift(false); return; }
+    if(isEntryKey(k)){ if(shiftArmed) setShift(false); primaryKey(k); return; }
     if(k === "eq" || (shiftArmed && k === "dot")){ setShift(false); costFinish(); return; }
     if(k === "conv"){ setShift(!shiftArmed); return; }
-    costPrompt = null;
+    costPrompt = null; costPerMbm = false;   /* Batch F: cancelling a cost prompt abandons its quantity */
   }
   if(rclArmed){
     rclArmed = false;
@@ -2420,6 +3316,15 @@ function handleKey(k){
   if(k === "conv"){ setShift(!shiftArmed); return; }
   if(shiftArmed){
     setShift(false);
+    if(SOLVER_KEYS[k] && !(session && session.phase === "prompt")){ litSolver = k; lastRepeat = null; clearMbmUnlessPending(); }   /* Batch F: a Conv+solver result replaces the working value */   /* v1.23: Conv+key lights the physical solver key (Arc, Ir/Pitch, …) and starts a new job; Batch E2 I13: not inside a session prompt, where the session key stays lit */
+    /* Batch G fix 5 (P-2): the session-prompt guard in handleShift does
+       not cover these three direct calls — Conv+Pitch stored a phantom
+       pitch from the prompt default, Conv+Weight clobbered the prompt
+       display, and Conv+digit leaked the display mode after the
+       session. Inside a session prompt all three are silent no-ops
+       (Conv is already disarmed above); outside prompts they behave
+       exactly as before. */
+    if(session && session.phase === "prompt" && (k === "pitch" || k === "weight" || (k.indexOf("d:") === 0 && TEMP_RES[k.slice(2)] !== undefined))) return;
     if(k === "pitch"){ pitchKey(true); return; }   /* Conv+p = pitch ratio */
     if(k === "weight"){ weightKey(); return; }     /* reference: Ç w converts volume to weight */
     if(k.indexOf("d:") === 0 && TEMP_RES[k.slice(2)] !== undefined){ tempResKey(k.slice(2)); return; }
@@ -2428,7 +3333,7 @@ function handleKey(k){
     if(k === "feet" || k === "inch" || k === "yds" || k === "m" || k === "cm" || k === "mm"){ convertDisplayTo(k); return; }
     /* no shift function: fall through to the primary key */
   }
-  if(k !== "mplus" && k !== "op:+" && k !== "op:-") clearTransientModes();
+  if(k !== "mplus") clearTransientModes();   /* Batch E1 I7: +/− now exit memory-recall mode like digit keys do (only M+ itself is exempt — memAdd must see the mode to cycle AVG/CNT) */
   if(session){
     if(session.phase === "prompt"){
       if(k === session.def.key || k === "eq"){ sessionAdvance(); return; }
